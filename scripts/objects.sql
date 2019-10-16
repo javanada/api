@@ -10,15 +10,15 @@ START TRANSACTION;
 -- Table structure for table `objects`
 --
 
-CREATE TABLE IF NOT EXISTS `iNav`.`objects` (
+CREATE TABLE IF NOT EXISTS `i_nav`.`objects` (
   `object_id` int(11) NOT NULL,
   `location_id` int(11) NOT NULL,
   `short_name` varchar(25) COLLATE utf8_unicode_ci NOT NULL,
   `long_name` varchar(50) COLLATE utf8_unicode_ci DEFAULT NULL,
   `description` varchar(128) COLLATE utf8_unicode_ci DEFAULT NULL,
-  `objectType_id` int(11) NOT NULL,
-  `x-coordinate` int(8) NOT NULL,
-  `y-coordinate` int(8) NOT NULL,
+  `object_type_id` int(11) NOT NULL,
+  `x_coordinate` int(8) NOT NULL,
+  `y_coordinate` int(8) NOT NULL,
   `latitude` decimal(9,6) DEFAULT NULL,
   `longitude` decimal(9,6) DEFAULT NULL,
   `active` tinyint(1) NOT NULL
@@ -30,9 +30,9 @@ CREATE TABLE IF NOT EXISTS `iNav`.`objects` (
 ALTER TABLE `objects`
   ADD PRIMARY KEY (`object_id`);
 ALTER TABLE `objects`
-  ADD FOREIGN KEY (`location_id`) REFERENCES `Locations`(`location_id`);
+  ADD FOREIGN KEY (`location_id`) REFERENCES `locations`(`location_id`);
 ALTER TABLE `objects`
-  ADD FOREIGN KEY (`objectType_id`) REFERENCES `objectTypes`(`objectType_id`);
+  ADD FOREIGN KEY (`object_type_id`) REFERENCES `object_types`(`object_type_id`);
 
 COMMIT;
 
