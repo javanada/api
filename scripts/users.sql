@@ -15,7 +15,6 @@ CREATE TABLE IF NOT EXISTS `i_nav`.`users` (
   `username` varchar(20) COLLATE utf8_unicode_ci NOT NULL,
   `salt` varchar(64) COLLATE utf8_unicode_ci DEFAULT NULL,
   `password` varchar(128) COLLATE utf8_unicode_ci DEFAULT NULL,
-  `password` varchar(128) COLLATE utf8_unicode_ci DEFAULT NULL,
   `first_name` varchar(40) COLLATE utf8_unicode_ci DEFAULT NULL,
   `last_name` varchar(60) COLLATE utf8_unicode_ci DEFAULT NULL,
   `email` varchar(40) COLLATE utf8_unicode_ci DEFAULT NULL,

@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS `i_nav`.`addresses` (
   `city` varchar(40) COLLATE utf8_unicode_ci NOT NULL,
   `state_id` int(11) NOT NULL,
   `zipcode` varchar(5) COLLATE utf8_unicode_ci NOT NULL,
-  `zipcode_ext` varchar(4) COLLATE utf8_unicode_ci NOT NULL,
+  `zipcode_ext` varchar(4) COLLATE utf8_unicode_ci NOT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 --
