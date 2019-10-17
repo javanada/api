@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS `i_nav`.`location_types` (
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 --
--- Indexes for table `objects`
+-- Indexes for table `location_types`
 --
 
 ALTER TABLE `location_types`
