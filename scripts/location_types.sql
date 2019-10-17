@@ -7,7 +7,7 @@ START TRANSACTION;
 -- --------------------------------------------------------
 
 --
--- Table structure for table `objects`
+-- Table structure for table `location_types`
 --
 
 CREATE TABLE IF NOT EXISTS `i_nav`.`location_types` (

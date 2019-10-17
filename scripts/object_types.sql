@@ -7,7 +7,7 @@ START TRANSACTION;
 -- --------------------------------------------------------
 
 --
--- Table structure for table `objects`
+-- Table structure for table `object_types`
 --
 
 CREATE TABLE IF NOT EXISTS `i_nav`.`object_types` (
@@ -18,11 +18,10 @@ CREATE TABLE IF NOT EXISTS `i_nav`.`object_types` (
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 --
--- Indexes for table `objects`
+-- Indexes for table `object_types`
 --
-
 ALTER TABLE `object_types`
-  ADD FOREIGN KEY (`object_type_id`) REFERENCES `objects`(`object_type_id`);
+  ADD PRIMARY KEY (`object_type_id`);
 
 COMMIT;
 
