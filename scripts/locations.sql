@@ -37,6 +37,8 @@ ALTER TABLE `locations`
   ADD FOREIGN KEY (`location_type_id`) REFERENCES `location_types`(`location_type_id`);
 ALTER TABLE `locations`
   ADD FOREIGN KEY (`address_id`) REFERENCES `addresses`(`address_id`);
+ALTER TABLE `locations`
+  ADD FOREIGN KEY (`primary_object_id`) REFERENCES `objects`(`object_id`);
 
 -- AUTO_INCREMENT for table `locations`
 --
