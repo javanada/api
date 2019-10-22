@@ -34,6 +34,11 @@ ALTER TABLE `objects`
 ALTER TABLE `objects`
   ADD FOREIGN KEY (`object_type_id`) REFERENCES `object_types`(`object_type_id`);
 
+-- AUTO_INCREMENT for table `objects`
+--
+ALTER TABLE `objects`
+  MODIFY `object_id` int(11) NOT NULL AUTO_INCREMENT;
+
 COMMIT;
 
 
