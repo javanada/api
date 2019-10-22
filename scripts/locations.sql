@@ -36,6 +36,11 @@ ALTER TABLE `locations`
 ALTER TABLE `locations`
   ADD FOREIGN KEY (`address_id`) REFERENCES `addresses`(`address_id`);
 
+-- AUTO_INCREMENT for table `locations`
+--
+ALTER TABLE `locations`
+  MODIFY `location_id` int(11) NOT NULL AUTO_INCREMENT;
+
 COMMIT;
 
 

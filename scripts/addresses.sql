@@ -11,7 +11,7 @@ START TRANSACTION;
 --
 
 CREATE TABLE IF NOT EXISTS `i_nav`.`addresses` (
-  `addresse_id` int(11) NOT NULL,
+  `address_id` int(11) NOT NULL,
   `address1` varchar(60) COLLATE utf8_unicode_ci NOT NULL,
   `address2` varchar(60) COLLATE utf8_unicode_ci NOT NULL,
   `city` varchar(40) COLLATE utf8_unicode_ci NOT NULL,
@@ -24,9 +24,14 @@ CREATE TABLE IF NOT EXISTS `i_nav`.`addresses` (
 -- Indexes for table `addresses`
 --
 ALTER TABLE `addresses`
-  ADD PRIMARY KEY (`addresse_id`);
+  ADD PRIMARY KEY (`address_id`);
 ALTER TABLE `addresses`
   ADD FOREIGN KEY (`state_id`) REFERENCES `states`(`state_id`);
+
+-- AUTO_INCREMENT for table `addresses`
+--
+ALTER TABLE `addresses`
+  MODIFY `address_id` int(11) NOT NULL AUTO_INCREMENT;
 
 COMMIT;
 

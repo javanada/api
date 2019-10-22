@@ -23,6 +23,11 @@ CREATE TABLE IF NOT EXISTS `i_nav`.`roles` (
 ALTER TABLE `roles`
   ADD PRIMARY KEY (`role_id`);
 
+-- AUTO_INCREMENT for table `roles`
+--
+ALTER TABLE `roles`
+  MODIFY `role_id` int(11) NOT NULL AUTO_INCREMENT;
+
 COMMIT;
 
 

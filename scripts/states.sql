@@ -22,6 +22,11 @@ CREATE TABLE IF NOT EXISTS `i_nav`.`states` (
 ALTER TABLE `states`
   ADD PRIMARY KEY (`state_id`);
 
+-- AUTO_INCREMENT for table `states`
+--
+ALTER TABLE `states`
+  MODIFY `state_id` int(11) NOT NULL AUTO_INCREMENT;
+
 COMMIT;
 
 

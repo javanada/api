@@ -23,6 +23,11 @@ CREATE TABLE IF NOT EXISTS `i_nav`.`object_types` (
 ALTER TABLE `object_types`
   ADD PRIMARY KEY (`object_type_id`);
 
+-- AUTO_INCREMENT for table `object_types`
+--
+ALTER TABLE `object_types`
+  MODIFY `object_type_id` int(11) NOT NULL AUTO_INCREMENT;
+
 COMMIT;
 
 
