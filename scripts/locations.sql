@@ -17,6 +17,8 @@ CREATE TABLE IF NOT EXISTS `i_nav`.`locations` (
   `description` varchar(128) COLLATE utf8_unicode_ci DEFAULT NULL,
   `location_type_id` int(11) NOT NULL,
   `address_id` int(11) NOT NULL,
+  `primary_object_id` int(11) NOT NULL,
+  `scale_ft` float(10) NOT NULL,
   `min_x_coordinate` int(8) NOT NULL,
   `min_y_coordinate` int(8) NOT NULL,
   `max_x_coordinate` int(8) NOT NULL,
