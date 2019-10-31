@@ -1,0 +1,5 @@
+#set($inputRoot = $input.path('$'))
+{
+     "httpMethod": "$context.httpMethod",
+     "entity": "locations"
+}
