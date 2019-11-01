@@ -50,7 +50,7 @@ public class Location implements INavEntity {
 			if (id != null) {
 				stmt.setString(1, id);
 			}
-			ResultSet resultSet = stmt.executeQuery(query);
+			ResultSet resultSet = stmt.executeQuery();
 
 			JSONArray jsonArray = new JSONArray();
 			while (resultSet.next()) {
