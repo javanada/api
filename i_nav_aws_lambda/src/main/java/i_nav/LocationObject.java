@@ -38,10 +38,7 @@ public class LocationObject implements INavEntity {
 		}
 		String query = select + join + where;
 		
-		String username = System.getenv("username");
-		String password = System.getenv("password");
-		String endpoint = System.getenv("endpoint");
-		String url = "jdbc:mysql://" + endpoint + ":3306/i_nav";
+		
 		
 		JSONArray jsonArray = new JSONArray();
 
@@ -92,14 +89,18 @@ public class LocationObject implements INavEntity {
 					jsonArray.add(locationObjectJson);
 					
 				} catch (ParseException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					JSONObject obj = new JSONObject();
+					obj.put("parseExceptin", e.getMessage());
+					jsonArray.add(obj);
 				}
 				
 			}
 			returnStr += jsonArray.toJSONString();
 
 		} catch (SQLException e) {
+			JSONObject obj = new JSONObject();
+			obj.put("SQLException", e.getMessage());
+			jsonArray.add(obj);
 			returnStr += e.getMessage() + " " + query;
 		}
 

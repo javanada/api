@@ -43,11 +43,6 @@ public class Location implements INavEntity {
 		}
 		String query = select + join + where;
 		
-		String username = System.getenv("username");
-		String password = System.getenv("password");
-		String endpoint = System.getenv("endpoint");
-		String url = "jdbc:mysql://" + endpoint + ":3306/i_nav";
-		
 		JSONArray jsonArray = new JSONArray();
 
 		try {
