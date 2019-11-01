@@ -9,6 +9,8 @@ import java.sql.Statement;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 public class Location implements INavEntity {
 	
@@ -29,15 +31,15 @@ public class Location implements INavEntity {
 	private double longitude;
 	private boolean active;
 	
-	public static String getLocations(String id) {
+	public static JSONArray getLocations(String id) {
 
 		String returnStr = "";
 		String where = "";
 		
 		String select = " SELECT * FROM locations l ";
-		String join = " inner join location_types lt ON lt.location_type_id =  l.location_type_id ";
+		String join = " INNER JOIN location_types lt ON l.location_type_id = lt.location_type_id ";
 		if (id != null) {
-			where = " where location_id = ? ";
+			where = " WHERE l.location_id = ? ";
 		}
 		String query = select + join + where;
 		
@@ -45,6 +47,8 @@ public class Location implements INavEntity {
 		String password = System.getenv("password");
 		String endpoint = System.getenv("endpoint");
 		String url = "jdbc:mysql://" + endpoint + ":3306/i_nav";
+		
+		JSONArray jsonArray = new JSONArray();
 
 		try {
 			Connection conn = DriverManager.getConnection(url, username, password);
@@ -55,13 +59,36 @@ public class Location implements INavEntity {
 			}
 			ResultSet resultSet = stmt.executeQuery();
 
-			JSONArray jsonArray = new JSONArray();
+			
 			while (resultSet.next()) {
 				Location location = new Location();
+				LocationType locationType = new LocationType();
+				
 				location.setLocation_id(resultSet.getInt(1));
 				location.setShort_name(resultSet.getString(2));
 				location.setLong_name(resultSet.getString(3));
-				jsonArray.add(location.getJSONString());
+				location.setDescription(resultSet.getString(4));
+				location.setLocation_type_id(resultSet.getInt(5));
+				location.setAddress_id(resultSet.getInt(6));
+				location.setPrimary_object_id(resultSet.getInt(7));
+				location.setScale_ft(resultSet.getDouble(8));
+				locationType.setLocation_type_id(resultSet.getInt(16));
+				locationType.setShort_name(resultSet.getString(17));
+				
+				JSONParser parser = new JSONParser();
+				try {
+					
+					JSONObject locationJson = (JSONObject) parser.parse(location.getJSONString());
+					JSONObject locationTypeJson = (JSONObject) parser.parse(locationType.getJSONString());
+					
+					locationJson.put("location_type", locationTypeJson);
+					jsonArray.add(locationJson);
+					
+				} catch (ParseException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
 			}
 			returnStr += jsonArray.toJSONString();
 
@@ -69,7 +96,7 @@ public class Location implements INavEntity {
 			returnStr += e.getMessage() + " " + query;
 		}
 
-		return returnStr;
+		return jsonArray;
 	}
 	
 	@Override
@@ -79,6 +106,18 @@ public class Location implements INavEntity {
 		jsonObject.put("location_id", location_id);
 		jsonObject.put("short_name", short_name);
 		jsonObject.put("long_name", long_name);
+		jsonObject.put("description", description);
+		jsonObject.put("location_type_id", location_type_id);
+		jsonObject.put("address_id", address_id);
+		jsonObject.put("primary_object_id", primary_object_id);
+		jsonObject.put("scale_ft", scale_ft);
+		jsonObject.put("min_x_coordinate", min_x_coordinate);
+		jsonObject.put("min_y_coordinate", min_y_coordinate);
+		jsonObject.put("max_x_coordinate", max_x_coordinate);
+		jsonObject.put("max_y_coordinate", max_y_coordinate);
+		jsonObject.put("latitude", latitude);
+		jsonObject.put("longitude", longitude);
+		jsonObject.put("active", active);
 		
 		return jsonObject.toJSONString();
 	}

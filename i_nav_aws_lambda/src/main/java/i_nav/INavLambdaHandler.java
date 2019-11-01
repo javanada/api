@@ -17,6 +17,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Base64;
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
+import com.mysql.cj.xdevapi.JsonString;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -33,6 +34,7 @@ public class INavLambdaHandler implements RequestStreamHandler {
 //		return "hi " + getLocations(context) + " [[" + request.getPathParameters().keySet().size() + "]]";
 //	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void handleRequest(InputStream inputStream, OutputStream outputStream, Context context) throws IOException {
 		String proxy = null;
@@ -74,23 +76,45 @@ public class INavLambdaHandler implements RequestStreamHandler {
 
 		
 
-		JSONObject responseBody = new JSONObject();
-		responseBody.put("input", event.toJSONString());
+		JSONObject responseBodyItem = new JSONObject();
+		JSONArray responseBodyArray = new JSONArray();
+//		responseBody.put("input", event.toJSONString());
 		
 		
 		String entity = event.get("entity").toString();
-		String queryResultJson = "{}";
+		String queryResultJson = "[]";
+		
 		if (entity.equals("location")) {
+			
 			String locationId = ((JSONObject)event).get("id").toString();
-			queryResultJson = Location.getLocations(locationId);
+			responseBodyArray = Location.getLocations(locationId);
+			
+//			try {
+//				responseBodyItem = (JSONObject) parser.parse(queryResultJson);
+//				responseJson.put("body", responseBodyItem.toJSONString());
+//			} catch (ParseException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
 			
 		} else if (entity.equals("locations")) {
-			queryResultJson = Location.getLocations(null);
+			
+			responseBodyArray = Location.getLocations(null);
+			
 		}
 		
-		responseBody.put("query result", queryResultJson);
+//		try {
+//			responseBodyArray = (JSONArray) parser.parse(queryResultJson);
+//		} catch (ParseException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
 		
+		JSONObject responseBody = new JSONObject();
+//		responseBody.put("input", event.toJSONString());
+		responseBody.put("data", responseBodyArray);
 		
+		responseJson.put("body", responseBody);
 
 		JSONObject headerJson = new JSONObject();
 		headerJson.put("x-custom-header", "my custom header value");
@@ -99,9 +123,10 @@ public class INavLambdaHandler implements RequestStreamHandler {
 		responseJson.put("isBase64Encoded", false);
 		responseJson.put("statusCode", responseCode);
 		responseJson.put("headers", headerJson);
-		responseJson.put("body", responseBody.toString());
+		
 
 		OutputStreamWriter writer = new OutputStreamWriter(outputStream, "UTF-8");
+		
 		writer.write(responseJson.toJSONString());
 		writer.close();
 

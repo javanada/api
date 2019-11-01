@@ -1,5 +1,7 @@
 package i_nav;
 
+import org.json.simple.JSONObject;
+
 public class LocationType implements INavEntity {
 	
 	private int location_type_id;
@@ -13,8 +15,12 @@ public class LocationType implements INavEntity {
 
 	@Override
 	public String getJSONString() {
-		// TODO Auto-generated method stub
-		return null;
+		JSONObject jsonObject = new JSONObject();
+		jsonObject.put("location_type_id", location_type_id);
+		jsonObject.put("short_name", short_name);
+		jsonObject.put("long_name", long_name);
+		jsonObject.put("description", description);
+		return jsonObject.toJSONString();
 	}
 
 	public int getLocation_type_id() {
