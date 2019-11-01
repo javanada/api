@@ -1,5 +1,12 @@
 package i_nav;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 public class Location {
@@ -126,5 +133,58 @@ public class Location {
 	}
 	public void setActive(boolean active) {
 		this.active = active;
+	}
+	
+	public static String getLocations(String id) {
+
+		String str = "";
+		String where = "";
+		if (id != null) {
+			where = " where location_id = " + id;
+		}
+		String query = "select * from locations " + where;
+
+		try {
+
+//			String username = AWSEnvironment.decryptKey("username");
+//			String password = AWSEnvironment.decryptKey("password");
+//			String endpoint = AWSEnvironment.decryptKey("endpoint");
+
+			String username = System.getenv("username");
+			String password = System.getenv("password");
+			String endpoint = System.getenv("endpoint");
+
+			String url = "jdbc:mysql://" + endpoint + ":3306/i_nav";
+
+			try {
+				Connection conn = DriverManager.getConnection(url, username, password);
+
+				Statement stmt = conn.createStatement();
+				ResultSet resultSet = stmt.executeQuery(query);
+//				str += resultSet.toString();
+
+				JSONArray jsonArray = new JSONArray();
+				while (resultSet.next()) {
+					Location location = new Location();
+					location.setLocation_id(resultSet.getInt(1));
+					location.setShort_name(resultSet.getString(2));
+					location.setLong_name(resultSet.getString(3));
+					jsonArray.add(location.getJSONString());
+				}
+				str += jsonArray.toJSONString();
+
+			} catch (SQLException e) {
+				str += e.getMessage() + " " + query;
+			}
+
+		} catch (Exception e) {
+//			str += e.getMessage() + "  <br />";
+//			for (StackTraceElement s : e.getStackTrace()) {
+//				str += s.toString() + "  <br />";
+//			}
+		}
+
+		return str;
+
 	}
 }

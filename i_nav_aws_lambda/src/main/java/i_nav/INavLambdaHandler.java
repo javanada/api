@@ -33,59 +33,6 @@ public class INavLambdaHandler implements RequestStreamHandler {
 //		return "hi " + getLocations(context) + " [[" + request.getPathParameters().keySet().size() + "]]";
 //	}
 
-	public static String getLocations(String id) {
-
-		String str = "";
-		String where = "";
-		if (id != null) {
-			where = " where location_id = " + id;
-		}
-		String query = "select * from locations " + where;
-
-		try {
-
-//			String username = AWSEnvironment.decryptKey("username");
-//			String password = AWSEnvironment.decryptKey("password");
-//			String endpoint = AWSEnvironment.decryptKey("endpoint");
-
-			String username = System.getenv("username");
-			String password = System.getenv("password");
-			String endpoint = System.getenv("endpoint");
-
-			String url = "jdbc:mysql://" + endpoint + ":3306/i_nav";
-
-			try {
-				Connection conn = DriverManager.getConnection(url, username, password);
-
-				Statement stmt = conn.createStatement();
-				ResultSet resultSet = stmt.executeQuery(query);
-//				str += resultSet.toString();
-
-				JSONArray jsonArray = new JSONArray();
-				while (resultSet.next()) {
-					Location location = new Location();
-					location.setLocation_id(resultSet.getInt(1));
-					location.setShort_name(resultSet.getString(2));
-					location.setLong_name(resultSet.getString(3));
-					jsonArray.add(location.getJSONString());
-				}
-				str += jsonArray.toJSONString();
-
-			} catch (SQLException e) {
-				str += e.getMessage() + " " + query;
-			}
-
-		} catch (Exception e) {
-//			str += e.getMessage() + "  <br />";
-//			for (StackTraceElement s : e.getStackTrace()) {
-//				str += s.toString() + "  <br />";
-//			}
-		}
-
-		return str;
-
-	}
-
 	@Override
 	public void handleRequest(InputStream inputStream, OutputStream outputStream, Context context) throws IOException {
 		String proxy = null;
@@ -109,7 +56,6 @@ public class INavLambdaHandler implements RequestStreamHandler {
 //		} catch (ParseException e) {
 //			writer.write(e.getMessage());
 //		}
-		
 		
 		
 		try {
@@ -136,10 +82,10 @@ public class INavLambdaHandler implements RequestStreamHandler {
 		String queryResultJson = "{}";
 		if (entity.equals("location")) {
 			String locationId = ((JSONObject)event).get("id").toString();
-			queryResultJson = getLocations(locationId);
+			queryResultJson = Location.getLocations(locationId);
 			
 		} else if (entity.equals("locations")) {
-			queryResultJson = getLocations(null);
+			queryResultJson = Location.getLocations(null);
 		}
 		
 		responseBody.put("query result", queryResultJson);
