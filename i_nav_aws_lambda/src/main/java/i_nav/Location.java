@@ -47,7 +47,9 @@ public class Location implements INavEntity {
 			Connection conn = DriverManager.getConnection(url, username, password);
 //			Statement stmt = conn.createStatement();
 			PreparedStatement stmt = conn.prepareStatement(query);
-			stmt.setString(1, id);
+			if (id != null) {
+				stmt.setString(1, id);
+			}
 			ResultSet resultSet = stmt.executeQuery(query);
 
 			JSONArray jsonArray = new JSONArray();
