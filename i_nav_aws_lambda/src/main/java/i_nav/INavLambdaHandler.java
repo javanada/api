@@ -101,6 +101,15 @@ public class INavLambdaHandler implements RequestStreamHandler {
 			
 			responseBodyArray = Location.getLocations(null);
 			
+		} else if (entity.equals("objects")) {
+			
+			responseBodyArray = LocationObject.getLocationObjects(null);
+			
+		} else if (entity.equals("object")) {
+			
+			String objectId = ((JSONObject)event).get("id").toString();
+			responseBodyArray = LocationObject.getLocationObjects(objectId);
+			
 		}
 		
 //		try {
