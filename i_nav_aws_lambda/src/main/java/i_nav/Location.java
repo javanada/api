@@ -28,6 +28,7 @@ public class Location implements INavEntity {
 	private double longitude;
 	private boolean active;
 	
+	@Override
 	public String getJSONString() {
 		
 		JSONObject jsonObject = new JSONObject();
