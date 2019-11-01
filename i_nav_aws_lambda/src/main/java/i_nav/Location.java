@@ -9,7 +9,7 @@ import java.sql.Statement;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
-public class Location {
+public class Location implements INavEntity {
 	
 	private int location_id;
 	private String short_name;
