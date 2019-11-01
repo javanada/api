@@ -33,10 +33,13 @@ public class Location implements INavEntity {
 
 		String returnStr = "";
 		String where = "";
+		
+		String select = " SELECT * FROM locations l ";
+		String join = " inner join location_types lt ON lt.location_type_id =  l.location_type_id ";
 		if (id != null) {
 			where = " where location_id = ? ";
 		}
-		String query = "select * from locations " + where;
+		String query = select + join + where;
 		
 		String username = System.getenv("username");
 		String password = System.getenv("password");
