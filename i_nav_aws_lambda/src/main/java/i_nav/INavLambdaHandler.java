@@ -82,20 +82,24 @@ public class INavLambdaHandler implements RequestStreamHandler {
 		
 		
 		String entity = event.get("entity").toString();
+		String requestBody = event.get("requestBody").toString();
 		String queryResultJson = "[]";
+		
 		
 		if (entity.equals("location")) {
 			
 			String locationId = ((JSONObject)event).get("id").toString();
 			responseBodyArray = Location.getLocations(locationId);
 			
-//			try {
-//				responseBodyItem = (JSONObject) parser.parse(queryResultJson);
-//				responseJson.put("body", responseBodyItem.toJSONString());
-//			} catch (ParseException e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			}
+		} else if (entity.equals("location/new")) {
+			
+			try {
+				responseBodyArray = Location.newLocation((JSONObject)parser.parse(requestBody));
+			} catch (ParseException e) {
+				JSONObject obj = new JSONObject();
+				obj.put("parseExceptin", e.getMessage());
+				responseBodyArray.add(obj);
+			}
 			
 		} else if (entity.equals("locations")) {
 			
@@ -111,6 +115,7 @@ public class INavLambdaHandler implements RequestStreamHandler {
 			responseBodyArray = LocationObject.getLocationObjects(objectId);
 			
 		}
+		
 		
 //		try {
 //			responseBodyArray = (JSONArray) parser.parse(queryResultJson);

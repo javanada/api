@@ -31,6 +31,51 @@ public class Location implements INavEntity {
 	private double longitude;
 	private boolean active;
 	
+	
+	public static JSONArray newLocation(JSONObject newLocation) {
+		
+		JSONArray jsonArray = new JSONArray();
+		
+		String query = "INSERT INTO `locations` (`short_name`, `long_name`, `description`, `location_type_id`, `address_id`, `primary_object_id`, `scale_ft`, `min_x_coordinate`, `min_y_coordinate`, `max_x_coordinate`, `max_y_coordinate`, `latitude`, `longitude`, `active`) " + 
+				"VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
+		
+		try {
+			
+			Connection conn = DriverManager.getConnection(url, username, password);
+			PreparedStatement stmt = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
+			
+			if (newLocation.get("short_name") != null) { stmt.setString(1, newLocation.get("short_name").toString()); } else { stmt.setNull(1, java.sql.Types.VARCHAR); }
+			if (newLocation.get("long_name") != null) { stmt.setString(2, newLocation.get("long_name").toString()); } else { stmt.setNull(2, java.sql.Types.VARCHAR); }
+			if (newLocation.get("description") != null) { stmt.setString(3, newLocation.get("description").toString()); } else { stmt.setNull(3, java.sql.Types.INTEGER); }
+			if (newLocation.get("location_type_id") != null) { stmt.setInt(4, Integer.parseInt(newLocation.get("location_type_id").toString())); } else { stmt.setNull(4, java.sql.Types.INTEGER); }
+			if (newLocation.get("address_id") != null) { stmt.setInt(5, Integer.parseInt(newLocation.get("address_id").toString())); } else { stmt.setNull(5, java.sql.Types.INTEGER); }
+			if (newLocation.get("primary_object_id") != null) { stmt.setInt(6, Integer.parseInt(newLocation.get("primary_object_id").toString())); } else { stmt.setNull(6, java.sql.Types.INTEGER); }
+			if (newLocation.get("scale_ft") != null) { stmt.setDouble(7, Double.parseDouble(newLocation.get("scale_ft").toString())); } else { stmt.setNull(7, java.sql.Types.FLOAT); }
+			if (newLocation.get("min_x_coordinate") != null) { stmt.setInt(8, Integer.parseInt(newLocation.get("min_x_coordinate").toString())); } else { stmt.setNull(8, java.sql.Types.INTEGER); }
+			if (newLocation.get("min_y_coordinate") != null) { stmt.setInt(9, Integer.parseInt(newLocation.get("min_y_coordinate").toString())); } else { stmt.setNull(9, java.sql.Types.INTEGER); }
+			if (newLocation.get("max_x_coordinate") != null) { stmt.setInt(10, Integer.parseInt(newLocation.get("max_x_coordinate").toString())); } else { stmt.setNull(10, java.sql.Types.INTEGER); }
+			if (newLocation.get("max_y_coordinate") != null) { stmt.setInt(11, Integer.parseInt(newLocation.get("max_y_coordinate").toString())); } else { stmt.setNull(11, java.sql.Types.INTEGER); }
+			if (newLocation.get("latitude") != null) { stmt.setDouble(12, Double.parseDouble(newLocation.get("latitude").toString())); } else { stmt.setNull(12, java.sql.Types.FLOAT); }
+			if (newLocation.get("longitude") != null) { stmt.setDouble(13, Double.parseDouble(newLocation.get("longitude").toString())); } else { stmt.setNull(13, java.sql.Types.FLOAT); }
+			stmt.setInt(14, 1);
+			
+			stmt.executeUpdate();
+			ResultSet resultSet = stmt.getGeneratedKeys();
+			if (resultSet.next()) {
+                long id = resultSet.getLong(1);
+                jsonArray = Location.getLocations("" + id);
+            }
+			
+			
+		} catch (SQLException e) {
+			JSONObject obj = new JSONObject();
+			obj.put("SQLException", e.getMessage());
+			jsonArray.add(obj);
+		}
+		
+		return jsonArray;
+	}
+	
 	public static JSONArray getLocations(String id) {
 
 		String returnStr = "";
@@ -213,6 +258,8 @@ public class Location implements INavEntity {
 	public void setActive(boolean active) {
 		this.active = active;
 	}
+
+	
 	
 	
 }

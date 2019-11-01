@@ -1,5 +1,6 @@
 package i_nav;
 
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 public class Address implements INavEntity {
@@ -11,6 +12,11 @@ public class Address implements INavEntity {
 	private int state_id;
 	private String zipcode;
 	private String zipcode_ext;
+	
+	public static JSONArray getAddresses(String id) {
+		
+		return null;
+	}
 
 	@Override
 	public String getJSONString() {

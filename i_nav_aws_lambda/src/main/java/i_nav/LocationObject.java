@@ -25,6 +25,7 @@ public class LocationObject implements INavEntity {
 	private double longitude;
 	private boolean active;
 	
+	
 	public static JSONArray getLocationObjects(String id) {
 		String returnStr = "";
 		String where = "";
