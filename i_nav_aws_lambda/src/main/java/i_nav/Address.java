@@ -17,6 +17,7 @@ public class Address implements INavEntity {
 		
 		return null;
 	}
+	
 
 	@Override
 	public String getJSONString() {
