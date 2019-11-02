@@ -1,5 +1,6 @@
 package i_nav;
 
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 public class State implements INavEntity {
@@ -7,6 +8,14 @@ public class State implements INavEntity {
 	private int state_id;
 	private String short_name;
 	private String long_name;
+	
+	public static JSONArray getState(String id) {
+		return null;
+	}
+	
+	public static JSONArray newState(JSONObject newState) {
+		return null;
+	}
 
 	@Override
 	public String getJSONString() {

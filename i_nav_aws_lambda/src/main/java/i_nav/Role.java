@@ -1,5 +1,6 @@
 package i_nav;
 
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 public class Role implements INavEntity {
@@ -8,6 +9,14 @@ public class Role implements INavEntity {
 	private String short_name;
 	private String long_name;
 	private String description;
+	
+	public static JSONArray getRole(String id) {
+		return null;
+	}
+	
+	public static JSONArray newRole(JSONObject newRole) {
+		return null;
+	}
 
 	@Override
 	public String getJSONString() {

@@ -1,5 +1,6 @@
 package i_nav;
 
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 public class LocationType implements INavEntity {
@@ -8,6 +9,11 @@ public class LocationType implements INavEntity {
 	private String short_name;
 	private String long_name;
 	private String description;
+	
+	
+	public static JSONArray newLocationType(JSONObject newLocationType) {
+		return null;
+	}
 	
 	public static String getLocationTypes(String id) {
 		return null;

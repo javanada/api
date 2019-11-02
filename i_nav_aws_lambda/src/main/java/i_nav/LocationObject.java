@@ -26,6 +26,10 @@ public class LocationObject implements INavEntity {
 	private boolean active;
 	
 	
+	public static JSONArray newLocationObject(JSONObject newLocationObject) {
+		return null;
+	}
+	
 	public static JSONArray getLocationObjects(String id) {
 		String returnStr = "";
 		String where = "";

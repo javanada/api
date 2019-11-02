@@ -14,10 +14,12 @@ public class Address implements INavEntity {
 	private String zipcode_ext;
 	
 	public static JSONArray getAddresses(String id) {
-		
 		return null;
 	}
 	
+	public static JSONArray newAddress(JSONObject newAddress) {
+		return null;
+	}
 
 	@Override
 	public String getJSONString() {
