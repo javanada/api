@@ -1,35 +1,5 @@
 
 
-SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
-SET AUTOCOMMIT = 0;
-START TRANSACTION;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `states`
---
-
-CREATE TABLE IF NOT EXISTS `i_nav`.`states` (
-  `state_id` int(11) NOT NULL,
-  `short_name` varchar(25) COLLATE utf8_unicode_ci NOT NULL,
-  `long_name` varchar(50) COLLATE utf8_unicode_ci DEFAULT NULL
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
---
--- Indexes for table `states`
---
-ALTER TABLE `states`
-  ADD PRIMARY KEY (`state_id`);
-
--- AUTO_INCREMENT for table `states`
---
-ALTER TABLE `states`
-  MODIFY `state_id` int(11) NOT NULL AUTO_INCREMENT;
-
-COMMIT;
-
-
 
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
@@ -148,7 +118,7 @@ CREATE TABLE IF NOT EXISTS `i_nav`.`addresses` (
   `address1` varchar(60) COLLATE utf8_unicode_ci NOT NULL,
   `address2` varchar(60) COLLATE utf8_unicode_ci NOT NULL,
   `city` varchar(40) COLLATE utf8_unicode_ci NOT NULL,
-  `state_id` int(11) NOT NULL,
+  `state` varchar(2) COLLATE utf8_unicode_ci NOT NULL,
   `zipcode` varchar(5) COLLATE utf8_unicode_ci NOT NULL,
   `zipcode_ext` varchar(4) COLLATE utf8_unicode_ci NOT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
@@ -158,8 +128,6 @@ CREATE TABLE IF NOT EXISTS `i_nav`.`addresses` (
 --
 ALTER TABLE `addresses`
   ADD PRIMARY KEY (`address_id`);
-ALTER TABLE `addresses`
-  ADD FOREIGN KEY (`state_id`) REFERENCES `states`(`state_id`);
 
 -- AUTO_INCREMENT for table `addresses`
 --

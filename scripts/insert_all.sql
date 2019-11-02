@@ -2,11 +2,8 @@
 INSERT INTO `roles` (`short_name`, `long_name`, `description`) 
 VALUES ('admin', 'administrator', NULL);
 
-INSERT INTO `states` (`short_name`, `long_name`) 
-VALUES ('WA', "Washington");
-
-INSERT INTO `addresses` (`address1`, `address2`, `city`, `state_id`, `zipcode`, `zipcode_ext`) 
-VALUES ('123 fake st', 'apt 1', 'Cheney', 1, '99004', '');
+INSERT INTO `addresses` (`address1`, `address2`, `city`, `state`, `zipcode`, `zipcode_ext`) 
+VALUES ('123 fake st', 'apt 1', 'Cheney', 'WA', '99004', '');
 
 INSERT INTO `location_types` (`short_name`, `long_name`, `description`) 
 VALUES ('room', NULL, NULL);

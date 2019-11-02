@@ -9,7 +9,7 @@ public class Address implements INavEntity {
 	private String address1;
 	private String address2;
 	private String city;
-	private int state_id;
+	private String state;
 	private String zipcode;
 	private String zipcode_ext;
 	
@@ -28,7 +28,7 @@ public class Address implements INavEntity {
 		jsonObject.put("address1", address1);
 		jsonObject.put("address2", address2);
 		jsonObject.put("city", city);
-		jsonObject.put("state_id", state_id);
+		jsonObject.put("state", state);
 		jsonObject.put("zipcode", zipcode);
 		jsonObject.put("zipcode_ext", zipcode_ext);
 		
@@ -67,14 +67,6 @@ public class Address implements INavEntity {
 		this.city = city;
 	}
 
-	public int getState_id() {
-		return state_id;
-	}
-
-	public void setState_id(int state_id) {
-		this.state_id = state_id;
-	}
-
 	public String getZipcode() {
 		return zipcode;
 	}
@@ -89,6 +81,14 @@ public class Address implements INavEntity {
 
 	public void setZipcode_ext(String zipcode_ext) {
 		this.zipcode_ext = zipcode_ext;
+	}
+
+	public String getState() {
+		return state;
+	}
+
+	public void setState(String state) {
+		this.state = state;
 	}
 	
 	
