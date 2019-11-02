@@ -12,6 +12,8 @@ public interface INavEntity {
 //	String endpoint = System.getenv("bh_endpoint");
 //	String database = System.getenv("bh_database");
 	
+
+	
 	String url = "jdbc:mysql://" + endpoint + ":3306/" + database;
 	
 	public String getJSONString();

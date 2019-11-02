@@ -54,6 +54,11 @@ public class LocationObject implements INavEntity {
 			if (resultSet.next()) {
                 long id = resultSet.getLong(1);
                 jsonArray = LocationObject.getLocationObjects("" + id);
+                
+                if (jsonArray.size() > 0) {
+	                CloudGraphListDirected graph1 = new CloudGraphListDirected("i_nav_graph1", true);
+	                graph1.setVertex((JSONObject)jsonArray.get(0));
+                }
             }
 			
 			
@@ -70,14 +75,26 @@ public class LocationObject implements INavEntity {
 		String returnStr = "";
 		String where = "";
 		
-		String select = " SELECT * FROM objects o ";
-		String join = " INNER JOIN locations l ON l.location_id = o.location_id " + 
+		String select = " SELECT " + 
+						" o.object_id, o.short_name as object_short_name, o.x_coordinate, o.y_coordinate, " + 
+						" l.location_id, l.primary_object_id, " + 
+						" lt.location_type_id, lt.short_name as location_type_short_name, " + 
+						" ot.object_type_id, ot.short_name as object_type_short_name, " + 
+						" a.address_id, a.address1 "
+				;
+		
+		String from = " FROM objects o ";
+		String join = 
+					" INNER JOIN locations l ON l.location_id = o.location_id " + 
 					" INNER JOIN location_types lt on l.location_type_id = lt.location_type_id " + 
-					" INNER JOIN addresses a on a.address_id = l.address_id ";
+					" INNER JOIN addresses a on a.address_id = l.address_id " + 
+					" INNER JOIN object_types ot on ot.object_type_id = o.object_type_id "
+				;
+		
 		if (id != null) {
 			where = " WHERE o.object_id = ? ";
 		}
-		String query = select + join + where;
+		String query = select + from +  join + where;
 		
 		
 		
@@ -98,34 +115,38 @@ public class LocationObject implements INavEntity {
 				Location location = new Location();
 				LocationType locationType = new LocationType();
 				Address address = new Address();
+				LocationObjectType locationObjectType = new LocationObjectType();
 				
-				location.setLocation_id(resultSet.getInt(2));
-				location.setLocation_type_id(resultSet.getInt(5));
-				location.setAddress_id(resultSet.getInt(17));
-				location.setPrimary_object_id(resultSet.getInt(18));
-				location.setScale_ft(resultSet.getDouble(19));
+				location.setLocation_id(resultSet.getInt("location_id"));
+				location.setPrimary_object_id(resultSet.getInt("primary_object_id"));
 				
-				locationObject.setObject_id(resultSet.getInt(1));
-				locationObject.setLocation_id(resultSet.getInt(2));
-				locationObject.setShort_name(resultSet.getString(3));
+				locationObject.setObject_id(resultSet.getInt("object_id"));
+				locationObject.setShort_name(resultSet.getString("object_short_name"));
+				locationObject.setX_coordinate(resultSet.getInt("x_coordinate"));
+				locationObject.setY_coordinate(resultSet.getInt("y_coordinate"));
 				
-				locationType.setLocation_type_id(resultSet.getInt(27));
-				locationType.setShort_name(resultSet.getString(28));
+				locationObjectType.setObject_type_id(resultSet.getInt("object_type_id"));
+				locationObjectType.setShort_name(resultSet.getString("object_type_short_name"));
 				
-				address.setAddress_id(resultSet.getInt(17));
-				address.setAddress1(resultSet.getString(32));
+				locationType.setLocation_type_id(resultSet.getInt("location_type_id"));
+				locationType.setShort_name(resultSet.getString("location_type_short_name"));
+				
+				address.setAddress_id(resultSet.getInt("address_id"));
+				address.setAddress1(resultSet.getString("address1"));
 				
 				JSONParser parser = new JSONParser();
 				try {
 					
 					JSONObject locationJson = (JSONObject) parser.parse(location.getJSONString());
 					JSONObject locationObjectJson = (JSONObject) parser.parse(locationObject.getJSONString());
+					JSONObject locationObjectTypeJson = (JSONObject) parser.parse(locationObjectType.getJSONString());
 					JSONObject locationTypeJson = (JSONObject) parser.parse(locationType.getJSONString());
 					JSONObject addressJson = (JSONObject) parser.parse(address.getJSONString());
 					
 					locationObjectJson.put("location_type", locationTypeJson);
 					locationObjectJson.put("location", locationJson);
 					locationObjectJson.put("address", addressJson);
+					locationObjectJson.put("object_type", locationObjectTypeJson);
 					
 					jsonArray.add(locationObjectJson);
 					

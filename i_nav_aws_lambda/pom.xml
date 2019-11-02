@@ -30,6 +30,12 @@
 	  <version>0.4</version>
 	</dependency>
 	
+	<dependency>
+	  <groupId>com.amazonaws</groupId>
+	  <artifactId>aws-java-sdk-dynamodb</artifactId>
+	  <version>1.11.665</version>
+	</dependency>
+	
   </dependencies>
   
   <build>

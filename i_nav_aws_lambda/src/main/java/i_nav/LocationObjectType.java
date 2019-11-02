@@ -47,10 +47,10 @@ public class LocationObjectType implements INavEntity {
 				LocationObjectType locationObjectType = new LocationObjectType();
 				
 				
-				locationObjectType.setObject_type_id(resultSet.getInt(1));
-				locationObjectType.setShort_name(resultSet.getString(2));
-				locationObjectType.setLong_name(resultSet.getString(3));
-				locationObjectType.setDescription(resultSet.getString(4));
+				locationObjectType.setObject_type_id(resultSet.getInt("object_type_id"));
+				locationObjectType.setShort_name(resultSet.getString("short_name"));
+				locationObjectType.setLong_name(resultSet.getString("long_name"));
+				locationObjectType.setDescription(resultSet.getString("description"));
 				
 				
 				JSONParser parser = new JSONParser();
