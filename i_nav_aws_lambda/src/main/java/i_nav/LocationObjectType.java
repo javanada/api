@@ -1,7 +1,16 @@
 package i_nav;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 public class LocationObjectType implements INavEntity {
 	
@@ -11,11 +20,92 @@ public class LocationObjectType implements INavEntity {
 	private String description;
 	
 	public static JSONArray getLocationObjectTypes(String id) {
-		return null;
+		
+		String returnStr = "";
+		String where = "";
+		
+		String select = " SELECT * FROM object_types ot ";
+		String join = "  ";
+		if (id != null) {
+			where = " WHERE ot.object_type_id = ? ";
+		}
+		String query = select + join + where;
+		
+		JSONArray jsonArray = new JSONArray();
+
+		try {
+			Connection conn = DriverManager.getConnection(url, username, password);
+//			Statement stmt = conn.createStatement();
+			PreparedStatement stmt = conn.prepareStatement(query);
+			if (id != null) {
+				stmt.setString(1, id);
+			}
+			ResultSet resultSet = stmt.executeQuery();
+
+			
+			while (resultSet.next()) {
+				LocationObjectType locationObjectType = new LocationObjectType();
+				
+				
+				locationObjectType.setObject_type_id(resultSet.getInt(1));
+				locationObjectType.setShort_name(resultSet.getString(2));
+				locationObjectType.setLong_name(resultSet.getString(3));
+				locationObjectType.setDescription(resultSet.getString(4));
+				
+				
+				JSONParser parser = new JSONParser();
+				try {
+					
+					JSONObject locationObjectTypeJson = (JSONObject) parser.parse(locationObjectType.getJSONString());
+					
+					jsonArray.add(locationObjectTypeJson);
+					
+				} catch (ParseException e) {
+					JSONObject obj = new JSONObject();
+					obj.put("ParseException", e.getMessage());
+					jsonArray.add(obj);
+				}
+				
+			}
+			returnStr += jsonArray.toJSONString();
+
+		} catch (SQLException e) {
+			returnStr += e.getMessage() + " " + query;
+		}
+
+		return jsonArray;
 	}
 	
 	public static JSONArray newLocationObjectType(JSONObject newLocationObjectType) {
-		return null;
+		JSONArray jsonArray = new JSONArray();
+		
+		String query = "INSERT INTO `object_types` (`short_name`, `long_name`, `description`) " + 
+				"VALUES (?, ?, ?);";
+		
+		try {
+			
+			Connection conn = DriverManager.getConnection(url, username, password);
+			PreparedStatement stmt = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
+			
+			if (newLocationObjectType.get("short_name") != null) { stmt.setString(1, newLocationObjectType.get("short_name").toString()); } else { stmt.setNull(1, java.sql.Types.VARCHAR); }
+			if (newLocationObjectType.get("long_name") != null) { stmt.setString(2, newLocationObjectType.get("long_name").toString()); } else { stmt.setNull(2, java.sql.Types.VARCHAR); }
+			if (newLocationObjectType.get("description") != null) { stmt.setString(3, newLocationObjectType.get("description").toString()); } else { stmt.setNull(3, java.sql.Types.INTEGER); }
+			
+			stmt.executeUpdate();
+			ResultSet resultSet = stmt.getGeneratedKeys();
+			if (resultSet.next()) {
+                long id = resultSet.getLong(1);
+                jsonArray = LocationObjectType.getLocationObjectTypes("" + id);
+            }
+			
+			
+		} catch (SQLException e) {
+			JSONObject obj = new JSONObject();
+			obj.put("SQLException", e.getMessage());
+			jsonArray.add(obj);
+		}
+		
+		return jsonArray;
 	}
 
 	@Override
