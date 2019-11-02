@@ -186,7 +186,7 @@ public class INavLambdaHandler implements RequestStreamHandler {
 				responseBodyArray.add(obj);
 			}
 			
-		}  else if (entity.equals("roles")) {
+		} else if (entity.equals("roles")) {
 			
 			responseBodyArray = Role.getRoles(null);
 			
@@ -199,6 +199,25 @@ public class INavLambdaHandler implements RequestStreamHandler {
 			
 			try {
 				responseBodyArray = Role.newRole((JSONObject)parser.parse(requestBody));
+			} catch (ParseException e) {
+				JSONObject obj = new JSONObject();
+				obj.put("parseExceptin", e.getMessage());
+				responseBodyArray.add(obj);
+			}
+			
+		} else if (entity.equals("users")) {
+			
+			responseBodyArray = User.getUsers(null);
+			
+		} else if (entity.equals("user")) {
+			
+			String userId = ((JSONObject)event).get("id").toString();
+			responseBodyArray = User.getUsers(userId);
+			
+		} else if (entity.equals("user/new")) {
+			
+			try {
+				responseBodyArray = User.newUser((JSONObject)parser.parse(requestBody));
 			} catch (ParseException e) {
 				JSONObject obj = new JSONObject();
 				obj.put("parseExceptin", e.getMessage());
