@@ -186,6 +186,25 @@ public class INavLambdaHandler implements RequestStreamHandler {
 				responseBodyArray.add(obj);
 			}
 			
+		}  else if (entity.equals("roles")) {
+			
+			responseBodyArray = Role.getRoles(null);
+			
+		} else if (entity.equals("role")) {
+			
+			String roleId = ((JSONObject)event).get("id").toString();
+			responseBodyArray = Role.getRoles(roleId);
+			
+		} else if (entity.equals("role/new")) {
+			
+			try {
+				responseBodyArray = Role.newRole((JSONObject)parser.parse(requestBody));
+			} catch (ParseException e) {
+				JSONObject obj = new JSONObject();
+				obj.put("parseExceptin", e.getMessage());
+				responseBodyArray.add(obj);
+			}
+			
 		} 
 		
 		
