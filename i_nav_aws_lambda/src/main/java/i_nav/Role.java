@@ -1,6 +1,6 @@
 package i_nav;
 
-public class Roles implements INavEntity {
+public class Role implements INavEntity {
 
 	@Override
 	public String getJSONString() {

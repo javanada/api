@@ -1,6 +1,6 @@
 package i_nav;
 
-public class States implements INavEntity {
+public class LocationObjectType implements INavEntity {
 
 	@Override
 	public String getJSONString() {

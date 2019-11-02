@@ -1,6 +1,6 @@
 package i_nav;
 
-public class Users implements INavEntity {
+public class State implements INavEntity {
 
 	@Override
 	public String getJSONString() {
