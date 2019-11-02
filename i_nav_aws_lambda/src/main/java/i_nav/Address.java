@@ -1,7 +1,16 @@
 package i_nav;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 public class Address implements INavEntity {
 	
@@ -14,11 +23,100 @@ public class Address implements INavEntity {
 	private String zipcode_ext;
 	
 	public static JSONArray getAddresses(String id) {
-		return null;
+		String returnStr = "";
+		String where = "";
+		
+		String select = " SELECT * FROM addresses a ";
+		String join = "  ";
+		if (id != null) {
+			where = " WHERE a.address_id = ? ";
+		}
+		String query = select + join + where;
+		
+		JSONArray jsonArray = new JSONArray();
+
+		try {
+			Connection conn = DriverManager.getConnection(url, username, password);
+//			Statement stmt = conn.createStatement();
+			PreparedStatement stmt = conn.prepareStatement(query);
+			if (id != null) {
+				stmt.setString(1, id);
+			}
+			ResultSet resultSet = stmt.executeQuery();
+
+			
+			while (resultSet.next()) {
+				Address address = new Address();
+				
+				
+				address.setAddress_id(resultSet.getInt(1));
+				address.setAddress1(resultSet.getString(2));
+				address.setAddress2(resultSet.getString(3));
+				address.setCity(resultSet.getString(4));
+				address.setState(resultSet.getString(5));
+				address.setZipcode(resultSet.getString(6));
+				address.setZipcode_ext(resultSet.getString(7));
+				
+				
+				
+				JSONParser parser = new JSONParser();
+				try {
+					
+					JSONObject addressJson = (JSONObject) parser.parse(address.getJSONString());
+					
+					jsonArray.add(addressJson);
+					
+				} catch (ParseException e) {
+					JSONObject obj = new JSONObject();
+					obj.put("ParseException", e.getMessage());
+					jsonArray.add(obj);
+				}
+				
+			}
+			returnStr += jsonArray.toJSONString();
+
+		} catch (SQLException e) {
+			JSONObject obj = new JSONObject();
+			obj.put("SQLException", e.getMessage());
+			jsonArray.add(obj);
+		}
+
+		return jsonArray;
 	}
 	
 	public static JSONArray newAddress(JSONObject newAddress) {
-		return null;
+		JSONArray jsonArray = new JSONArray();
+		
+		String query = "INSERT INTO `addresses` (`address1`, `address2`, `city`, `state`, `zipcode`, `zipcode_ext`)  " + 
+				"VALUES (?, ?, ?, ?, ?, ?);";
+		
+		try {
+			
+			Connection conn = DriverManager.getConnection(url, username, password);
+			PreparedStatement stmt = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
+			
+			if (newAddress.get("address1") != null) { stmt.setString(1, newAddress.get("address1").toString()); } else { stmt.setNull(1, java.sql.Types.VARCHAR); }
+			if (newAddress.get("address2") != null) { stmt.setString(2, newAddress.get("address2").toString()); } else { stmt.setNull(2, java.sql.Types.VARCHAR); }
+			if (newAddress.get("city") != null) { stmt.setString(3, newAddress.get("city").toString()); } else { stmt.setNull(3, java.sql.Types.VARCHAR); }
+			if (newAddress.get("state") != null) { stmt.setString(4, newAddress.get("state").toString()); } else { stmt.setNull(4, java.sql.Types.VARCHAR); }
+			if (newAddress.get("zipcode") != null) { stmt.setString(5, newAddress.get("zipcode").toString()); } else { stmt.setNull(5, java.sql.Types.VARCHAR); }
+			if (newAddress.get("zipcode_ext") != null) { stmt.setString(6, newAddress.get("zipcode_ext").toString()); } else { stmt.setNull(6, java.sql.Types.VARCHAR); }
+			
+			stmt.executeUpdate();
+			ResultSet resultSet = stmt.getGeneratedKeys();
+			if (resultSet.next()) {
+                long id = resultSet.getLong(1);
+                jsonArray = Address.getAddresses("" + id);
+            }
+			
+			
+		} catch (SQLException e) {
+			JSONObject obj = new JSONObject();
+			obj.put("SQLException", e.getMessage());
+			jsonArray.add(obj);
+		}
+		
+		return jsonArray;
 	}
 
 	@Override

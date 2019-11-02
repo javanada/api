@@ -119,7 +119,17 @@ public class INavLambdaHandler implements RequestStreamHandler {
 			String objectId = ((JSONObject)event).get("id").toString();
 			responseBodyArray = LocationObject.getLocationObjects(objectId);
 			
-		}  else if (entity.equals("object-types")) {
+		}  else if (entity.equals("object/new")) {
+			
+			try {
+				responseBodyArray = LocationObject.newLocationObject((JSONObject)parser.parse(requestBody));
+			} catch (ParseException e) {
+				JSONObject obj = new JSONObject();
+				obj.put("parseExceptin", e.getMessage());
+				responseBodyArray.add(obj);
+			}
+			
+		} else if (entity.equals("object-types")) {
 			
 			responseBodyArray = LocationObjectType.getLocationObjectTypes(null);
 			
@@ -132,6 +142,44 @@ public class INavLambdaHandler implements RequestStreamHandler {
 			
 			try {
 				responseBodyArray = LocationObjectType.newLocationObjectType((JSONObject)parser.parse(requestBody));
+			} catch (ParseException e) {
+				JSONObject obj = new JSONObject();
+				obj.put("parseExceptin", e.getMessage());
+				responseBodyArray.add(obj);
+			}
+			
+		} else if (entity.equals("location-types")) {
+			
+			responseBodyArray = LocationType.getLocationTypes(null);
+			
+		} else if (entity.equals("location-type")) {
+			
+			String locationTypeId = ((JSONObject)event).get("id").toString();
+			responseBodyArray = LocationType.getLocationTypes(locationTypeId);
+			
+		} else if (entity.equals("location-type/new")) {
+			
+			try {
+				responseBodyArray = LocationType.newLocationType((JSONObject)parser.parse(requestBody));
+			} catch (ParseException e) {
+				JSONObject obj = new JSONObject();
+				obj.put("parseExceptin", e.getMessage());
+				responseBodyArray.add(obj);
+			}
+			
+		} else if (entity.equals("addresses")) {
+			
+			responseBodyArray = Address.getAddresses(null);
+			
+		} else if (entity.equals("address")) {
+			
+			String addressId = ((JSONObject)event).get("id").toString();
+			responseBodyArray = Address.getAddresses(addressId);
+			
+		} else if (entity.equals("address/new")) {
+			
+			try {
+				responseBodyArray = Address.newAddress((JSONObject)parser.parse(requestBody));
 			} catch (ParseException e) {
 				JSONObject obj = new JSONObject();
 				obj.put("parseExceptin", e.getMessage());

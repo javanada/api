@@ -89,7 +89,7 @@ public class LocationObjectType implements INavEntity {
 			
 			if (newLocationObjectType.get("short_name") != null) { stmt.setString(1, newLocationObjectType.get("short_name").toString()); } else { stmt.setNull(1, java.sql.Types.VARCHAR); }
 			if (newLocationObjectType.get("long_name") != null) { stmt.setString(2, newLocationObjectType.get("long_name").toString()); } else { stmt.setNull(2, java.sql.Types.VARCHAR); }
-			if (newLocationObjectType.get("description") != null) { stmt.setString(3, newLocationObjectType.get("description").toString()); } else { stmt.setNull(3, java.sql.Types.INTEGER); }
+			if (newLocationObjectType.get("description") != null) { stmt.setString(3, newLocationObjectType.get("description").toString()); } else { stmt.setNull(3, java.sql.Types.VARCHAR); }
 			
 			stmt.executeUpdate();
 			ResultSet resultSet = stmt.getGeneratedKeys();
