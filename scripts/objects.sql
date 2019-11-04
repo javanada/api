@@ -29,8 +29,8 @@ CREATE TABLE IF NOT EXISTS `i_nav`.`objects` (
 --
 ALTER TABLE `objects`
   ADD PRIMARY KEY (`object_id`);
-ALTER TABLE `objects`
-  ADD FOREIGN KEY (`location_id`) REFERENCES `locations`(`location_id`);
+-- ALTER TABLE `objects`
+--   ADD FOREIGN KEY (`location_id`) REFERENCES `locations`(`location_id`);
 ALTER TABLE `objects`
   ADD FOREIGN KEY (`object_type_id`) REFERENCES `object_types`(`object_type_id`);
 
