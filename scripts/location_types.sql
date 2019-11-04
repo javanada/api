@@ -22,7 +22,13 @@ CREATE TABLE IF NOT EXISTS `i_nav`.`location_types` (
 --
 
 ALTER TABLE `location_types`
-  ADD FOREIGN KEY (`location_type_id`) REFERENCES `locations`(`location_type_id`);
+  ADD PRIMARY KEY (`location_type_id`);
+
+-- AUTO_INCREMENT for table `location_types`
+--
+ALTER TABLE `location_types`
+  MODIFY `location_type_id` int(11) NOT NULL AUTO_INCREMENT;
+
 
 COMMIT;
 
