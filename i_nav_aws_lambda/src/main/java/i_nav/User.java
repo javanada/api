@@ -1,5 +1,9 @@
 package i_nav;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -97,13 +101,64 @@ public class User implements INavEntity {
 			PreparedStatement stmt = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
 			
 			if (newUser.get("username") != null) { stmt.setString(1, newUser.get("username").toString()); } else { stmt.setNull(1, java.sql.Types.VARCHAR); }
-			if (newUser.get("salt") != null) { stmt.setString(2, newUser.get("salt").toString()); } else { stmt.setNull(2, java.sql.Types.VARCHAR); }
-			if (newUser.get("password") != null) { stmt.setString(3, newUser.get("password").toString()); } else { stmt.setNull(3, java.sql.Types.VARCHAR); }
+//			if (newUser.get("salt") != null) { stmt.setString(2, newUser.get("salt").toString()); } else { stmt.setNull(2, java.sql.Types.VARCHAR); }
+//			if (newUser.get("password") != null) { stmt.setString(3, newUser.get("password").toString()); } else { stmt.setNull(3, java.sql.Types.VARCHAR); }
 			if (newUser.get("first_name") != null) { stmt.setString(4, newUser.get("first_name").toString()); } else { stmt.setNull(4, java.sql.Types.VARCHAR); }
 			if (newUser.get("last_name") != null) { stmt.setString(5, newUser.get("last_name").toString()); } else { stmt.setNull(5, java.sql.Types.VARCHAR); }
 			if (newUser.get("email") != null) { stmt.setString(6, newUser.get("email").toString()); } else { stmt.setNull(6, java.sql.Types.VARCHAR); }
 			if (newUser.get("role_id") != null) { stmt.setInt(7, Integer.parseInt(newUser.get("role_id").toString())); } else { stmt.setNull(7, java.sql.Types.INTEGER); }
 			stmt.setInt(8, 1);
+			
+			String password = "";
+			String hashedPasswordString = "";
+			String saltString = "";
+			if (newUser.get("password") != null) { // regex to validate username and password
+				password = newUser.get("password").toString();
+			} else {
+				return jsonArray;
+			}
+
+			
+	        MessageDigest md;
+	        try
+	        {
+	            // Select the message digest for the hash computation -> SHA-256
+	            md = MessageDigest.getInstance("SHA-256");
+
+	            // Generate the random salt
+	            SecureRandom random = new SecureRandom();
+	            byte[] salt = new byte[16];
+	            random.nextBytes(salt);
+
+	            // Passing the salt to the digest for the computation
+	            md.update(salt);
+
+	            // Generate the salted hash
+	            byte[] hashedPassword = md.digest(password.getBytes(StandardCharsets.UTF_8));
+
+	            StringBuilder sb = new StringBuilder();
+	            for (byte b : hashedPassword)
+	                sb.append(String.format("%02x", b));
+
+//	            System.out.println(sb);
+	            hashedPasswordString = sb.toString();
+	            
+	            StringBuilder sb2 = new StringBuilder();
+	            for (byte b : salt)
+	            	sb2.append(String.format("%02x", b));
+	            saltString = sb2.toString();
+	            
+	        } catch (NoSuchAlgorithmException e)
+	        {
+	        	JSONObject obj = new JSONObject();
+				obj.put("NoSuchAlgorithmException", e.getMessage());
+				jsonArray.add(obj);
+				return jsonArray;
+	        }
+	        
+	        stmt.setString(2, saltString);
+	        stmt.setString(3, hashedPasswordString);
+	        
 			
 			stmt.executeUpdate();
 			ResultSet resultSet = stmt.getGeneratedKeys();
