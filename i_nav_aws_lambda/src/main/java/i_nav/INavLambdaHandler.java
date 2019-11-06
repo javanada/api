@@ -102,7 +102,7 @@ public class INavLambdaHandler implements RequestStreamHandler {
 				responseBodyArray = Location.newLocation((JSONObject)parser.parse(requestBody));
 			} catch (ParseException e) {
 				JSONObject obj = new JSONObject();
-				obj.put("parseExceptin", e.getMessage());
+				obj.put("parseException", e.getMessage());
 				responseBodyArray.add(obj);
 			}
 			
@@ -125,7 +125,7 @@ public class INavLambdaHandler implements RequestStreamHandler {
 				responseBodyArray = LocationObject.newLocationObject((JSONObject)parser.parse(requestBody));
 			} catch (ParseException e) {
 				JSONObject obj = new JSONObject();
-				obj.put("parseExceptin", e.getMessage());
+				obj.put("parseException", e.getMessage());
 				responseBodyArray.add(obj);
 			}
 			
@@ -144,7 +144,7 @@ public class INavLambdaHandler implements RequestStreamHandler {
 				responseBodyArray = LocationObjectType.newLocationObjectType((JSONObject)parser.parse(requestBody));
 			} catch (ParseException e) {
 				JSONObject obj = new JSONObject();
-				obj.put("parseExceptin", e.getMessage());
+				obj.put("parseException", e.getMessage());
 				responseBodyArray.add(obj);
 			}
 			
@@ -163,7 +163,7 @@ public class INavLambdaHandler implements RequestStreamHandler {
 				responseBodyArray = LocationType.newLocationType((JSONObject)parser.parse(requestBody));
 			} catch (ParseException e) {
 				JSONObject obj = new JSONObject();
-				obj.put("parseExceptin", e.getMessage());
+				obj.put("parseException", e.getMessage());
 				responseBodyArray.add(obj);
 			}
 			
@@ -182,7 +182,7 @@ public class INavLambdaHandler implements RequestStreamHandler {
 				responseBodyArray = Address.newAddress((JSONObject)parser.parse(requestBody));
 			} catch (ParseException e) {
 				JSONObject obj = new JSONObject();
-				obj.put("parseExceptin", e.getMessage());
+				obj.put("parseException", e.getMessage());
 				responseBodyArray.add(obj);
 			}
 			
@@ -201,7 +201,7 @@ public class INavLambdaHandler implements RequestStreamHandler {
 				responseBodyArray = Role.newRole((JSONObject)parser.parse(requestBody));
 			} catch (ParseException e) {
 				JSONObject obj = new JSONObject();
-				obj.put("parseExceptin", e.getMessage());
+				obj.put("parseException", e.getMessage());
 				responseBodyArray.add(obj);
 			}
 			
@@ -220,11 +220,21 @@ public class INavLambdaHandler implements RequestStreamHandler {
 				responseBodyArray = User.newUser((JSONObject)parser.parse(requestBody));
 			} catch (ParseException e) {
 				JSONObject obj = new JSONObject();
-				obj.put("parseExceptin", e.getMessage());
+				obj.put("parseException", e.getMessage());
 				responseBodyArray.add(obj);
 			}
 			
-		} 
+		}  else if (entity.equals("user/login")) {
+			
+			try {
+				responseBodyArray = User.login((JSONObject)parser.parse(requestBody));
+			} catch (ParseException e) {
+				JSONObject obj = new JSONObject();
+				obj.put("parseException", e.getMessage());
+				responseBodyArray.add(obj);
+			}
+			
+		}
 		
 		
 //		try {

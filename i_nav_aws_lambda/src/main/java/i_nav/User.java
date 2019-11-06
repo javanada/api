@@ -89,6 +89,13 @@ public class User implements INavEntity {
 		return jsonArray;
 	}
 	
+	public static JSONArray login(JSONObject newUser) {
+		
+		JSONArray jsonArray = new JSONArray();
+		
+		return jsonArray;
+	}
+	
 	public static JSONArray newUser(JSONObject newUser) {
 		JSONArray jsonArray = new JSONArray();
 		
