@@ -73,7 +73,7 @@ public class INavLambdaHandler implements RequestStreamHandler {
 			responseJson.put("statusCode", "400");
 			responseJson.put("exception", pex);
 		}
-
+		
 		
 
 		JSONObject responseBodyItem = new JSONObject();
@@ -247,6 +247,7 @@ public class INavLambdaHandler implements RequestStreamHandler {
 		JSONObject responseBody = new JSONObject();
 //		responseBody.put("input", event.toJSONString());
 		responseBody.put("data", responseBodyArray);
+		responseJson.put("event", "" + event.toString());
 		
 		responseJson.put("body", responseBody);
 
