@@ -1,16 +1,16 @@
 
 INSERT INTO `roles` (`short_name`, `long_name`, `description`) 
-VALUES ('admin', 'administrator', NULL);
+VALUES ('admin', 'administrator', 'godlike');
 
 INSERT INTO `addresses` (`address1`, `address2`, `city`, `state`, `zipcode`, `zipcode_ext`) 
-VALUES ('123 fake st', 'apt 1', 'Cheney', 'WA', '99004', '');
+VALUES ('123 fake st', '', 'Cheney', 'WA', '99004', '');
 
 INSERT INTO `location_types` (`short_name`, `long_name`, `description`) 
-VALUES ('room', NULL, NULL);
+VALUES ('room', 'room', 'a generic room');
 
 INSERT INTO `object_types` (`short_name`, `long_name`, `description`) 
-VALUES ('path', NULL, NULL),
- ('door', NULL, NULL);
+VALUES ('path', 'path', 'a point through which one can travel'),
+ ('door', 'door', 'a door leading from one room to another');
 
 INSERT INTO `objects` (`location_id`, `short_name`, `long_name`, `description`, `object_type_id`, `x_coordinate`, `y_coordinate`, `latitude`, `longitude`, `active`) 
 VALUES (1, 'object1', NULL, NULL, 1, 0, 0, NULL, NULL, 1),

@@ -341,7 +341,7 @@ public class DBAccessGraphDynamoDB implements DBAccessGraph {
 		return null;
 	}
 	
-	public Map<LocationObject, List<Edge>> getCloudVerticesAndEdges(String graphName) {
+	public Map<LocationObjectVertex, List<Edge>> getCloudVerticesAndEdges(String graphName) {
 		
 		JSONParser parser;
 		JSONObject locationObjectJson;
@@ -350,8 +350,8 @@ public class DBAccessGraphDynamoDB implements DBAccessGraph {
 		
 		List<Map<String, AttributeValue>> cloudNodes = getAllNodes(graphName);
 		
-		List<LocationObject> locationObjects = new ArrayList<LocationObject>();
-		Map<LocationObject, List<Edge>> pointsAndEdges = new HashMap<LocationObject, List<Edge>>();
+		List<LocationObjectVertex> locationObjects = new ArrayList<LocationObjectVertex>();
+		Map<LocationObjectVertex, List<Edge>> pointsAndEdges = new HashMap<LocationObjectVertex, List<Edge>>();
 		
 		for (Map<String, AttributeValue> cloudNode : cloudNodes) {
 			
@@ -376,18 +376,12 @@ public class DBAccessGraphDynamoDB implements DBAccessGraph {
 					locationObjectJson = (JSONObject)parser.parse(locationObject);
 					System.out.println("location object: ...." + locationObject);
 					
-					LocationObject item = new LocationObject();
+					LocationObjectVertex item = new LocationObjectVertex();
 					if (locationObjectJson.get("object_id") != null) { item.setObject_id(Integer.parseInt(locationObjectJson.get("object_id").toString())); }
 					if (locationObjectJson.get("location_id") != null) { item.setLocation_id(Integer.parseInt(locationObjectJson.get("location_id").toString())); }
-					if (locationObjectJson.get("short_name") != null) { item.setShort_name(locationObjectJson.get("short_name").toString()); }
-					if (locationObjectJson.get("long_name") != null) { item.setLong_name(locationObjectJson.get("long_name").toString()); }
-					if (locationObjectJson.get("description") != null) { item.setDescription(locationObjectJson.get("description").toString()); }
-					if (locationObjectJson.get("object_type_id") != null) { item.setObject_type_id(Integer.parseInt(locationObjectJson.get("object_type_id").toString())); }
-					if (locationObjectJson.get("x_coordinate") != null) { item.setX_coordinate(Integer.parseInt(locationObjectJson.get("x_coordinate").toString())); }
-					if (locationObjectJson.get("y_coordinate") != null) { item.setY_coordinate(Integer.parseInt(locationObjectJson.get("y_coordinate").toString())); }
-					if (locationObjectJson.get("latitude") != null) { item.setLatitude(Double.parseDouble(locationObjectJson.get("latitude").toString())); }
-					if (locationObjectJson.get("longitude") != null) { item.setLongitude(Double.parseDouble(locationObjectJson.get("longitude").toString())); }
-					if (locationObjectJson.get("active") != null) { item.setActive(Boolean.parseBoolean(locationObjectJson.get("active").toString())); }
+					if (locationObjectJson.get("x") != null) { item.setX(Integer.parseInt(locationObjectJson.get("x_coordinate").toString())); }
+					if (locationObjectJson.get("y") != null) { item.setY(Integer.parseInt(locationObjectJson.get("y_coordinate").toString())); }
+					
 					
 					locationObjects.add(item);
 					if (!pointsAndEdges.containsKey(item)) {
@@ -415,32 +409,32 @@ public class DBAccessGraphDynamoDB implements DBAccessGraph {
 							JSONObject v1Obj = (JSONObject)parser.parse(v1str);
 							JSONObject v2Obj = (JSONObject)parser.parse(v2str);
 							
-							LocationObject v1 = new LocationObject();
-							LocationObject v2 = new LocationObject();
+							LocationObjectVertex v1 = new LocationObjectVertex();
+							LocationObjectVertex v2 = new LocationObjectVertex();
 							
 							if (v1Obj.get("object_id") != null) { v1.setObject_id(Integer.parseInt(v1Obj.get("object_id").toString())); }
 							if (v1Obj.get("location_id") != null) { v1.setLocation_id(Integer.parseInt(v1Obj.get("location_id").toString())); }
-							if (v1Obj.get("short_name") != null) { v1.setShort_name(v1Obj.get("short_name").toString()); }
-							if (v1Obj.get("long_name") != null) { v1.setLong_name(v1Obj.get("long_name").toString()); }
-							if (v1Obj.get("description") != null) { v1.setDescription(v1Obj.get("description").toString()); }
-							if (v1Obj.get("object_type_id") != null) { v1.setObject_type_id(Integer.parseInt(v1Obj.get("object_type_id").toString())); }
-							if (v1Obj.get("x_coordinate") != null) { v1.setX_coordinate(Integer.parseInt(v1Obj.get("x_coordinate").toString())); }
-							if (v1Obj.get("y_coordinate") != null) { v1.setY_coordinate(Integer.parseInt(v1Obj.get("y_coordinate").toString())); }
-							if (v1Obj.get("latitude") != null) { v1.setLatitude(Double.parseDouble(v1Obj.get("latitude").toString())); }
-							if (v1Obj.get("longitude") != null) { v1.setLongitude(Double.parseDouble(v1Obj.get("longitude").toString())); }
-							if (v1Obj.get("active") != null) { v1.setActive(Boolean.parseBoolean(v1Obj.get("active").toString())); }
+//							if (v1Obj.get("short_name") != null) { v1.setShort_name(v1Obj.get("short_name").toString()); }
+//							if (v1Obj.get("long_name") != null) { v1.setLong_name(v1Obj.get("long_name").toString()); }
+//							if (v1Obj.get("description") != null) { v1.setDescription(v1Obj.get("description").toString()); }
+//							if (v1Obj.get("object_type_id") != null) { v1.setObject_type_id(Integer.parseInt(v1Obj.get("object_type_id").toString())); }
+							if (v1Obj.get("x_coordinate") != null) { v1.setX(Integer.parseInt(v1Obj.get("x_coordinate").toString())); }
+							if (v1Obj.get("y_coordinate") != null) { v1.setY(Integer.parseInt(v1Obj.get("y_coordinate").toString())); }
+//							if (v1Obj.get("latitude") != null) { v1.setLatitude(Double.parseDouble(v1Obj.get("latitude").toString())); }
+//							if (v1Obj.get("longitude") != null) { v1.setLongitude(Double.parseDouble(v1Obj.get("longitude").toString())); }
+//							if (v1Obj.get("active") != null) { v1.setActive(Boolean.parseBoolean(v1Obj.get("active").toString())); }
 							
 							if (v2Obj.get("object_id") != null) { v2.setObject_id(Integer.parseInt(v2Obj.get("object_id").toString())); }
 							if (v2Obj.get("location_id") != null) { v2.setLocation_id(Integer.parseInt(v2Obj.get("location_id").toString())); }
-							if (v2Obj.get("short_name") != null) { v2.setShort_name(v2Obj.get("short_name").toString()); }
-							if (v2Obj.get("long_name") != null) { v2.setLong_name(v2Obj.get("long_name").toString()); }
-							if (v2Obj.get("description") != null) { v2.setDescription(v2Obj.get("description").toString()); }
-							if (v2Obj.get("object_type_id") != null) { v2.setObject_type_id(Integer.parseInt(v2Obj.get("object_type_id").toString())); }
-							if (v2Obj.get("x_coordinate") != null) { v2.setX_coordinate(Integer.parseInt(v2Obj.get("x_coordinate").toString())); }
-							if (v2Obj.get("y_coordinate") != null) { v2.setY_coordinate(Integer.parseInt(v2Obj.get("y_coordinate").toString())); }
-							if (v2Obj.get("latitude") != null) { v2.setLatitude(Double.parseDouble(v2Obj.get("latitude").toString())); }
-							if (v2Obj.get("longitude") != null) { v2.setLongitude(Double.parseDouble(v2Obj.get("longitude").toString())); }
-							if (v2Obj.get("active") != null) { v2.setActive(Boolean.parseBoolean(v2Obj.get("active").toString())); }
+//							if (v2Obj.get("short_name") != null) { v2.setShort_name(v2Obj.get("short_name").toString()); }
+//							if (v2Obj.get("long_name") != null) { v2.setLong_name(v2Obj.get("long_name").toString()); }
+//							if (v2Obj.get("description") != null) { v2.setDescription(v2Obj.get("description").toString()); }
+//							if (v2Obj.get("object_type_id") != null) { v2.setObject_type_id(Integer.parseInt(v2Obj.get("object_type_id").toString())); }
+							if (v2Obj.get("x_coordinate") != null) { v2.setX(Integer.parseInt(v2Obj.get("x_coordinate").toString())); }
+							if (v2Obj.get("y_coordinate") != null) { v2.setY(Integer.parseInt(v2Obj.get("y_coordinate").toString())); }
+//							if (v2Obj.get("latitude") != null) { v2.setLatitude(Double.parseDouble(v2Obj.get("latitude").toString())); }
+//							if (v2Obj.get("longitude") != null) { v2.setLongitude(Double.parseDouble(v2Obj.get("longitude").toString())); }
+//							if (v2Obj.get("active") != null) { v2.setActive(Boolean.parseBoolean(v2Obj.get("active").toString())); }
 							
 							System.out.println("v1str: " + v1str + " v2str: " + v2str + " weight: " + w);
 							

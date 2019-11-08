@@ -18,6 +18,7 @@ public class Location implements INavEntity {
 	private String short_name;
 	private String long_name;
 	private String description;
+	private String image;
 	private int location_type_id;
 	private int address_id;
 	private int primary_object_id;
@@ -81,12 +82,17 @@ public class Location implements INavEntity {
 		String returnStr = "";
 		String where = "";
 		
-		String select = " SELECT * FROM locations l ";
+		String select = 
+					" SELECT " + 
+					" l.location_id as location_location_id, l.primary_object_id, l.short_name as location_short_name, l.long_name as location_long_name, l.description as location_description, l.scale_ft, l.latitude, l.longitude, l.image as canvas_image, " + 
+					" lt.location_type_id, lt.short_name as location_type_short_name, lt.description as location_type_description ";
+		
+		String from = " FROM locations l ";
 		String join = " INNER JOIN location_types lt ON l.location_type_id = lt.location_type_id ";
 		if (id != null) {
-			where = " WHERE l.location_id = ? ";
+			where = " WHERE l.location_id = ? AND l.active = 1";
 		}
-		String query = select + join + where;
+		String query = select + from + join + where;
 		
 		JSONArray jsonArray = new JSONArray();
 
@@ -104,16 +110,19 @@ public class Location implements INavEntity {
 				Location location = new Location();
 				LocationType locationType = new LocationType();
 				
-				location.setLocation_id(resultSet.getInt(1));
-				location.setShort_name(resultSet.getString(2));
-				location.setLong_name(resultSet.getString(3));
-				location.setDescription(resultSet.getString(4));
-				location.setLocation_type_id(resultSet.getInt(5));
-				location.setAddress_id(resultSet.getInt(6));
-				location.setPrimary_object_id(resultSet.getInt(7));
-				location.setScale_ft(resultSet.getDouble(8));
-				locationType.setLocation_type_id(resultSet.getInt(16));
-				locationType.setShort_name(resultSet.getString(17));
+				location.setLocation_id(resultSet.getInt("location_location_id"));
+				location.setPrimary_object_id(resultSet.getInt("primary_object_id"));
+				location.setShort_name(resultSet.getString("location_short_name"));
+				location.setLong_name(resultSet.getString("location_long_name"));
+				location.setDescription(resultSet.getString("location_description"));
+				location.setScale_ft(resultSet.getDouble("scale_ft"));
+				location.setLatitude(resultSet.getDouble("latitude"));
+				location.setLongitude(resultSet.getDouble("longitude"));
+				location.setImage(resultSet.getString("canvas_image"));
+				
+				locationType.setLocation_type_id(resultSet.getInt("location_type_id"));
+				locationType.setShort_name(resultSet.getString("location_type_short_name"));
+				locationType.setDescription(resultSet.getString("location_type_description"));
 				
 				JSONParser parser = new JSONParser();
 				try {
@@ -147,6 +156,7 @@ public class Location implements INavEntity {
 		jsonObject.put("short_name", short_name);
 		jsonObject.put("long_name", long_name);
 		jsonObject.put("description", description);
+		jsonObject.put("canvas_image", image);
 		jsonObject.put("location_type_id", location_type_id);
 		jsonObject.put("address_id", address_id);
 		jsonObject.put("primary_object_id", primary_object_id);
@@ -257,6 +267,14 @@ public class Location implements INavEntity {
 	}
 	public void setActive(boolean active) {
 		this.active = active;
+	}
+
+	public String getImage() {
+		return image;
+	}
+
+	public void setImage(String image) {
+		this.image = image;
 	}
 
 	

@@ -4,21 +4,21 @@ import org.json.simple.JSONObject;
 
 public class Edge {
 	
-	private LocationObject v1;
-	private LocationObject v2;
+	private LocationObjectVertex v1;
+	private LocationObjectVertex v2;
 	private int weight;
 	
-	public Edge(LocationObject v1, LocationObject v2, int weight) {
+	public Edge(LocationObjectVertex v1, LocationObjectVertex v2, int weight) {
 		this.v1 = v1;
 		this.v2 = v2;
 		this.weight = weight;
 	}
 	
-	public LocationObject v1() {
+	public LocationObjectVertex v1() {
 		return v1;
 	}
 	
-	public LocationObject v2() {
+	public LocationObjectVertex v2() {
 		return v2;
 	}
 	

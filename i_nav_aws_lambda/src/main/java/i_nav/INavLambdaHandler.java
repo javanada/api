@@ -112,12 +112,17 @@ public class INavLambdaHandler implements RequestStreamHandler {
 			
 		} else if (entity.equals("objects")) {
 			
-			responseBodyArray = LocationObject.getLocationObjects(null);
+			responseBodyArray = LocationObject.getLocationObjects(null, null);
+			
+		} else if (entity.equals("objects/location")) {
+			
+			String locationId = ((JSONObject)event).get("id").toString();
+			responseBodyArray = LocationObject.getLocationObjects(null, locationId);
 			
 		} else if (entity.equals("object")) {
 			
 			String objectId = ((JSONObject)event).get("id").toString();
-			responseBodyArray = LocationObject.getLocationObjects(objectId);
+			responseBodyArray = LocationObject.getLocationObjects(objectId, null);
 			
 		}  else if (entity.equals("object/new")) {
 			
@@ -234,6 +239,13 @@ public class INavLambdaHandler implements RequestStreamHandler {
 				responseBodyArray.add(obj);
 			}
 			
+		} else if (entity.equals("set-edge-directed")) {
+			
+			String sourceObjectId = ((JSONObject)event).get("source_object_id").toString();
+			String sourceLocationId = ((JSONObject)event).get("source_location_id").toString();
+			String destObjectId = ((JSONObject)event).get("dest_object_id").toString();
+			String destLocationId = ((JSONObject)event).get("dest_location_id").toString();
+			responseBodyArray = LocationObject.setEdgeDirected(sourceObjectId, sourceLocationId, destObjectId, destLocationId);
 		}
 		
 		
