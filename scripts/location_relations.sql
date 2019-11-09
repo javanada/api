@@ -20,9 +20,9 @@ CREATE TABLE IF NOT EXISTS `i_nav`.`location_relations` (
 -- Indexes for table `location_relations`
 --
 ALTER TABLE `location_relations`
-  ADD FOREIGN KEY (`parent_id`) REFERENCES `locations`(`parent_id`);
+  ADD FOREIGN KEY (`parent_id`) REFERENCES `locations`(`location_id`);
 ALTER TABLE `location_relations`
-  ADD FOREIGN KEY (`child_id`) REFERENCES `locations`(`child_id`);
+  ADD FOREIGN KEY (`child_id`) REFERENCES `locations`(`location_id`);
 
 COMMIT;
 
