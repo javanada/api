@@ -30,8 +30,95 @@ public class Location implements INavEntity {
 	private double latitude;
 	private double longitude;
 	private boolean active;
-	
-	
+
+	public static JSONArray updateLocation(JSONObject updateLoc){
+		JSONArray JSONArr = new JSONArray();
+
+		String update = "UPDATE `locations`";
+		String set = " SET `short_name` = `?`, `long_name` = `?`, `description` = `?`, `min_x_coordinate` = `?`, `min_y_coordinate` = `?`, `max_x_coordinate` = `?`, `max_y_coordinate` = `?`, `active` = `?`";
+		String where = "";
+
+		if (where != null){
+			where = " WHERE `location_id` = " + id;
+		}
+
+		String query = update + set + where;
+
+		try {
+			Connection conn = DriverManager.getConnection(url, username, password);
+			PreparedStatement stmt = conn.prepareStatement(query);
+
+			if (id != null) {
+				stmt.setString(1, id);
+			}
+
+			stmt.executeUpdate();
+			ResultSet result = stmt.executeQuery();
+
+			while (result.next()){
+
+				updateLoc.setShort_name(result.getString(1));
+				updateLoc.setLong_name(result.getString(2));
+				updateLoc.setDescription(result.getString(3));
+				updateLoc.setMax_x_coordinate(result.getDouble(10));
+				updateLoc.setMax_y_coordinate(result.getDouble(11));
+				updateLoc.setMin_x_coordinate(result.getDouble(8));
+				updateLoc.setMin_y_coordinate(result.getDouble(9));
+			}
+
+			if (resultSet.next()) {
+				long id = result.getLong(1);
+				JSONArr = Location.getLocations("" + id);
+			}
+
+		} catch (Exception e) {
+			JSONObject obj = new JSONObject();
+			obj.put("Exception Occured", e.getMessage());
+			JSONArr.add(obj);
+		}
+
+		return JSONArr;
+	}
+	public static JSONArray deleteLocation(String id){
+		JSONArray jsonArr = new JSONArray();
+
+		String update = "UPDATE `locations` ";
+		String set = "SET `active` = `false`";
+		String where = "";
+
+		if (id != null) {
+			where = " WHERE `location_id` = " + id;
+		}
+
+		String query = update + set + where;
+
+		try {
+			Connection conn = DriverManager.getConnection(url, username, password);
+			PreparedStatement stmt = conn.prepareStatement(query);
+
+			ResultSet resultSet = stmt.executeUpdate();
+
+			while (resultSet.next()){
+				Location location = new Location();
+
+				if (location.isActive()){
+					location.setActive(false);
+				}
+				//stmt.executeUpdate();
+			}
+
+			JSONObject locationJson = (JSONObject) parser.parse(location.getJSONString());
+			jsonArray.add(locationJson);
+
+			stmt.executeUpdate();
+		} catch (Exception e) {
+			JSONObject obj = new JSONObject();
+			obj.put("Exception Occured", e.getMessage());
+			jsonArray.add(obj);
+		}
+
+		return jsonArr;
+	}
 	public static JSONArray newLocation(JSONObject newLocation) {
 		
 		JSONArray jsonArray = new JSONArray();
@@ -258,8 +345,4 @@ public class Location implements INavEntity {
 	public void setActive(boolean active) {
 		this.active = active;
 	}
-
-	
-	
-	
 }
