@@ -36,21 +36,13 @@ public class Location implements INavEntity {
 
 		String update = "UPDATE `locations`";
 		String set = " SET `short_name` = `?`, `long_name` = `?`, `description` = `?`, `min_x_coordinate` = `?`, `min_y_coordinate` = `?`, `max_x_coordinate` = `?`, `max_y_coordinate` = `?`, `active` = `?`";
-		String where = "";
-
-		if (where != null){
-			where = " WHERE `location_id` = " + id;
-		}
+		String where = " WHERE `id` = `?`"
 
 		String query = update + set + where;
 
 		try {
 			Connection conn = DriverManager.getConnection(url, username, password);
 			PreparedStatement stmt = conn.prepareStatement(query);
-
-			if (id != null) {
-				stmt.setString(1, id);
-			}
 
 			stmt.executeUpdate();
 			ResultSet result = stmt.executeQuery();
@@ -60,10 +52,10 @@ public class Location implements INavEntity {
 				updateLoc.setShort_name(result.getString(1));
 				updateLoc.setLong_name(result.getString(2));
 				updateLoc.setDescription(result.getString(3));
-				updateLoc.setMax_x_coordinate(result.getDouble(10));
-				updateLoc.setMax_y_coordinate(result.getDouble(11));
 				updateLoc.setMin_x_coordinate(result.getDouble(8));
 				updateLoc.setMin_y_coordinate(result.getDouble(9));
+				updateLoc.setMax_x_coordinate(result.getDouble(10));
+				updateLoc.setMax_y_coordinate(result.getDouble(11));
 			}
 
 			if (resultSet.next()) {
@@ -110,7 +102,7 @@ public class Location implements INavEntity {
 			JSONObject locationJson = (JSONObject) parser.parse(location.getJSONString());
 			jsonArray.add(locationJson);
 
-			stmt.executeUpdate();
+			//stmt.executeUpdate();
 		} catch (Exception e) {
 			JSONObject obj = new JSONObject();
 			obj.put("Exception Occured", e.getMessage());
