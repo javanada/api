@@ -6,6 +6,7 @@ drop table location_types;
 drop table object_types;
 drop table objects;
 drop table locations;
+drop table location_relations;
 drop table users;
 
 
@@ -16,4 +17,5 @@ delete from location_types where 1;
 delete from object_types where 1;
 delete from objects where 1;
 delete from locations where 1;
+delete from location_relations where 1;
 delete from users where 1;
