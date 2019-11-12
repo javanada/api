@@ -39,7 +39,39 @@ public class User implements INavEntity {
 	private int role_id;
 	private boolean active;
 	
-	public static JSONArray getUsers(String id) {
+	public User() {
+		
+	}
+	
+	public User(JSONObject jsonObject) {
+		user_id = Integer.parseInt(jsonObject.get("user_id").toString());
+		role_id = Integer.parseInt(jsonObject.get("role_id").toString());
+		username = jsonObject.get("username").toString();
+		salt = jsonObject.get("salt").toString();
+		password = jsonObject.get("password").toString();
+		first_name = jsonObject.get("first_name").toString();
+		last_name = jsonObject.get("last_name").toString();
+		email = jsonObject.get("email").toString();
+		active = Boolean.parseBoolean(jsonObject.get("active").toString());
+	}
+
+	public static User getCurrentUser(String apiKey) {
+		
+		AmazonApiGateway client = AmazonApiGatewayClientBuilder.standard().build();
+		GetApiKeyRequest req = new GetApiKeyRequest();
+		req.setApiKey(apiKey);
+		String apiKeyUsername = client.getApiKey(req).getName();
+		JSONArray arr = getUsers(null, apiKeyUsername);
+		if (arr.size() == 1) {
+			JSONObject obj = (JSONObject)arr.get(0);
+			User u = new User(obj);
+			return u;
+		}
+		
+		return new User();
+	}
+	
+	public static JSONArray getUsers(String id, String username) {
 		
 		String returnStr = "";
 		String where = "";
@@ -49,6 +81,9 @@ public class User implements INavEntity {
 		if (id != null) {
 			where = " WHERE u.user_id = ? ";
 		}
+		if (username != null) {
+			where = " WHERE u.username = ? ";
+		}
 		String query = select + join + where;
 		
 		JSONArray jsonArray = new JSONArray();
@@ -57,8 +92,13 @@ public class User implements INavEntity {
 			Connection conn = DriverManager.getConnection(url, INavEntity.username, INavEntity.password);
 //			Statement stmt = conn.createStatement();
 			PreparedStatement stmt = conn.prepareStatement(query);
-			if (id != null) {
+			if (id != null && username == null) {
 				stmt.setString(1, id);
+			} else if (id == null && username != null) {
+				stmt.setString(1, username);
+			} else if (id != null && username != null) {
+				stmt.setString(1, id);
+				stmt.setString(2, username);
 			}
 			ResultSet resultSet = stmt.executeQuery();
 
@@ -356,7 +396,7 @@ public class User implements INavEntity {
 				
 				
                 long id = resultSet.getLong(1);
-                jsonArray = User.getUsers("" + id);
+                jsonArray = User.getUsers("" + id, null);
                 ((JSONObject) jsonArray.get(0)).put("x-api-key", uuid);
                 
                 JSONObject obj = new JSONObject();

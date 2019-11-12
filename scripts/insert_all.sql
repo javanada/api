@@ -18,18 +18,28 @@ INSERT INTO `object_types` (`short_name`, `long_name`, `description`)
 VALUES 
  ('path', 'path', 'a point through which one can travel'),
  ('door', 'door', 'a door leading from one room to another'),
- ('generic', 'generic', 'whatever');
+ ('generic', 'generic', 'whatever'),
+ ('location_primary', 'location_primary', 'location_primary'),
+ ('location_secondary', 'location_secondary', 'location_secondary');
 
 
 INSERT INTO `locations` (`short_name`, `long_name`, `description`, `image`, `location_type_id`, `address_id`, `primary_object_id`, `scale_ft`, `min_x_coordinate`, `min_y_coordinate`, `max_x_coordinate`, `max_y_coordinate`, `latitude`, `longitude`, `active`) 
 VALUES 
- ('CEB', 'EWU Computer Engineering Building', 'Computer Science Stuff', 's3://inav-2761e89d-6096-43cc-b585-1c07a19a140d/ceb2.png', 2, 1, NULL, 1, '0', '0', '100', '100', NULL, NULL, 1),
+ ('CEB', 'EWU Computer Engineering Building', 'Computer Science Stuff', 'https://inav-2761e89d-6096-43cc-b585-1c07a19a140d.s3-us-west-2.amazonaws.com/ceb2.png', 2, 1, NULL, 1, '0', '0', '100', '100', NULL, NULL, 1),
+ ('CEB0', 'EWU Computer Engineering Building Lower Level', 'Computer Science Stuff', 'https://inav-2761e89d-6096-43cc-b585-1c07a19a140d.s3-us-west-2.amazonaws.com/ceb2.png', 2, 1, NULL, 1, '0', '0', '100', '100', NULL, NULL, 1),
+ ('CEB1', 'EWU Computer Engineering Building First Level', 'Computer Science Stuff', 'https://inav-2761e89d-6096-43cc-b585-1c07a19a140d.s3-us-west-2.amazonaws.com/ceb2.png', 2, 1, NULL, 1, '0', '0', '100', '100', NULL, NULL, 1),
+ ('CEB2', 'EWU Computer Engineering Building Second Level', 'Computer Science Stuff', 'https://inav-2761e89d-6096-43cc-b585-1c07a19a140d.s3-us-west-2.amazonaws.com/ceb2.png', 2, 1, NULL, 1, '0', '0', '100', '100', NULL, NULL, 1),
+ ('CEB3', 'EWU Computer Engineering Building Third Level', 'Computer Science Stuff', 'https://inav-2761e89d-6096-43cc-b585-1c07a19a140d.s3-us-west-2.amazonaws.com/ceb2.png', 2, 1, NULL, 1, '0', '0', '100', '100', NULL, NULL, 1),
  ('CEB101', 'EWU Computer Engineering Building Room 101', 'Computer Science Stuff', '', 1, 1, NULL, 1, '0', '0', '100', '100', NULL, NULL, 1);
 
 
 INSERT INTO `location_relations` (`parent_id`, `child_id`, `active`) 
 VALUES 
- (1, 2, 1);
+ (1, 2, 1),
+ (1, 3, 1),
+ (1, 4, 1),
+ (1, 5, 1),
+ (1, 6, 1);
 
 
 

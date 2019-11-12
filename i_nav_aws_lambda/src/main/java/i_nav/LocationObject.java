@@ -49,8 +49,8 @@ public class LocationObject implements INavEntity {
 		
 		JSONArray jsonArray = new JSONArray();
 		
-		JSONArray arrSource = getLocationObjects(sourceObjectId, sourceLocationId);
-		JSONArray arrDest = getLocationObjects(destObjectId, destLocationId);
+		JSONArray arrSource = getLocationObjects(sourceObjectId, sourceLocationId, null);
+		JSONArray arrDest = getLocationObjects(destObjectId, destLocationId, null);
 		
 		if (arrSource.size() == 1 && arrDest.size() == 1) {
 			
@@ -114,7 +114,7 @@ public class LocationObject implements INavEntity {
 			ResultSet resultSet = stmt.getGeneratedKeys();
 			if (resultSet.next()) {
                 long id = resultSet.getLong(1);
-                jsonArray = LocationObject.getLocationObjects("" + id, null);
+                jsonArray = LocationObject.getLocationObjects("" + id, null, null);
                 
                 if (jsonArray.size() > 0) {
 	                CloudGraphListDirected graph1 = new CloudGraphListDirected("i_nav_graph1", true);
@@ -132,13 +132,13 @@ public class LocationObject implements INavEntity {
 		return jsonArray;
 	}
 	
-	public static JSONArray getLocationObjects(String id, String locationId) {
+	public static JSONArray getLocationObjects(String id, String locationId, String objectTypeId) {
 		String returnStr = "";
 		String where = "";
 		
 		String select = " SELECT " + 
-						" o.object_id, o.short_name as object_short_name, o.long_name as object_long_name, o.description as object_description, o.x_coordinate, o.y_coordinate, " + 
-						" l.location_id as location_location_id, l.primary_object_id, l.short_name as location_short_name, l.long_name as location_long_name, l.description as location_description, l.scale_ft, l.latitude, l.longitude, l.image as canvas_image, " + 
+						" o.object_id, o.short_name as object_short_name, o.long_name as object_long_name, o.description as object_description, o.x_coordinate, o.y_coordinate, o.latitude, o.longitude, " + 
+						" l.location_id as location_location_id, l.primary_object_id, l.short_name as location_short_name, l.long_name as location_long_name, l.description as location_description, l.scale_ft, l.image as canvas_image, " + 
 						" lt.location_type_id, lt.short_name as location_type_short_name, lt.description as location_type_description, " + 
 						" ot.object_type_id, ot.short_name as object_type_short_name,  ot.description as object_type_description," + 
 						" a.address_id, a.address1, a.address2, a.city, a.state, a.zipcode, a.zipcode_ext "
@@ -158,6 +158,9 @@ public class LocationObject implements INavEntity {
 		if (locationId != null) {
 			where += " AND l.location_id = ? ";
 		}
+		if (objectTypeId != null) {
+			where += " AND ot.object_type_id = ? ";
+		}
 		String query = select + from +  join + where;
 		
 		
@@ -168,13 +171,16 @@ public class LocationObject implements INavEntity {
 			Connection conn = DriverManager.getConnection(url, username, password);
 //			Statement stmt = conn.createStatement();
 			PreparedStatement stmt = conn.prepareStatement(query);
-			if (id != null && locationId == null) {
-				stmt.setString(1, id);
-			} else if (locationId != null && id == null) {
-				stmt.setString(1, locationId);
-			} else if (locationId != null && id != null) {
-				stmt.setString(1, id);
-				stmt.setString(2, locationId);
+			
+			int c = 1;
+			if (id != null) {
+				stmt.setString(c++, id);
+			}
+			if (locationId != null) {
+				stmt.setString(c++, locationId);
+			}
+			if (objectTypeId != null) {
+				stmt.setString(c++, objectTypeId);
 			}
 			ResultSet resultSet = stmt.executeQuery();
 
@@ -203,6 +209,8 @@ public class LocationObject implements INavEntity {
 				locationObject.setDescription(resultSet.getString("object_description"));
 				locationObject.setX_coordinate(resultSet.getInt("x_coordinate"));
 				locationObject.setY_coordinate(resultSet.getInt("y_coordinate"));
+				locationObject.setLatitude(resultSet.getDouble("latitude"));
+				locationObject.setLongitude(resultSet.getDouble("longitude"));
 				
 				locationObjectType.setObject_type_id(resultSet.getInt("object_type_id"));
 				locationObjectType.setShort_name(resultSet.getString("object_type_short_name"));

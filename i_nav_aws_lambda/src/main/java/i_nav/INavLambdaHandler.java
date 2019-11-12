@@ -96,6 +96,11 @@ public class INavLambdaHandler implements RequestStreamHandler {
 			String locationId = ((JSONObject)event).get("id").toString();
 			responseBodyArray = Location.getLocations(locationId);
 			
+		} else if (entity.equals("location/set-scale")) {
+			
+			String locationId = ((JSONObject)event).get("id").toString();
+			responseBodyArray = Location.setLocationScale(locationId);
+			
 		} else if (entity.equals("location/new")) {
 			
 			try {
@@ -112,17 +117,17 @@ public class INavLambdaHandler implements RequestStreamHandler {
 			
 		} else if (entity.equals("objects")) {
 			
-			responseBodyArray = LocationObject.getLocationObjects(null, null);
+			responseBodyArray = LocationObject.getLocationObjects(null, null, null);
 			
 		} else if (entity.equals("objects/location")) {
 			
 			String locationId = ((JSONObject)event).get("id").toString();
-			responseBodyArray = LocationObject.getLocationObjects(null, locationId);
+			responseBodyArray = LocationObject.getLocationObjects(null, locationId, null);
 			
 		} else if (entity.equals("object")) {
 			
 			String objectId = ((JSONObject)event).get("id").toString();
-			responseBodyArray = LocationObject.getLocationObjects(objectId, null);
+			responseBodyArray = LocationObject.getLocationObjects(objectId, null, null);
 			
 		}  else if (entity.equals("object/new")) {
 			
@@ -212,12 +217,12 @@ public class INavLambdaHandler implements RequestStreamHandler {
 			
 		} else if (entity.equals("users")) {
 			
-			responseBodyArray = User.getUsers(null);
+			responseBodyArray = User.getUsers(null, null);
 			
 		} else if (entity.equals("user")) {
 			
 			String userId = ((JSONObject)event).get("id").toString();
-			responseBodyArray = User.getUsers(userId);
+			responseBodyArray = User.getUsers(userId, null);
 			
 		} else if (entity.equals("user/new")) {
 			
@@ -260,6 +265,7 @@ public class INavLambdaHandler implements RequestStreamHandler {
 //		responseBody.put("input", event.toJSONString());
 		responseBody.put("data", responseBodyArray);
 		responseJson.put("event", "" + event.toString());
+//		responseJson.put("current_user", User.getCurrentUser().getJSONString());
 		
 		responseJson.put("body", responseBody);
 
