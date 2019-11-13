@@ -19,6 +19,8 @@ CREATE TABLE IF NOT EXISTS `i_nav`.`objects` (
   `object_type_id` int(11) NOT NULL,
   `x_coordinate` int(8) NOT NULL,
   `y_coordinate` int(8) NOT NULL,
+  `image_x` int(11) DEFAULT NULL,
+  `image_y` int(11) DEFAULT NULL,
   `latitude` decimal(9,6) DEFAULT NULL,
   `longitude` decimal(9,6) DEFAULT NULL,
   `active` tinyint(1) NOT NULL

@@ -56,13 +56,20 @@ public class Location implements INavEntity {
 		double secondaryLat = Math.toRadians(secondary.getLatitude());
 		double secondaryLong = Math.toRadians(secondary.getLongitude());
 		
-		double R = 6371000; // mean radius of Earth (m)
+		double R = 6369061; // radius of Earth (m) at Cheney, WA
 		// todo: calculate exact radius by latitude
 		
 		double theta = (primaryLat + secondaryLat) / 2;
 		double phi = (primaryLong + secondaryLong) / 2;
-		double dist_x = R * ((Math.sin(theta) * Math.cos(phi) * (primaryLat - secondaryLat)) - (Math.cos(theta) * Math.sin(phi) * (primaryLong - secondaryLong)));
-		double dist_y = R * ((Math.sin(theta) * Math.sin(phi) * (primaryLat - secondaryLat)) - (Math.cos(theta) * Math.cos(phi) * (primaryLong - secondaryLong)));
+//		double dist_x = R * ((Math.sin(theta) * Math.cos(phi) * (primaryLat - secondaryLat)) - (Math.cos(theta) * Math.sin(phi) * (primaryLong - secondaryLong)));
+//		double dist_y = R * ((Math.sin(theta) * Math.sin(phi) * (primaryLat - secondaryLat)) - (Math.cos(theta) * Math.cos(phi) * (primaryLong - secondaryLong)));
+//		double dist_x = R * (Math.cos(secondaryLat) * Math.cos(secondaryLong) - Math.cos(primaryLat) * Math.cos(primaryLong));
+//		double dist_y = R * (Math.cos(secondaryLat) * Math.sin(secondaryLong) - Math.cos(primaryLat) * Math.sin(primaryLong));
+		double dist_x1 = R * (Math.cos(secondaryLat) * Math.cos(secondaryLong) - Math.cos(primaryLat) * Math.cos(primaryLong));
+		double dist_x2 = R * (Math.cos(secondaryLat) * Math.sin(secondaryLong) - Math.cos(primaryLat) * Math.sin(primaryLong));
+		double dist_x = Math.sqrt(dist_x2 * dist_x2 + dist_x1 * dist_x1); 
+		
+		double dist_y = R * (Math.sin(secondaryLat) - Math.sin(primaryLat));
 		
 		dist_x = Math.abs(dist_x) * 3.28084;
 		dist_y = Math.abs(dist_y) * 3.28084;
@@ -82,15 +89,25 @@ public class Location implements INavEntity {
 		
 		jsonArray.add(tempObj);
 		
-		String query = "UPDATE locations SET max_x_coordinate = '" + dist_x + "', max_y_coordinate = '" + dist_y + "' WHERE location_id = ? ";
+		double secondaryX = primaryLong < secondaryLong ? dist_x : -1 * dist_x;
+		double secondaryY = primaryLat < secondaryLat ? dist_y : -1 * dist_y;
+		
+//		String query = "UPDATE locations SET max_x_coordinate = '" + dist_x + "', max_y_coordinate = '" + dist_y + "' WHERE location_id = ? ";
+		String query2 = "UPDATE objects SET x_coordinate = '" + secondaryX + "', y_coordinate = '" + secondaryY + "' WHERE location_id = ? AND object_type_id = 5 ";
 		try {
 			Connection conn = DriverManager.getConnection(url, username, password);
 	//		Statement stmt = conn.createStatement();
-			PreparedStatement stmt = conn.prepareStatement(query);
+//			PreparedStatement stmt = conn.prepareStatement(query);
+//			if (id != null) {
+//				stmt.setString(1, id);
+//			}
+//			int result = stmt.executeUpdate();
+			
+			PreparedStatement stmt2 = conn.prepareStatement(query2);
 			if (id != null) {
-				stmt.setString(1, id);
+				stmt2.setString(1, id);
 			}
-			int result = stmt.executeUpdate();
+			int result2 = stmt2.executeUpdate();
 			
 		} catch (SQLException e) {
 			JSONObject obj = new JSONObject();
