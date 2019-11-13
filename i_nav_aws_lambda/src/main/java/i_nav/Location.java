@@ -35,8 +35,8 @@ public class Location implements INavEntity {
 		JSONArray JSONArr = new JSONArray();
 
 		String update = "UPDATE `locations`";
-		String set = " SET `short_name` = `?`, `long_name` = `?`, `description` = `?`, `min_x_coordinate` = `?`, `min_y_coordinate` = `?`, `max_x_coordinate` = `?`, `max_y_coordinate` = `?`, `active` = `?`";
-		String where = " WHERE `id` = `?`"
+		String set = " SET `short_name` = ?";//, `long_name` = ?, `description` = ?, `min_x_coordinate` = ?, `min_y_coordinate` = ?, `max_x_coordinate` = ?, `max_y_coordinate` = ?;
+		String where = " WHERE `location_id` = ?";
 
 		String query = update + set + where;
 
@@ -44,8 +44,14 @@ public class Location implements INavEntity {
 			Connection conn = DriverManager.getConnection(url, username, password);
 			PreparedStatement stmt = conn.prepareStatement(query);
 
+			if (updateLoc.get("short_name").toString() != null) {
+				stmt.setString(1, updateLoc.get("short_name").toString());
+			}
+
+			stmt.setInt(2, Integer.parseInt(updateLoc.get("location_id").toString()));
+
 			stmt.executeUpdate();
-			ResultSet result = stmt.executeQuery();
+			/*ResultSet result = stmt.executeQuery();
 
 			while (result.next()){
 
@@ -61,7 +67,7 @@ public class Location implements INavEntity {
 			if (resultSet.next()) {
 				long id = result.getLong(1);
 				JSONArr = Location.getLocations("" + id);
-			}
+			}*/
 
 		} catch (Exception e) {
 			JSONObject obj = new JSONObject();
@@ -88,25 +94,25 @@ public class Location implements INavEntity {
 			Connection conn = DriverManager.getConnection(url, username, password);
 			PreparedStatement stmt = conn.prepareStatement(query);
 
-			ResultSet resultSet = stmt.executeUpdate();
+			stmt.executeUpdate();
 
-			while (resultSet.next()){
+			/*while (resultSet.next()){
 				Location location = new Location();
 
 				if (location.isActive()){
 					location.setActive(false);
 				}
 				//stmt.executeUpdate();
-			}
+			}*/
 
-			JSONObject locationJson = (JSONObject) parser.parse(location.getJSONString());
-			jsonArray.add(locationJson);
+			//JSONObject locationJson = (JSONObject)parser.parse(location.getJSONString());
+			//jsonArr.add(locationJson);
 
 			//stmt.executeUpdate();
 		} catch (Exception e) {
 			JSONObject obj = new JSONObject();
 			obj.put("Exception Occured", e.getMessage());
-			jsonArray.add(obj);
+			jsonArr.add(obj);
 		}
 
 		return jsonArr;
