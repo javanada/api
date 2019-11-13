@@ -18,6 +18,7 @@ public class Location implements INavEntity {
 	private String short_name;
 	private String long_name;
 	private String description;
+	private String image;
 	private int location_type_id;
 	private int address_id;
 	private int primary_object_id;
@@ -117,6 +118,7 @@ public class Location implements INavEntity {
 
 		return jsonArr;
 	}
+  
 	public static JSONArray newLocation(JSONObject newLocation) {
 		
 		JSONArray jsonArray = new JSONArray();
@@ -166,12 +168,17 @@ public class Location implements INavEntity {
 		String returnStr = "";
 		String where = "";
 		
-		String select = " SELECT * FROM locations l ";
+		String select = 
+					" SELECT " + 
+					" l.location_id as location_location_id, l.primary_object_id, l.short_name as location_short_name, l.long_name as location_long_name, l.description as location_description, l.scale_ft, l.latitude, l.longitude, l.image as canvas_image, " + 
+					" lt.location_type_id, lt.short_name as location_type_short_name, lt.description as location_type_description ";
+		
+		String from = " FROM locations l ";
 		String join = " INNER JOIN location_types lt ON l.location_type_id = lt.location_type_id ";
 		if (id != null) {
-			where = " WHERE l.location_id = ? ";
+			where = " WHERE l.location_id = ? AND l.active = 1";
 		}
-		String query = select + join + where;
+		String query = select + from + join + where;
 		
 		JSONArray jsonArray = new JSONArray();
 
@@ -189,16 +196,19 @@ public class Location implements INavEntity {
 				Location location = new Location();
 				LocationType locationType = new LocationType();
 				
-				location.setLocation_id(resultSet.getInt(1));
-				location.setShort_name(resultSet.getString(2));
-				location.setLong_name(resultSet.getString(3));
-				location.setDescription(resultSet.getString(4));
-				location.setLocation_type_id(resultSet.getInt(5));
-				location.setAddress_id(resultSet.getInt(6));
-				location.setPrimary_object_id(resultSet.getInt(7));
-				location.setScale_ft(resultSet.getDouble(8));
-				locationType.setLocation_type_id(resultSet.getInt(16));
-				locationType.setShort_name(resultSet.getString(17));
+				location.setLocation_id(resultSet.getInt("location_location_id"));
+				location.setPrimary_object_id(resultSet.getInt("primary_object_id"));
+				location.setShort_name(resultSet.getString("location_short_name"));
+				location.setLong_name(resultSet.getString("location_long_name"));
+				location.setDescription(resultSet.getString("location_description"));
+				location.setScale_ft(resultSet.getDouble("scale_ft"));
+				location.setLatitude(resultSet.getDouble("latitude"));
+				location.setLongitude(resultSet.getDouble("longitude"));
+				location.setImage(resultSet.getString("canvas_image"));
+				
+				locationType.setLocation_type_id(resultSet.getInt("location_type_id"));
+				locationType.setShort_name(resultSet.getString("location_type_short_name"));
+				locationType.setDescription(resultSet.getString("location_type_description"));
 				
 				JSONParser parser = new JSONParser();
 				try {
@@ -224,6 +234,92 @@ public class Location implements INavEntity {
 		return jsonArray;
 	}
 	
+	public static JSONArray setLocationScale(String id) {
+		JSONArray jsonArray = new JSONArray();
+		
+		// get primary and secondary objects for this location id
+		JSONArray primaryArr = LocationObject.getLocationObjects(null, id, "4");
+		JSONArray secondaryArr = LocationObject.getLocationObjects(null, id, "5");
+		
+		if (primaryArr.size() == 0 || secondaryArr.size() == 0) {
+			JSONObject obj = new JSONObject();
+			obj.put("Exception", "Primary and/or secondary objects do not exist");
+			return jsonArray;
+		}
+		JSONObject primaryObj = (JSONObject)primaryArr.get(0);
+		JSONObject secondaryObj = (JSONObject)secondaryArr.get(0);
+		
+		LocationObject primary = new LocationObject(primaryObj);
+		LocationObject secondary = new LocationObject(secondaryObj);
+		
+		// calculate distance between primary and secondary lat and long and convert to feet or meters
+		double primaryLat = Math.toRadians(primary.getLatitude());
+		double primaryLong = Math.toRadians(primary.getLongitude());
+		double secondaryLat = Math.toRadians(secondary.getLatitude());
+		double secondaryLong = Math.toRadians(secondary.getLongitude());
+		
+		double R = 6369061; // radius of Earth (m) at Cheney, WA
+		// todo: calculate exact radius by latitude
+		
+		double theta = (primaryLat + secondaryLat) / 2;
+		double phi = (primaryLong + secondaryLong) / 2;
+//		double dist_x = R * ((Math.sin(theta) * Math.cos(phi) * (primaryLat - secondaryLat)) - (Math.cos(theta) * Math.sin(phi) * (primaryLong - secondaryLong)));
+//		double dist_y = R * ((Math.sin(theta) * Math.sin(phi) * (primaryLat - secondaryLat)) - (Math.cos(theta) * Math.cos(phi) * (primaryLong - secondaryLong)));
+//		double dist_x = R * (Math.cos(secondaryLat) * Math.cos(secondaryLong) - Math.cos(primaryLat) * Math.cos(primaryLong));
+//		double dist_y = R * (Math.cos(secondaryLat) * Math.sin(secondaryLong) - Math.cos(primaryLat) * Math.sin(primaryLong));
+		double dist_x1 = R * (Math.cos(secondaryLat) * Math.cos(secondaryLong) - Math.cos(primaryLat) * Math.cos(primaryLong));
+		double dist_x2 = R * (Math.cos(secondaryLat) * Math.sin(secondaryLong) - Math.cos(primaryLat) * Math.sin(primaryLong));
+		double dist_x = Math.sqrt(dist_x2 * dist_x2 + dist_x1 * dist_x1); 
+		
+		double dist_y = R * (Math.sin(secondaryLat) - Math.sin(primaryLat));
+		
+		dist_x = Math.abs(dist_x) * 3.28084;
+		dist_y = Math.abs(dist_y) * 3.28084;
+		// there should be an x_scale and a y_scale
+		// this distance is the scale
+		// set secondary x and y to the max and location max_x and max_y
+		
+		JSONObject tempObj = new JSONObject();
+		tempObj.put("dist_x", dist_x);
+		tempObj.put("dist_y", dist_y);
+		tempObj.put("primaryLat", primaryLat);
+		tempObj.put("primaryLong", primaryLong);
+		tempObj.put("secondaryLat", secondaryLat);
+		tempObj.put("secondaryLong", secondaryLong);
+		tempObj.put("theta", theta);
+		tempObj.put("phi", phi);
+		
+		jsonArray.add(tempObj);
+		
+		double secondaryX = primaryLong < secondaryLong ? dist_x : -1 * dist_x;
+		double secondaryY = primaryLat < secondaryLat ? dist_y : -1 * dist_y;
+		
+//		String query = "UPDATE locations SET max_x_coordinate = '" + dist_x + "', max_y_coordinate = '" + dist_y + "' WHERE location_id = ? ";
+		String query2 = "UPDATE objects SET x_coordinate = '" + secondaryX + "', y_coordinate = '" + secondaryY + "' WHERE location_id = ? AND object_type_id = 5 ";
+		try {
+			Connection conn = DriverManager.getConnection(url, username, password);
+	//		Statement stmt = conn.createStatement();
+//			PreparedStatement stmt = conn.prepareStatement(query);
+//			if (id != null) {
+//				stmt.setString(1, id);
+//			}
+//			int result = stmt.executeUpdate();
+			
+			PreparedStatement stmt2 = conn.prepareStatement(query2);
+			if (id != null) {
+				stmt2.setString(1, id);
+			}
+			int result2 = stmt2.executeUpdate();
+			
+		} catch (SQLException e) {
+			JSONObject obj = new JSONObject();
+			obj.put("SQLException", e.getMessage());
+			jsonArray.add(obj);
+		}
+		
+		return jsonArray;
+	}
+	
 	@Override
 	public String getJSONString() {
 		
@@ -232,6 +328,7 @@ public class Location implements INavEntity {
 		jsonObject.put("short_name", short_name);
 		jsonObject.put("long_name", long_name);
 		jsonObject.put("description", description);
+		jsonObject.put("canvas_image", image);
 		jsonObject.put("location_type_id", location_type_id);
 		jsonObject.put("address_id", address_id);
 		jsonObject.put("primary_object_id", primary_object_id);
@@ -343,4 +440,13 @@ public class Location implements INavEntity {
 	public void setActive(boolean active) {
 		this.active = active;
 	}
+
+	public String getImage() {
+		return image;
+	}
+
+	public void setImage(String image) {
+		this.image = image;
+	}
+
 }

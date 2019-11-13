@@ -11,7 +11,7 @@ public interface DBAccessGraph {
 	public void createTable(String tableName);
 	public void addGraphVertex(String nodeId, String adj, String location, String graphName);
 	public void updateItem(String graphName, String type, String edge);
-	public Map<LocationObject, List<Edge>> getCloudVerticesAndEdges(String graphName);
+	public Map<LocationObjectVertex, List<Edge>> getCloudVerticesAndEdges(String graphName);
 	
 	
 	public int getNumAdds();

@@ -1,7 +1,5 @@
 
 
-
-
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 SET AUTOCOMMIT = 0;
 START TRANSACTION;
@@ -154,6 +152,7 @@ CREATE TABLE IF NOT EXISTS `i_nav`.`locations` (
   `short_name` varchar(25) COLLATE utf8_unicode_ci NOT NULL,
   `long_name` varchar(50) COLLATE utf8_unicode_ci DEFAULT NULL,
   `description` varchar(128) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `image` varchar(128) COLLATE utf8_unicode_ci DEFAULT NULL,
   `location_type_id` int(11) NOT NULL,
   `address_id` int(11) NOT NULL,
   `primary_object_id` int(11) DEFAULT NULL,
@@ -208,6 +207,8 @@ CREATE TABLE IF NOT EXISTS `i_nav`.`objects` (
   `object_type_id` int(11) NOT NULL,
   `x_coordinate` int(8) NOT NULL,
   `y_coordinate` int(8) NOT NULL,
+  `image_x` int(11) DEFAULT NULL,
+  `image_y` int(11) DEFAULT NULL,
   `latitude` decimal(9,6) DEFAULT NULL,
   `longitude` decimal(9,6) DEFAULT NULL,
   `active` tinyint(1) NOT NULL
@@ -268,6 +269,35 @@ ALTER TABLE `users`
 ALTER TABLE `users`
   MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT;
 
+
+COMMIT;
+
+
+
+
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+SET AUTOCOMMIT = 0;
+START TRANSACTION;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `location_relations`
+--
+
+CREATE TABLE IF NOT EXISTS `i_nav`.`location_relations` (
+  `parent_id` int(11) NOT NULL,
+  `child_id` int(11) NOT NULL,
+  `active` tinyint(1) NOT NULL
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+--
+-- Indexes for table `location_relations`
+--
+ALTER TABLE `location_relations`
+  ADD FOREIGN KEY (`parent_id`) REFERENCES `locations`(`location_id`);
+ALTER TABLE `location_relations`
+  ADD FOREIGN KEY (`child_id`) REFERENCES `locations`(`location_id`);
 
 COMMIT;
 

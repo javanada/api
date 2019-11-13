@@ -73,7 +73,7 @@ public class INavLambdaHandler implements RequestStreamHandler {
 			responseJson.put("statusCode", "400");
 			responseJson.put("exception", pex);
 		}
-
+		
 		
 
 		JSONObject responseBodyItem = new JSONObject();
@@ -96,13 +96,18 @@ public class INavLambdaHandler implements RequestStreamHandler {
 			String locationId = ((JSONObject)event).get("id").toString();
 			responseBodyArray = Location.getLocations(locationId);
 			
+		} else if (entity.equals("location/set-scale")) {
+			
+			String locationId = ((JSONObject)event).get("id").toString();
+			responseBodyArray = Location.setLocationScale(locationId);
+			
 		} else if (entity.equals("location/new")) {
 			
 			try {
 				responseBodyArray = Location.newLocation((JSONObject)parser.parse(requestBody));
 			} catch (ParseException e) {
 				JSONObject obj = new JSONObject();
-				obj.put("parseExceptin", e.getMessage());
+				obj.put("parseException", e.getMessage());
 				responseBodyArray.add(obj);
 			}
 			
@@ -123,12 +128,17 @@ public class INavLambdaHandler implements RequestStreamHandler {
 			
 		} else if (entity.equals("objects")) {
 			
-			responseBodyArray = LocationObject.getLocationObjects(null);
+			responseBodyArray = LocationObject.getLocationObjects(null, null, null);
+			
+		} else if (entity.equals("objects/location")) {
+			
+			String locationId = ((JSONObject)event).get("id").toString();
+			responseBodyArray = LocationObject.getLocationObjects(null, locationId, null);
 			
 		} else if (entity.equals("object")) {
 			
 			String objectId = ((JSONObject)event).get("id").toString();
-			responseBodyArray = LocationObject.getLocationObjects(objectId);
+			responseBodyArray = LocationObject.getLocationObjects(objectId, null, null);
 			
 		}  else if (entity.equals("object/new")) {
 			
@@ -136,7 +146,7 @@ public class INavLambdaHandler implements RequestStreamHandler {
 				responseBodyArray = LocationObject.newLocationObject((JSONObject)parser.parse(requestBody));
 			} catch (ParseException e) {
 				JSONObject obj = new JSONObject();
-				obj.put("parseExceptin", e.getMessage());
+				obj.put("parseException", e.getMessage());
 				responseBodyArray.add(obj);
 			}
 			
@@ -155,7 +165,7 @@ public class INavLambdaHandler implements RequestStreamHandler {
 				responseBodyArray = LocationObjectType.newLocationObjectType((JSONObject)parser.parse(requestBody));
 			} catch (ParseException e) {
 				JSONObject obj = new JSONObject();
-				obj.put("parseExceptin", e.getMessage());
+				obj.put("parseException", e.getMessage());
 				responseBodyArray.add(obj);
 			}
 			
@@ -174,7 +184,7 @@ public class INavLambdaHandler implements RequestStreamHandler {
 				responseBodyArray = LocationType.newLocationType((JSONObject)parser.parse(requestBody));
 			} catch (ParseException e) {
 				JSONObject obj = new JSONObject();
-				obj.put("parseExceptin", e.getMessage());
+				obj.put("parseException", e.getMessage());
 				responseBodyArray.add(obj);
 			}
 			
@@ -193,7 +203,7 @@ public class INavLambdaHandler implements RequestStreamHandler {
 				responseBodyArray = Address.newAddress((JSONObject)parser.parse(requestBody));
 			} catch (ParseException e) {
 				JSONObject obj = new JSONObject();
-				obj.put("parseExceptin", e.getMessage());
+				obj.put("parseException", e.getMessage());
 				responseBodyArray.add(obj);
 			}
 			
@@ -212,18 +222,18 @@ public class INavLambdaHandler implements RequestStreamHandler {
 				responseBodyArray = Role.newRole((JSONObject)parser.parse(requestBody));
 			} catch (ParseException e) {
 				JSONObject obj = new JSONObject();
-				obj.put("parseExceptin", e.getMessage());
+				obj.put("parseException", e.getMessage());
 				responseBodyArray.add(obj);
 			}
 			
 		} else if (entity.equals("users")) {
 			
-			responseBodyArray = User.getUsers(null);
+			responseBodyArray = User.getUsers(null, null);
 			
 		} else if (entity.equals("user")) {
 			
 			String userId = ((JSONObject)event).get("id").toString();
-			responseBodyArray = User.getUsers(userId);
+			responseBodyArray = User.getUsers(userId, null);
 			
 		} else if (entity.equals("user/new")) {
 			
@@ -231,11 +241,28 @@ public class INavLambdaHandler implements RequestStreamHandler {
 				responseBodyArray = User.newUser((JSONObject)parser.parse(requestBody));
 			} catch (ParseException e) {
 				JSONObject obj = new JSONObject();
-				obj.put("parseExceptin", e.getMessage());
+				obj.put("parseException", e.getMessage());
 				responseBodyArray.add(obj);
 			}
 			
-		} 
+		}  else if (entity.equals("user/login")) {
+			
+			try {
+				responseBodyArray = User.login((JSONObject)parser.parse(requestBody));
+			} catch (ParseException e) {
+				JSONObject obj = new JSONObject();
+				obj.put("parseException", e.getMessage());
+				responseBodyArray.add(obj);
+			}
+			
+		} else if (entity.equals("set-edge-directed")) {
+			
+			String sourceObjectId = ((JSONObject)event).get("source_object_id").toString();
+			String sourceLocationId = ((JSONObject)event).get("source_location_id").toString();
+			String destObjectId = ((JSONObject)event).get("dest_object_id").toString();
+			String destLocationId = ((JSONObject)event).get("dest_location_id").toString();
+			responseBodyArray = LocationObject.setEdgeDirected(sourceObjectId, sourceLocationId, destObjectId, destLocationId);
+		}
 		
 		
 //		try {
@@ -248,6 +275,8 @@ public class INavLambdaHandler implements RequestStreamHandler {
 		JSONObject responseBody = new JSONObject();
 //		responseBody.put("input", event.toJSONString());
 		responseBody.put("data", responseBodyArray);
+		responseJson.put("event", "" + event.toString());
+//		responseJson.put("current_user", User.getCurrentUser().getJSONString());
 		
 		responseJson.put("body", responseBody);
 

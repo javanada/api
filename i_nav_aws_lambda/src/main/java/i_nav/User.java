@@ -1,16 +1,31 @@
 package i_nav;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.UUID;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+
+import com.amazonaws.services.apigateway.AmazonApiGateway;
+import com.amazonaws.services.apigateway.AmazonApiGatewayClientBuilder;
+import com.amazonaws.services.apigateway.model.ApiKey;
+import com.amazonaws.services.apigateway.model.CreateApiKeyRequest;
+import com.amazonaws.services.apigateway.model.CreateUsagePlanKeyRequest;
+import com.amazonaws.services.apigateway.model.GetApiKeyRequest;
+import com.amazonaws.services.apigateway.model.GetApiKeysRequest;
+import com.amazonaws.services.apigateway.model.GetUsagePlanRequest;
+import com.amazonaws.services.apigateway.model.UsagePlan;
 
 public class User implements INavEntity {
 	
@@ -24,7 +39,40 @@ public class User implements INavEntity {
 	private int role_id;
 	private boolean active;
 	
-	public static JSONArray getUsers(String id) {
+	public User() {
+		
+	}
+	
+	public User(JSONObject jsonObject) {
+		user_id = Integer.parseInt(jsonObject.get("user_id").toString());
+		role_id = Integer.parseInt(jsonObject.get("role_id").toString());
+		username = jsonObject.get("username").toString();
+		salt = jsonObject.get("salt").toString();
+		password = jsonObject.get("password").toString();
+		first_name = jsonObject.get("first_name").toString();
+		last_name = jsonObject.get("last_name").toString();
+		email = jsonObject.get("email").toString();
+		active = Boolean.parseBoolean(jsonObject.get("active").toString());
+	}
+
+	public static User getCurrentUser(String apiKey) {
+		
+		AmazonApiGateway client = AmazonApiGatewayClientBuilder.standard().build();
+		GetApiKeyRequest req = new GetApiKeyRequest();
+		req.setApiKey(apiKey);
+		String apiKeyUsername = client.getApiKey(req).getName();
+		JSONArray arr = getUsers(null, apiKeyUsername);
+		if (arr.size() == 1) {
+			JSONObject obj = (JSONObject)arr.get(0);
+			User u = new User(obj);
+			return u;
+		}
+		
+		return new User();
+	}
+	
+	public static JSONArray getUsers(String id, String username) {
+		
 		String returnStr = "";
 		String where = "";
 		
@@ -32,6 +80,9 @@ public class User implements INavEntity {
 		String join = "  ";
 		if (id != null) {
 			where = " WHERE u.user_id = ? ";
+		}
+		if (username != null) {
+			where = " WHERE u.username = ? ";
 		}
 		String query = select + join + where;
 		
@@ -41,8 +92,13 @@ public class User implements INavEntity {
 			Connection conn = DriverManager.getConnection(url, INavEntity.username, INavEntity.password);
 //			Statement stmt = conn.createStatement();
 			PreparedStatement stmt = conn.prepareStatement(query);
-			if (id != null) {
+			if (id != null && username == null) {
 				stmt.setString(1, id);
+			} else if (id == null && username != null) {
+				stmt.setString(1, username);
+			} else if (id != null && username != null) {
+				stmt.setString(1, id);
+				stmt.setString(2, username);
 			}
 			ResultSet resultSet = stmt.executeQuery();
 
@@ -85,6 +141,153 @@ public class User implements INavEntity {
 		return jsonArray;
 	}
 	
+	private static byte[] decodeHexString(String hexString) {
+	    if (hexString.length() % 2 == 1) {
+	        throw new IllegalArgumentException(
+	          "Invalid hexadecimal String supplied.");
+	    }
+	     
+	    byte[] bytes = new byte[hexString.length() / 2];
+	    for (int i = 0; i < hexString.length(); i += 2) {
+	        bytes[i / 2] = hexToByte(hexString.substring(i, i + 2));
+	    }
+	    return bytes;
+	}
+	private static byte hexToByte(String hexString) {
+	    int firstDigit = toDigit(hexString.charAt(0));
+	    int secondDigit = toDigit(hexString.charAt(1));
+	    return (byte) ((firstDigit << 4) + secondDigit);
+	}
+	 
+	private static int toDigit(char hexChar) {
+	    int digit = Character.digit(hexChar, 16);
+	    if(digit == -1) {
+	        throw new IllegalArgumentException(
+	          "Invalid Hexadecimal Character: "+ hexChar);
+	    }
+	    return digit;
+	}
+	
+	public static JSONArray login(JSONObject loginUser) {
+		
+		JSONArray jsonArray = new JSONArray();
+		
+		String password = "";
+		String hashedPasswordString = "";
+		String saltString = "";
+		String username = "";
+		if (loginUser.get("password") != null) { // regex to validate username and password
+			password = loginUser.get("password").toString();
+		} else {
+			return jsonArray;
+		}
+		
+		if (loginUser.get("username") != null) { // regex to validate username and password
+			username = loginUser.get("username").toString();
+		}
+		
+		
+		String select = " SELECT * FROM users u ";
+		String join = "  ";
+		String where = " WHERE u.username = ? ";
+		String query = select + join + where;
+		User user = new User();
+		
+		try {
+			Connection conn = DriverManager.getConnection(url, INavEntity.username, INavEntity.password);
+//			Statement stmt = conn.createStatement();
+			PreparedStatement stmt = conn.prepareStatement(query);
+			if (username != null) {
+				stmt.setString(1, username);
+			}
+			ResultSet resultSet = stmt.executeQuery();
+			
+			while (resultSet.next()) {
+				
+				user.setUser_id(resultSet.getInt(1));
+				user.setUsername(resultSet.getString(2));
+				user.setSalt(resultSet.getString(3));
+				user.setPassword(resultSet.getString(4));
+				user.setFirst_name(resultSet.getString(5));
+				user.setLast_name(resultSet.getString(6));
+				user.setEmail(resultSet.getString(7));
+				user.setRole_id(resultSet.getInt(8));
+				user.setActive(resultSet.getBoolean(9));
+				
+			}
+
+		} catch (SQLException e) {
+			
+		}
+
+		
+        MessageDigest md;
+        try
+        {
+            // Select the message digest for the hash computation -> SHA-256
+            md = MessageDigest.getInstance("SHA-256");
+
+            // Generate the random salt
+            SecureRandom random = new SecureRandom();
+            byte[] salt = new byte[16];
+            salt = decodeHexString(user.getSalt());
+
+            // Passing the salt to the digest for the computation
+            md.update(salt);
+
+            // Generate the salted hash
+            byte[] hashedPassword = md.digest(password.getBytes(StandardCharsets.UTF_8));
+
+            StringBuilder sb = new StringBuilder();
+            for (byte b : hashedPassword)
+                sb.append(String.format("%02x", b));
+
+//            System.out.println(sb);
+            hashedPasswordString = sb.toString();
+            
+            if (hashedPasswordString.equals(user.getPassword())) { // login success
+            	
+            	AmazonApiGateway client = AmazonApiGatewayClientBuilder.standard().build();
+				GetApiKeysRequest req = new GetApiKeysRequest();
+				req.setIncludeValues(true);
+				req.setNameQuery(user.getUsername());
+				String apiKey = client.getApiKeys(req).getItems().get(0).getValue();
+            	
+//            	JSONObject obj = new JSONObject();
+//    			obj.put("login", "success");
+//    			jsonArray.add(obj);
+    			
+    			JSONParser parser = new JSONParser();
+				try {
+					
+					JSONObject userJson = (JSONObject) parser.parse(user.getJSONString());
+					userJson.put("x-api-key", apiKey);
+					jsonArray.add(userJson);
+					
+				} catch (ParseException e) {
+					JSONObject obj2 = new JSONObject();
+					obj2.put("ParseException", e.getMessage());
+					jsonArray.add(obj2);
+				}
+				
+				
+            } else {
+            	JSONObject obj = new JSONObject();
+    			obj.put("login", "fail");
+    			jsonArray.add(obj);
+            }
+            
+        } catch (NoSuchAlgorithmException e)
+        {
+        	JSONObject obj = new JSONObject();
+			obj.put("NoSuchAlgorithmException", e.getMessage());
+			jsonArray.add(obj);
+			return jsonArray;
+        }
+		
+		return jsonArray;
+	}
+	
 	public static JSONArray newUser(JSONObject newUser) {
 		JSONArray jsonArray = new JSONArray();
 		
@@ -97,19 +300,108 @@ public class User implements INavEntity {
 			PreparedStatement stmt = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
 			
 			if (newUser.get("username") != null) { stmt.setString(1, newUser.get("username").toString()); } else { stmt.setNull(1, java.sql.Types.VARCHAR); }
-			if (newUser.get("salt") != null) { stmt.setString(2, newUser.get("salt").toString()); } else { stmt.setNull(2, java.sql.Types.VARCHAR); }
-			if (newUser.get("password") != null) { stmt.setString(3, newUser.get("password").toString()); } else { stmt.setNull(3, java.sql.Types.VARCHAR); }
+//			if (newUser.get("salt") != null) { stmt.setString(2, newUser.get("salt").toString()); } else { stmt.setNull(2, java.sql.Types.VARCHAR); }
+//			if (newUser.get("password") != null) { stmt.setString(3, newUser.get("password").toString()); } else { stmt.setNull(3, java.sql.Types.VARCHAR); }
 			if (newUser.get("first_name") != null) { stmt.setString(4, newUser.get("first_name").toString()); } else { stmt.setNull(4, java.sql.Types.VARCHAR); }
 			if (newUser.get("last_name") != null) { stmt.setString(5, newUser.get("last_name").toString()); } else { stmt.setNull(5, java.sql.Types.VARCHAR); }
 			if (newUser.get("email") != null) { stmt.setString(6, newUser.get("email").toString()); } else { stmt.setNull(6, java.sql.Types.VARCHAR); }
 			if (newUser.get("role_id") != null) { stmt.setInt(7, Integer.parseInt(newUser.get("role_id").toString())); } else { stmt.setNull(7, java.sql.Types.INTEGER); }
 			stmt.setInt(8, 1);
 			
+			String password = "";
+			String hashedPasswordString = "";
+			String saltString = "";
+			String username = "";
+			if (newUser.get("password") != null) { // regex to validate username and password
+				password = newUser.get("password").toString();
+			} else {
+				return jsonArray;
+			}
+			
+			if (newUser.get("username") != null) { // regex to validate username and password
+				username = newUser.get("username").toString();
+			}
+
+			
+	        MessageDigest md;
+	        try
+	        {
+	            // Select the message digest for the hash computation -> SHA-256
+	            md = MessageDigest.getInstance("SHA-256");
+
+	            // Generate the random salt
+	            SecureRandom random = new SecureRandom();
+	            byte[] salt = new byte[16];
+	            random.nextBytes(salt);
+
+	            // Passing the salt to the digest for the computation
+	            md.update(salt);
+
+	            // Generate the salted hash
+	            byte[] hashedPassword = md.digest(password.getBytes(StandardCharsets.UTF_8));
+
+	            StringBuilder sb = new StringBuilder();
+	            for (byte b : hashedPassword)
+	                sb.append(String.format("%02x", b));
+
+//	            System.out.println(sb);
+	            hashedPasswordString = sb.toString();
+	            
+	            StringBuilder sb2 = new StringBuilder();
+	            for (byte b : salt)
+	            	sb2.append(String.format("%02x", b));
+	            saltString = sb2.toString();
+	            
+	        } catch (NoSuchAlgorithmException e)
+	        {
+	        	JSONObject obj = new JSONObject();
+				obj.put("NoSuchAlgorithmException", e.getMessage());
+				jsonArray.add(obj);
+				return jsonArray;
+	        }
+	        
+	        stmt.setString(2, saltString);
+	        stmt.setString(3, hashedPasswordString);
+	        
+			
 			stmt.executeUpdate();
 			ResultSet resultSet = stmt.getGeneratedKeys();
-			if (resultSet.next()) {
+			
+			if (resultSet.next()) { // success
+				
+//				AmazonApiGateway client = AmazonApiGatewayClientBuilder.standard().withRegion("my region").build();
+				AmazonApiGateway client = AmazonApiGatewayClientBuilder.standard().build();
+//				GetApiKeysRequest req = new GetApiKeysRequest();
+				
+				
+				CreateApiKeyRequest request = new CreateApiKeyRequest();
+				request.setName(username);
+				request.setDescription("hi");
+				
+				GetUsagePlanRequest getUsagePlanRequest = new GetUsagePlanRequest();
+	            getUsagePlanRequest.setUsagePlanId("hjwwwt");
+				
+				String uuid = UUID.randomUUID().toString();
+				request.setValue(uuid);
+				request.setEnabled(true);
+				
+				CreateUsagePlanKeyRequest createUsagePlanKeyRequest = new CreateUsagePlanKeyRequest()
+	                    .withUsagePlanId("hjwwwt");
+
+	            createUsagePlanKeyRequest.setKeyId(client.createApiKey(request).getId());
+	            createUsagePlanKeyRequest.setKeyType("API_KEY");
+	            client.createUsagePlanKey(createUsagePlanKeyRequest);
+				
+				
+				
+				
                 long id = resultSet.getLong(1);
-                jsonArray = User.getUsers("" + id);
+                jsonArray = User.getUsers("" + id, null);
+                ((JSONObject) jsonArray.get(0)).put("x-api-key", uuid);
+                
+                JSONObject obj = new JSONObject();
+				obj.put("API Key Request", request.toString());
+				jsonArray.add(request.toString());
             }
 			
 			
