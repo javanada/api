@@ -32,8 +32,6 @@ public class Location implements INavEntity {
 	private double longitude;
 	private boolean active;
 	
-	
-	
 	public static JSONArray newLocation(JSONObject newLocation) {
 		
 		JSONArray jsonArray = new JSONArray();
