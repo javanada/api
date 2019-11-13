@@ -242,6 +242,7 @@ public class LocationObject implements INavEntity {
 				locationObject.setImage_y(resultSet.getInt("image_y"));
 				locationObject.setLatitude(resultSet.getDouble("latitude"));
 				locationObject.setLongitude(resultSet.getDouble("longitude"));
+				locationObject.setObject_type_id(resultSet.getInt("object_type_id"));
 				
 				locationObjectType.setObject_type_id(resultSet.getInt("object_type_id"));
 				locationObjectType.setShort_name(resultSet.getString("object_type_short_name"));

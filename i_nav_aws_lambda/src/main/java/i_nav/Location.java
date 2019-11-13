@@ -32,91 +32,7 @@ public class Location implements INavEntity {
 	private double longitude;
 	private boolean active;
 	
-	public static JSONArray setLocationScale(String id) {
-		JSONArray jsonArray = new JSONArray();
-		
-		// get primary and secondary objects for this location id
-		JSONArray primaryArr = LocationObject.getLocationObjects(null, id, "4");
-		JSONArray secondaryArr = LocationObject.getLocationObjects(null, id, "5");
-		
-		if (primaryArr.size() == 0 || secondaryArr.size() == 0) {
-			JSONObject obj = new JSONObject();
-			obj.put("Exception", "Primary and/or secondary objects do not exist");
-			return jsonArray;
-		}
-		JSONObject primaryObj = (JSONObject)primaryArr.get(0);
-		JSONObject secondaryObj = (JSONObject)secondaryArr.get(0);
-		
-		LocationObject primary = new LocationObject(primaryObj);
-		LocationObject secondary = new LocationObject(secondaryObj);
-		
-		// calculate distance between primary and secondary lat and long and convert to feet or meters
-		double primaryLat = Math.toRadians(primary.getLatitude());
-		double primaryLong = Math.toRadians(primary.getLongitude());
-		double secondaryLat = Math.toRadians(secondary.getLatitude());
-		double secondaryLong = Math.toRadians(secondary.getLongitude());
-		
-		double R = 6369061; // radius of Earth (m) at Cheney, WA
-		// todo: calculate exact radius by latitude
-		
-		double theta = (primaryLat + secondaryLat) / 2;
-		double phi = (primaryLong + secondaryLong) / 2;
-//		double dist_x = R * ((Math.sin(theta) * Math.cos(phi) * (primaryLat - secondaryLat)) - (Math.cos(theta) * Math.sin(phi) * (primaryLong - secondaryLong)));
-//		double dist_y = R * ((Math.sin(theta) * Math.sin(phi) * (primaryLat - secondaryLat)) - (Math.cos(theta) * Math.cos(phi) * (primaryLong - secondaryLong)));
-//		double dist_x = R * (Math.cos(secondaryLat) * Math.cos(secondaryLong) - Math.cos(primaryLat) * Math.cos(primaryLong));
-//		double dist_y = R * (Math.cos(secondaryLat) * Math.sin(secondaryLong) - Math.cos(primaryLat) * Math.sin(primaryLong));
-		double dist_x1 = R * (Math.cos(secondaryLat) * Math.cos(secondaryLong) - Math.cos(primaryLat) * Math.cos(primaryLong));
-		double dist_x2 = R * (Math.cos(secondaryLat) * Math.sin(secondaryLong) - Math.cos(primaryLat) * Math.sin(primaryLong));
-		double dist_x = Math.sqrt(dist_x2 * dist_x2 + dist_x1 * dist_x1); 
-		
-		double dist_y = R * (Math.sin(secondaryLat) - Math.sin(primaryLat));
-		
-		dist_x = Math.abs(dist_x) * 3.28084;
-		dist_y = Math.abs(dist_y) * 3.28084;
-		// there should be an x_scale and a y_scale
-		// this distance is the scale
-		// set secondary x and y to the max and location max_x and max_y
-		
-		JSONObject tempObj = new JSONObject();
-		tempObj.put("dist_x", dist_x);
-		tempObj.put("dist_y", dist_y);
-		tempObj.put("primaryLat", primaryLat);
-		tempObj.put("primaryLong", primaryLong);
-		tempObj.put("secondaryLat", secondaryLat);
-		tempObj.put("secondaryLong", secondaryLong);
-		tempObj.put("theta", theta);
-		tempObj.put("phi", phi);
-		
-		jsonArray.add(tempObj);
-		
-		double secondaryX = primaryLong < secondaryLong ? dist_x : -1 * dist_x;
-		double secondaryY = primaryLat < secondaryLat ? dist_y : -1 * dist_y;
-		
-//		String query = "UPDATE locations SET max_x_coordinate = '" + dist_x + "', max_y_coordinate = '" + dist_y + "' WHERE location_id = ? ";
-		String query2 = "UPDATE objects SET x_coordinate = '" + secondaryX + "', y_coordinate = '" + secondaryY + "' WHERE location_id = ? AND object_type_id = 5 ";
-		try {
-			Connection conn = DriverManager.getConnection(url, username, password);
-	//		Statement stmt = conn.createStatement();
-//			PreparedStatement stmt = conn.prepareStatement(query);
-//			if (id != null) {
-//				stmt.setString(1, id);
-//			}
-//			int result = stmt.executeUpdate();
-			
-			PreparedStatement stmt2 = conn.prepareStatement(query2);
-			if (id != null) {
-				stmt2.setString(1, id);
-			}
-			int result2 = stmt2.executeUpdate();
-			
-		} catch (SQLException e) {
-			JSONObject obj = new JSONObject();
-			obj.put("SQLException", e.getMessage());
-			jsonArray.add(obj);
-		}
-		
-		return jsonArray;
-	}
+	
 	
 	public static JSONArray newLocation(JSONObject newLocation) {
 		
@@ -230,6 +146,92 @@ public class Location implements INavEntity {
 			returnStr += e.getMessage() + " " + query;
 		}
 
+		return jsonArray;
+	}
+	
+	public static JSONArray setLocationScale(String id) {
+		JSONArray jsonArray = new JSONArray();
+		
+		// get primary and secondary objects for this location id
+		JSONArray primaryArr = LocationObject.getLocationObjects(null, id, "4");
+		JSONArray secondaryArr = LocationObject.getLocationObjects(null, id, "5");
+		
+		if (primaryArr.size() == 0 || secondaryArr.size() == 0) {
+			JSONObject obj = new JSONObject();
+			obj.put("Exception", "Primary and/or secondary objects do not exist");
+			return jsonArray;
+		}
+		JSONObject primaryObj = (JSONObject)primaryArr.get(0);
+		JSONObject secondaryObj = (JSONObject)secondaryArr.get(0);
+		
+		LocationObject primary = new LocationObject(primaryObj);
+		LocationObject secondary = new LocationObject(secondaryObj);
+		
+		// calculate distance between primary and secondary lat and long and convert to feet or meters
+		double primaryLat = Math.toRadians(primary.getLatitude());
+		double primaryLong = Math.toRadians(primary.getLongitude());
+		double secondaryLat = Math.toRadians(secondary.getLatitude());
+		double secondaryLong = Math.toRadians(secondary.getLongitude());
+		
+		double R = 6369061; // radius of Earth (m) at Cheney, WA
+		// todo: calculate exact radius by latitude
+		
+		double theta = (primaryLat + secondaryLat) / 2;
+		double phi = (primaryLong + secondaryLong) / 2;
+//		double dist_x = R * ((Math.sin(theta) * Math.cos(phi) * (primaryLat - secondaryLat)) - (Math.cos(theta) * Math.sin(phi) * (primaryLong - secondaryLong)));
+//		double dist_y = R * ((Math.sin(theta) * Math.sin(phi) * (primaryLat - secondaryLat)) - (Math.cos(theta) * Math.cos(phi) * (primaryLong - secondaryLong)));
+//		double dist_x = R * (Math.cos(secondaryLat) * Math.cos(secondaryLong) - Math.cos(primaryLat) * Math.cos(primaryLong));
+//		double dist_y = R * (Math.cos(secondaryLat) * Math.sin(secondaryLong) - Math.cos(primaryLat) * Math.sin(primaryLong));
+		double dist_x1 = R * (Math.cos(secondaryLat) * Math.cos(secondaryLong) - Math.cos(primaryLat) * Math.cos(primaryLong));
+		double dist_x2 = R * (Math.cos(secondaryLat) * Math.sin(secondaryLong) - Math.cos(primaryLat) * Math.sin(primaryLong));
+		double dist_x = Math.sqrt(dist_x2 * dist_x2 + dist_x1 * dist_x1); 
+		
+		double dist_y = R * (Math.sin(secondaryLat) - Math.sin(primaryLat));
+		
+		dist_x = Math.abs(dist_x) * 3.28084;
+		dist_y = Math.abs(dist_y) * 3.28084;
+		// there should be an x_scale and a y_scale
+		// this distance is the scale
+		// set secondary x and y to the max and location max_x and max_y
+		
+		JSONObject tempObj = new JSONObject();
+		tempObj.put("dist_x", dist_x);
+		tempObj.put("dist_y", dist_y);
+		tempObj.put("primaryLat", primaryLat);
+		tempObj.put("primaryLong", primaryLong);
+		tempObj.put("secondaryLat", secondaryLat);
+		tempObj.put("secondaryLong", secondaryLong);
+		tempObj.put("theta", theta);
+		tempObj.put("phi", phi);
+		
+		jsonArray.add(tempObj);
+		
+		double secondaryX = primaryLong < secondaryLong ? dist_x : -1 * dist_x;
+		double secondaryY = primaryLat < secondaryLat ? dist_y : -1 * dist_y;
+		
+//		String query = "UPDATE locations SET max_x_coordinate = '" + dist_x + "', max_y_coordinate = '" + dist_y + "' WHERE location_id = ? ";
+		String query2 = "UPDATE objects SET x_coordinate = '" + secondaryX + "', y_coordinate = '" + secondaryY + "' WHERE location_id = ? AND object_type_id = 5 ";
+		try {
+			Connection conn = DriverManager.getConnection(url, username, password);
+	//		Statement stmt = conn.createStatement();
+//			PreparedStatement stmt = conn.prepareStatement(query);
+//			if (id != null) {
+//				stmt.setString(1, id);
+//			}
+//			int result = stmt.executeUpdate();
+			
+			PreparedStatement stmt2 = conn.prepareStatement(query2);
+			if (id != null) {
+				stmt2.setString(1, id);
+			}
+			int result2 = stmt2.executeUpdate();
+			
+		} catch (SQLException e) {
+			JSONObject obj = new JSONObject();
+			obj.put("SQLException", e.getMessage());
+			jsonArray.add(obj);
+		}
+		
 		return jsonArray;
 	}
 	
