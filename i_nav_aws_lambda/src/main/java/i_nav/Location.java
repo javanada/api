@@ -286,8 +286,8 @@ public class Location implements INavEntity {
 		tempObj.put("primaryLong", primaryLong);
 		tempObj.put("secondaryLat", secondaryLat);
 		tempObj.put("secondaryLong", secondaryLong);
-		tempObj.put("theta", theta);
-		tempObj.put("phi", phi);
+//		tempObj.put("theta", theta);
+//		tempObj.put("phi", phi);
 		
 		jsonArray.add(tempObj);
 		
