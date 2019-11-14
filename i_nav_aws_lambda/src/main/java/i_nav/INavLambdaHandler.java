@@ -37,12 +37,12 @@ public class INavLambdaHandler implements RequestStreamHandler {
 	@SuppressWarnings("unchecked")
 	@Override
 	public void handleRequest(InputStream inputStream, OutputStream outputStream, Context context) throws IOException {
-		String proxy = null;
+//		String proxy = null;
 		BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
 		JSONObject responseJson = new JSONObject();
 		String responseCode = "200";
 		JSONObject event = null;
-		JSONObject pps = new JSONObject();
+//		JSONObject pps = new JSONObject();
 		
 		
 //		OutputStreamWriter writer = new OutputStreamWriter(outputStream, "UTF-8");
@@ -62,13 +62,15 @@ public class INavLambdaHandler implements RequestStreamHandler {
 		
 		try {
 			event = (JSONObject) parser.parse(reader);
-			if (event.get("pathParameters") != null) {
-				pps = (JSONObject) event.get("pathParameters");
-				if (pps.get("proxy") != null) {
-					proxy = (String) pps.get("proxy");
-				}
-
-			}
+			
+//			if (event.get("pathParameters") != null) {
+//				pps = (JSONObject) event.get("pathParameters");
+//				if (pps.get("proxy") != null) {
+//					proxy = (String) pps.get("proxy");
+//				}
+//
+//			}
+			
 		} catch (Exception pex) {
 			responseJson.put("statusCode", "400");
 			responseJson.put("exception", pex);
@@ -88,13 +90,13 @@ public class INavLambdaHandler implements RequestStreamHandler {
 			requestBody = event.get("requestBody").toString();
 		}
 		
-		String queryResultJson = "[]";
+		
 		
 		
 		if (entity.equals("location")) {
 			
 			String locationId = ((JSONObject)event).get("id").toString();
-			responseBodyArray = Location.getLocations(locationId);
+			responseBodyArray = Location.getLocations(locationId, null);
 			
 		} else if (entity.equals("location/set-scale")) {
 			
@@ -124,7 +126,7 @@ public class INavLambdaHandler implements RequestStreamHandler {
 			responseBodyArray = Location.deleteLocation(((JSONObject)event).get("id").toString());
 		} else if (entity.equals("locations")) {
 			
-			responseBodyArray = Location.getLocations(null);
+			responseBodyArray = Location.getLocations(null, null);
 			
 		} else if (entity.equals("objects")) {
 			
@@ -261,7 +263,17 @@ public class INavLambdaHandler implements RequestStreamHandler {
 			String sourceLocationId = ((JSONObject)event).get("source_location_id").toString();
 			String destObjectId = ((JSONObject)event).get("dest_object_id").toString();
 			String destLocationId = ((JSONObject)event).get("dest_location_id").toString();
-			responseBodyArray = LocationObject.setEdgeDirected(sourceObjectId, sourceLocationId, destObjectId, destLocationId);
+			responseBodyArray = CloudGraphListDirected.setEdgeDirected(sourceObjectId, sourceLocationId, destObjectId, destLocationId);
+			
+		} else if (entity.equals("edges/location")) {
+			
+			String locationId = ((JSONObject)event).get("id").toString();
+			responseBodyArray = CloudGraphListDirected.getEdges(locationId);
+			
+		} else if (entity.equals("locations/parent")) {
+			
+			String parentId = ((JSONObject)event).get("id").toString();
+			responseBodyArray = Location.getLocations(null, parentId);
 		}
 		
 		
@@ -275,8 +287,14 @@ public class INavLambdaHandler implements RequestStreamHandler {
 		JSONObject responseBody = new JSONObject();
 //		responseBody.put("input", event.toJSONString());
 		responseBody.put("data", responseBodyArray);
-		responseJson.put("event", "" + event.toString());
-//		responseJson.put("current_user", User.getCurrentUser().getJSONString());
+		responseJson.put("event", event);
+		
+		JSONObject headers = (JSONObject)event.get("headers");
+		if (headers != null && headers.containsKey("x-api-key")) {
+			responseJson.put("current_user", headers.get("x-api-key").toString());
+//			responseJson.put("current_user", User.getCurrentUser(headers.get("x-api-key").toString()).getJSON());
+		}
+		
 		
 		responseJson.put("body", responseBody);
 

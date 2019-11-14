@@ -172,8 +172,8 @@ public class DBAccessGraphDynamoDB implements DBAccessGraph {
 		}
 	}
 	
-	public void addGraphVertex(String nodeId, String adj, String location, String graphName) {
-		Map<String, AttributeValue> item = newNode(nodeId, adj, location);
+	public void addGraphVertex(String nodeId, String adj, String location, String locationId, String graphName) {
+		Map<String, AttributeValue> item = newNode(nodeId, adj, location, locationId);
 		addItemToTable(item, graphName);
 	}
 
@@ -341,14 +341,14 @@ public class DBAccessGraphDynamoDB implements DBAccessGraph {
 		return null;
 	}
 	
-	public Map<LocationObjectVertex, List<Edge>> getCloudVerticesAndEdges(String graphName) {
+	public Map<LocationObjectVertex, List<Edge>> getCloudVerticesAndEdges(String graphName, String locationId) {
 		
 		JSONParser parser;
 		JSONObject locationObjectJson;
 		String locationObject = null;
 		
 		
-		List<Map<String, AttributeValue>> cloudNodes = getAllNodes(graphName);
+		List<Map<String, AttributeValue>> cloudNodes = getAllNodes(graphName, locationId);
 		
 		List<LocationObjectVertex> locationObjects = new ArrayList<LocationObjectVertex>();
 		Map<LocationObjectVertex, List<Edge>> pointsAndEdges = new HashMap<LocationObjectVertex, List<Edge>>();
@@ -379,8 +379,8 @@ public class DBAccessGraphDynamoDB implements DBAccessGraph {
 					LocationObjectVertex item = new LocationObjectVertex();
 					if (locationObjectJson.get("object_id") != null) { item.setObject_id(Integer.parseInt(locationObjectJson.get("object_id").toString())); }
 					if (locationObjectJson.get("location_id") != null) { item.setLocation_id(Integer.parseInt(locationObjectJson.get("location_id").toString())); }
-					if (locationObjectJson.get("x") != null) { item.setX(Integer.parseInt(locationObjectJson.get("x_coordinate").toString())); }
-					if (locationObjectJson.get("y") != null) { item.setY(Integer.parseInt(locationObjectJson.get("y_coordinate").toString())); }
+					if (locationObjectJson.get("x") != null) { item.setX(Integer.parseInt(locationObjectJson.get("x").toString())); }
+					if (locationObjectJson.get("y") != null) { item.setY(Integer.parseInt(locationObjectJson.get("y").toString())); }
 					
 					
 					locationObjects.add(item);
@@ -418,8 +418,8 @@ public class DBAccessGraphDynamoDB implements DBAccessGraph {
 //							if (v1Obj.get("long_name") != null) { v1.setLong_name(v1Obj.get("long_name").toString()); }
 //							if (v1Obj.get("description") != null) { v1.setDescription(v1Obj.get("description").toString()); }
 //							if (v1Obj.get("object_type_id") != null) { v1.setObject_type_id(Integer.parseInt(v1Obj.get("object_type_id").toString())); }
-							if (v1Obj.get("x_coordinate") != null) { v1.setX(Integer.parseInt(v1Obj.get("x_coordinate").toString())); }
-							if (v1Obj.get("y_coordinate") != null) { v1.setY(Integer.parseInt(v1Obj.get("y_coordinate").toString())); }
+							if (v1Obj.get("x") != null) { v1.setX(Integer.parseInt(v1Obj.get("x").toString())); }
+							if (v1Obj.get("y") != null) { v1.setY(Integer.parseInt(v1Obj.get("y").toString())); }
 //							if (v1Obj.get("latitude") != null) { v1.setLatitude(Double.parseDouble(v1Obj.get("latitude").toString())); }
 //							if (v1Obj.get("longitude") != null) { v1.setLongitude(Double.parseDouble(v1Obj.get("longitude").toString())); }
 //							if (v1Obj.get("active") != null) { v1.setActive(Boolean.parseBoolean(v1Obj.get("active").toString())); }
@@ -430,8 +430,8 @@ public class DBAccessGraphDynamoDB implements DBAccessGraph {
 //							if (v2Obj.get("long_name") != null) { v2.setLong_name(v2Obj.get("long_name").toString()); }
 //							if (v2Obj.get("description") != null) { v2.setDescription(v2Obj.get("description").toString()); }
 //							if (v2Obj.get("object_type_id") != null) { v2.setObject_type_id(Integer.parseInt(v2Obj.get("object_type_id").toString())); }
-							if (v2Obj.get("x_coordinate") != null) { v2.setX(Integer.parseInt(v2Obj.get("x_coordinate").toString())); }
-							if (v2Obj.get("y_coordinate") != null) { v2.setY(Integer.parseInt(v2Obj.get("y_coordinate").toString())); }
+							if (v2Obj.get("x") != null) { v2.setX(Integer.parseInt(v2Obj.get("x").toString())); }
+							if (v2Obj.get("y") != null) { v2.setY(Integer.parseInt(v2Obj.get("y").toString())); }
 //							if (v2Obj.get("latitude") != null) { v2.setLatitude(Double.parseDouble(v2Obj.get("latitude").toString())); }
 //							if (v2Obj.get("longitude") != null) { v2.setLongitude(Double.parseDouble(v2Obj.get("longitude").toString())); }
 //							if (v2Obj.get("active") != null) { v2.setActive(Boolean.parseBoolean(v2Obj.get("active").toString())); }
@@ -458,15 +458,19 @@ public class DBAccessGraphDynamoDB implements DBAccessGraph {
 		return pointsAndEdges;
 	}
 	
-	public List<Map<String, AttributeValue>> getAllNodes(String tableName) {
+	public List<Map<String, AttributeValue>> getAllNodes(String tableName, String locationId) {
 		try {
 
 			long time = System.currentTimeMillis();
-//			HashMap<String, Condition> scanFilter = new HashMap<String, Condition>();
-//			Condition condition = new Condition().withComparisonOperator(ComparisonOperator.EQ.toString())
-//					.withAttributeValueList(new AttributeValue().withS(nodeId));
-//			
-//			scanFilter.put("nodeId", condition);
+			
+			HashMap<String, Condition> scanFilter = new HashMap<String, Condition>();
+			if (locationId != null) {
+				Condition condition = new Condition().withComparisonOperator(ComparisonOperator.EQ.toString())
+						.withAttributeValueList(new AttributeValue().withS(locationId));
+				
+				scanFilter.put("locationId", condition);
+			}
+			
 			ScanRequest scanRequest = new ScanRequest(tableName);
 			ScanResult scanResult = dynamoDB.scan(scanRequest);
 			
@@ -502,7 +506,7 @@ public class DBAccessGraphDynamoDB implements DBAccessGraph {
 		return null;
 	}
 
-	public Map<String, AttributeValue> newNode(String nodeId, String adj, String location) {
+	public Map<String, AttributeValue> newNode(String nodeId, String adj, String location, String locationId) {
 		
 		Map<String, AttributeValue> item = new HashMap<String, AttributeValue>();
 		
@@ -510,6 +514,9 @@ public class DBAccessGraphDynamoDB implements DBAccessGraph {
 		
 		if (location != null) {
 			item.put("location", new AttributeValue(location));
+		}
+		if (locationId != null) {
+			item.put("locationId", new AttributeValue(locationId));
 		}
 		if (adj != null) {
 			item.put("adj", new AttributeValue(adj));

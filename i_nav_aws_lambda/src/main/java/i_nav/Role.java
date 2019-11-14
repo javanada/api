@@ -20,11 +20,11 @@ public class Role implements INavEntity {
 	private String description;
 	
 	public static JSONArray getRoles(String id) {
-		String returnStr = "";
-		String where = "";
 		
 		String select = " SELECT * FROM roles r ";
 		String join = "  ";
+		String where = "  ";
+		
 		if (id != null) {
 			where = " WHERE r.role_id = ? ";
 		}
@@ -34,7 +34,6 @@ public class Role implements INavEntity {
 
 		try {
 			Connection conn = DriverManager.getConnection(url, username, password);
-//			Statement stmt = conn.createStatement();
 			PreparedStatement stmt = conn.prepareStatement(query);
 			if (id != null) {
 				stmt.setString(1, id);
@@ -43,14 +42,12 @@ public class Role implements INavEntity {
 
 			
 			while (resultSet.next()) {
+				
 				Role role = new Role();
-				
-				
 				role.setRole_id(resultSet.getInt(1));
 				role.setShort_name(resultSet.getString(2));
 				role.setLong_name(resultSet.getString(3));
 				role.setDescription(resultSet.getString(4));
-				
 				
 				JSONParser parser = new JSONParser();
 				try {
@@ -66,10 +63,11 @@ public class Role implements INavEntity {
 				}
 				
 			}
-			returnStr += jsonArray.toJSONString();
 
 		} catch (SQLException e) {
-			returnStr += e.getMessage() + " " + query;
+			JSONObject obj = new JSONObject();
+			obj.put("SQLException", e.getMessage());
+			jsonArray.add(obj);
 		}
 
 		return jsonArray;

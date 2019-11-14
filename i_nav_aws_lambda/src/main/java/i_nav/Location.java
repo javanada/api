@@ -150,7 +150,7 @@ public class Location implements INavEntity {
 			ResultSet resultSet = stmt.getGeneratedKeys();
 			if (resultSet.next()) {
                 long id = resultSet.getLong(1);
-                jsonArray = Location.getLocations("" + id);
+                jsonArray = Location.getLocations("" + id, null);
             }
 			
 			
@@ -163,10 +163,7 @@ public class Location implements INavEntity {
 		return jsonArray;
 	}
 	
-	public static JSONArray getLocations(String id) {
-
-		String returnStr = "";
-		String where = "";
+	public static JSONArray getLocations(String id, String parentId) {
 		
 		String select = 
 					" SELECT " + 
@@ -175,19 +172,30 @@ public class Location implements INavEntity {
 		
 		String from = " FROM locations l ";
 		String join = " INNER JOIN location_types lt ON l.location_type_id = lt.location_type_id ";
+		String where = " WHERE 1 ";
+		
 		if (id != null) {
-			where = " WHERE l.location_id = ? AND l.active = 1";
+			where += " AND l.location_id = ? AND l.active = 1";
 		}
+		
+		if (parentId != null) {
+			from += " INNER JOIN location_relations lr ON lr.child_id = l.location_id ";
+			where += " AND lr.parent_id = ? ";
+		}
+		
 		String query = select + from + join + where;
 		
 		JSONArray jsonArray = new JSONArray();
 
 		try {
 			Connection conn = DriverManager.getConnection(url, username, password);
-//			Statement stmt = conn.createStatement();
 			PreparedStatement stmt = conn.prepareStatement(query);
+			int c = 1;
 			if (id != null) {
-				stmt.setString(1, id);
+				stmt.setString(c++, id);
+			}
+			if (parentId != null) {
+				stmt.setString(c++, parentId);
 			}
 			ResultSet resultSet = stmt.executeQuery();
 
@@ -220,15 +228,18 @@ public class Location implements INavEntity {
 					jsonArray.add(locationJson);
 					
 				} catch (ParseException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					JSONObject obj = new JSONObject();
+					obj.put("ParseException", e.getMessage());
+					jsonArray.add(obj);
 				}
 				
 			}
-			returnStr += jsonArray.toJSONString();
+			
 
 		} catch (SQLException e) {
-			returnStr += e.getMessage() + " " + query;
+			JSONObject obj = new JSONObject();
+			obj.put("SQLException", e.getMessage());
+			jsonArray.add(obj);
 		}
 
 		return jsonArray;
