@@ -126,7 +126,7 @@ public class LocationObject implements INavEntity {
 		
 		String select = " SELECT " + 
 						" o.object_id, o.short_name as object_short_name, o.long_name as object_long_name, o.description as object_description, o.x_coordinate, o.y_coordinate, o.latitude, o.longitude, o.image_x, o.image_y, " + 
-						" l.location_id as location_location_id, l.primary_object_id, l.short_name as location_short_name, l.long_name as location_long_name, l.description as location_description, l.scale_ft, l.image as canvas_image, " + 
+						" l.location_id as location_location_id, l.short_name as location_short_name, l.long_name as location_long_name, l.description as location_description, l.image as canvas_image, " + 
 						" lt.location_type_id, lt.short_name as location_type_short_name, lt.description as location_type_description, " + 
 						" ot.object_type_id, ot.short_name as object_type_short_name,  ot.description as object_type_description," + 
 						" a.address_id, a.address1, a.address2, a.city, a.state, a.zipcode, a.zipcode_ext "
@@ -181,13 +181,9 @@ public class LocationObject implements INavEntity {
 				LocationObjectType locationObjectType = new LocationObjectType();
 				
 				location.setLocation_id(resultSet.getInt("location_location_id"));
-				location.setPrimary_object_id(resultSet.getInt("primary_object_id"));
 				location.setShort_name(resultSet.getString("location_short_name"));
 				location.setLong_name(resultSet.getString("location_long_name"));
 				location.setDescription(resultSet.getString("location_description"));
-				location.setScale_ft(resultSet.getDouble("scale_ft"));
-				location.setLatitude(resultSet.getDouble("latitude"));
-				location.setLongitude(resultSet.getDouble("longitude"));
 				location.setImage(resultSet.getString("canvas_image"));
 				
 				locationObject.setObject_id(resultSet.getInt("object_id"));
