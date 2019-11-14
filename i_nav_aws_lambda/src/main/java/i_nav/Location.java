@@ -21,15 +21,6 @@ public class Location implements INavEntity {
 	private String image;
 	private int location_type_id;
 	private int address_id;
-	private int primary_object_id;
-	private LocationObject primary_object;
-	private double scale_ft;
-	private int min_x_coordinate;
-	private int min_y_coordinate;
-	private int max_x_coordinate;
-	private int max_y_coordinate;
-	private double latitude;
-	private double longitude;
 	private boolean active;
 
 	public static JSONArray updateLocation(JSONObject updateLoc){
@@ -123,8 +114,8 @@ public class Location implements INavEntity {
 		
 		JSONArray jsonArray = new JSONArray();
 		
-		String query = "INSERT INTO `locations` (`short_name`, `long_name`, `description`, `location_type_id`, `address_id`, `primary_object_id`, `scale_ft`, `min_x_coordinate`, `min_y_coordinate`, `max_x_coordinate`, `max_y_coordinate`, `latitude`, `longitude`, `active`) " + 
-				"VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
+		String query = "INSERT INTO `locations` (`short_name`, `long_name`, `description`, `location_type_id`, `address_id`, `active`) " + 
+				"VALUES (?, ?, ?, ?, ?, 1);";
 		
 		try {
 			
@@ -136,15 +127,7 @@ public class Location implements INavEntity {
 			if (newLocation.get("description") != null) { stmt.setString(3, newLocation.get("description").toString()); } else { stmt.setNull(3, java.sql.Types.INTEGER); }
 			if (newLocation.get("location_type_id") != null) { stmt.setInt(4, Integer.parseInt(newLocation.get("location_type_id").toString())); } else { stmt.setNull(4, java.sql.Types.INTEGER); }
 			if (newLocation.get("address_id") != null) { stmt.setInt(5, Integer.parseInt(newLocation.get("address_id").toString())); } else { stmt.setNull(5, java.sql.Types.INTEGER); }
-			if (newLocation.get("primary_object_id") != null) { stmt.setInt(6, Integer.parseInt(newLocation.get("primary_object_id").toString())); } else { stmt.setNull(6, java.sql.Types.INTEGER); }
-			if (newLocation.get("scale_ft") != null) { stmt.setDouble(7, Double.parseDouble(newLocation.get("scale_ft").toString())); } else { stmt.setNull(7, java.sql.Types.FLOAT); }
-			if (newLocation.get("min_x_coordinate") != null) { stmt.setInt(8, Integer.parseInt(newLocation.get("min_x_coordinate").toString())); } else { stmt.setNull(8, java.sql.Types.INTEGER); }
-			if (newLocation.get("min_y_coordinate") != null) { stmt.setInt(9, Integer.parseInt(newLocation.get("min_y_coordinate").toString())); } else { stmt.setNull(9, java.sql.Types.INTEGER); }
-			if (newLocation.get("max_x_coordinate") != null) { stmt.setInt(10, Integer.parseInt(newLocation.get("max_x_coordinate").toString())); } else { stmt.setNull(10, java.sql.Types.INTEGER); }
-			if (newLocation.get("max_y_coordinate") != null) { stmt.setInt(11, Integer.parseInt(newLocation.get("max_y_coordinate").toString())); } else { stmt.setNull(11, java.sql.Types.INTEGER); }
-			if (newLocation.get("latitude") != null) { stmt.setDouble(12, Double.parseDouble(newLocation.get("latitude").toString())); } else { stmt.setNull(12, java.sql.Types.FLOAT); }
-			if (newLocation.get("longitude") != null) { stmt.setDouble(13, Double.parseDouble(newLocation.get("longitude").toString())); } else { stmt.setNull(13, java.sql.Types.FLOAT); }
-			stmt.setInt(14, 1);
+			
 			
 			stmt.executeUpdate();
 			ResultSet resultSet = stmt.getGeneratedKeys();
@@ -167,7 +150,7 @@ public class Location implements INavEntity {
 		
 		String select = 
 					" SELECT " + 
-					" l.location_id as location_location_id, l.primary_object_id, l.short_name as location_short_name, l.long_name as location_long_name, l.description as location_description, l.scale_ft, l.latitude, l.longitude, l.image as canvas_image, " + 
+					" l.location_id as location_location_id, l.short_name as location_short_name, l.long_name as location_long_name, l.description as location_description, l.image as canvas_image, " + 
 					" lt.location_type_id, lt.short_name as location_type_short_name, lt.description as location_type_description ";
 		
 		String from = " FROM locations l ";
@@ -205,13 +188,9 @@ public class Location implements INavEntity {
 				LocationType locationType = new LocationType();
 				
 				location.setLocation_id(resultSet.getInt("location_location_id"));
-				location.setPrimary_object_id(resultSet.getInt("primary_object_id"));
 				location.setShort_name(resultSet.getString("location_short_name"));
 				location.setLong_name(resultSet.getString("location_long_name"));
 				location.setDescription(resultSet.getString("location_description"));
-				location.setScale_ft(resultSet.getDouble("scale_ft"));
-				location.setLatitude(resultSet.getDouble("latitude"));
-				location.setLongitude(resultSet.getDouble("longitude"));
 				location.setImage(resultSet.getString("canvas_image"));
 				
 				locationType.setLocation_type_id(resultSet.getInt("location_type_id"));
@@ -342,14 +321,6 @@ public class Location implements INavEntity {
 		jsonObject.put("canvas_image", image);
 		jsonObject.put("location_type_id", location_type_id);
 		jsonObject.put("address_id", address_id);
-		jsonObject.put("primary_object_id", primary_object_id);
-		jsonObject.put("scale_ft", scale_ft);
-		jsonObject.put("min_x_coordinate", min_x_coordinate);
-		jsonObject.put("min_y_coordinate", min_y_coordinate);
-		jsonObject.put("max_x_coordinate", max_x_coordinate);
-		jsonObject.put("max_y_coordinate", max_y_coordinate);
-		jsonObject.put("latitude", latitude);
-		jsonObject.put("longitude", longitude);
 		jsonObject.put("active", active);
 		
 		return jsonObject.toJSONString();
@@ -390,60 +361,6 @@ public class Location implements INavEntity {
 	}
 	public void setAddress_id(int address_id) {
 		this.address_id = address_id;
-	}
-	public int getPrimary_object_id() {
-		return primary_object_id;
-	}
-	public void setPrimary_object_id(int primary_object_id) {
-		this.primary_object_id = primary_object_id;
-	}
-	public LocationObject getPrimary_object() {
-		return primary_object;
-	}
-	public void setPrimary_object(LocationObject primary_object) {
-		this.primary_object = primary_object;
-	}
-	public double getScale_ft() {
-		return scale_ft;
-	}
-	public void setScale_ft(double scale_ft) {
-		this.scale_ft = scale_ft;
-	}
-	public int getMin_x_coordinate() {
-		return min_x_coordinate;
-	}
-	public void setMin_x_coordinate(int min_x_coordinate) {
-		this.min_x_coordinate = min_x_coordinate;
-	}
-	public int getMin_y_coordinate() {
-		return min_y_coordinate;
-	}
-	public void setMin_y_coordinate(int min_y_coordinate) {
-		this.min_y_coordinate = min_y_coordinate;
-	}
-	public int getMax_x_coordinate() {
-		return max_x_coordinate;
-	}
-	public void setMax_x_coordinate(int max_x_coordinate) {
-		this.max_x_coordinate = max_x_coordinate;
-	}
-	public int getMax_y_coordinate() {
-		return max_y_coordinate;
-	}
-	public void setMax_y_coordinate(int max_y_coordinate) {
-		this.max_y_coordinate = max_y_coordinate;
-	}
-	public double getLatitude() {
-		return latitude;
-	}
-	public void setLatitude(double latitude) {
-		this.latitude = latitude;
-	}
-	public double getLongitude() {
-		return longitude;
-	}
-	public void setLongitude(double longitude) {
-		this.longitude = longitude;
 	}
 	public boolean isActive() {
 		return active;
