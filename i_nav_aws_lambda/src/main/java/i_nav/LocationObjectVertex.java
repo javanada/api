@@ -39,9 +39,20 @@ public class LocationObjectVertex {
 		JSONObject jsonObject = new JSONObject();
 		jsonObject.put("object_id", object_id);
 		jsonObject.put("location_id", location_id);
+		jsonObject.put("x", x);
+		jsonObject.put("y", y);
 		
 		return jsonObject.toJSONString();
 	}
-	
+	public JSONObject toJSON() {
+		
+		JSONObject jsonObject = new JSONObject();
+		jsonObject.put("object_id", object_id);
+		jsonObject.put("location_id", location_id);
+		jsonObject.put("x", x);
+		jsonObject.put("y", y);
+		
+		return jsonObject;
+	}
 	
 }

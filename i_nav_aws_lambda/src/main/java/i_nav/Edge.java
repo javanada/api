@@ -1,5 +1,6 @@
 package i_nav;
 
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 public class Edge {
@@ -32,10 +33,12 @@ public class Edge {
 	
 	public JSONObject getJson() {
 		JSONObject obj = new JSONObject();
-		obj.put("v1", v1.getJSONString());
-		obj.put("v2", v2.getJSONString());
+		obj.put("v1", v1.toJSON());
+		obj.put("v2", v2.toJSON());
 		obj.put("weight", weight);
 		return obj;
 	}
+	
+	
 
 }

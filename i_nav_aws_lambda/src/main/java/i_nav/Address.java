@@ -23,11 +23,10 @@ public class Address implements INavEntity {
 	private String zipcode_ext;
 	
 	public static JSONArray getAddresses(String id) {
-		String returnStr = "";
-		String where = "";
 		
 		String select = " SELECT * FROM addresses a ";
 		String join = "  ";
+		String where = "  ";
 		if (id != null) {
 			where = " WHERE a.address_id = ? ";
 		}
@@ -37,7 +36,6 @@ public class Address implements INavEntity {
 
 		try {
 			Connection conn = DriverManager.getConnection(url, username, password);
-//			Statement stmt = conn.createStatement();
 			PreparedStatement stmt = conn.prepareStatement(query);
 			if (id != null) {
 				stmt.setString(1, id);
@@ -46,9 +44,8 @@ public class Address implements INavEntity {
 
 			
 			while (resultSet.next()) {
+				
 				Address address = new Address();
-				
-				
 				address.setAddress_id(resultSet.getInt(1));
 				address.setAddress1(resultSet.getString(2));
 				address.setAddress2(resultSet.getString(3));
@@ -56,8 +53,6 @@ public class Address implements INavEntity {
 				address.setState(resultSet.getString(5));
 				address.setZipcode(resultSet.getString(6));
 				address.setZipcode_ext(resultSet.getString(7));
-				
-				
 				
 				JSONParser parser = new JSONParser();
 				try {
@@ -71,9 +66,7 @@ public class Address implements INavEntity {
 					obj.put("ParseException", e.getMessage());
 					jsonArray.add(obj);
 				}
-				
 			}
-			returnStr += jsonArray.toJSONString();
 
 		} catch (SQLException e) {
 			JSONObject obj = new JSONObject();
@@ -85,6 +78,7 @@ public class Address implements INavEntity {
 	}
 	
 	public static JSONArray newAddress(JSONObject newAddress) {
+		
 		JSONArray jsonArray = new JSONArray();
 		
 		String query = "INSERT INTO `addresses` (`address1`, `address2`, `city`, `state`, `zipcode`, `zipcode_ext`)  " + 

@@ -57,31 +57,30 @@ public class User implements INavEntity {
 
 	public static User getCurrentUser(String apiKey) {
 		
-		AmazonApiGateway client = AmazonApiGatewayClientBuilder.standard().build();
-		GetApiKeyRequest req = new GetApiKeyRequest();
-		req.setApiKey(apiKey);
-		String apiKeyUsername = client.getApiKey(req).getName();
-		JSONArray arr = getUsers(null, apiKeyUsername);
-		if (arr.size() == 1) {
-			JSONObject obj = (JSONObject)arr.get(0);
-			User u = new User(obj);
-			return u;
-		}
+//		AmazonApiGateway client = AmazonApiGatewayClientBuilder.standard().build();
+//		GetApiKeyRequest req = new GetApiKeyRequest();
+//		req.setApiKey(apiKey);
+//		
+//		String apiKeyUsername = client.getApiKey(req).getName();
+//		JSONArray arr = getUsers(null, apiKeyUsername);
+//		if (arr.size() == 1) {
+//			JSONObject obj = (JSONObject)arr.get(0);
+//			User u = new User(obj);
+//			return u;
+//		}
 		
 		return new User();
 	}
 	
 	public static JSONArray getUsers(String id, String username) {
 		
-		String returnStr = "";
-		String where = "";
-		
 		String select = " SELECT * FROM users u ";
 		String join = "  ";
+		String where = "  ";
+		
 		if (id != null) {
 			where = " WHERE u.user_id = ? ";
-		}
-		if (username != null) {
+		} else if (username != null) {
 			where = " WHERE u.username = ? ";
 		}
 		String query = select + join + where;
@@ -90,23 +89,19 @@ public class User implements INavEntity {
 
 		try {
 			Connection conn = DriverManager.getConnection(url, INavEntity.username, INavEntity.password);
-//			Statement stmt = conn.createStatement();
 			PreparedStatement stmt = conn.prepareStatement(query);
-			if (id != null && username == null) {
+			
+			if (id != null) {
 				stmt.setString(1, id);
-			} else if (id == null && username != null) {
+			} else if (username != null) {
 				stmt.setString(1, username);
-			} else if (id != null && username != null) {
-				stmt.setString(1, id);
-				stmt.setString(2, username);
 			}
+			
 			ResultSet resultSet = stmt.executeQuery();
-
 			
 			while (resultSet.next()) {
+				
 				User user = new User();
-				
-				
 				user.setUser_id(resultSet.getInt(1));
 				user.setUsername(resultSet.getString(2));
 				user.setSalt(resultSet.getString(3));
@@ -117,12 +112,11 @@ public class User implements INavEntity {
 				user.setRole_id(resultSet.getInt(8));
 				user.setActive(resultSet.getBoolean(9));
 				
-				
 				JSONParser parser = new JSONParser();
+				
 				try {
 					
 					JSONObject userJson = (JSONObject) parser.parse(user.getJSONString());
-					
 					jsonArray.add(userJson);
 					
 				} catch (ParseException e) {
@@ -132,10 +126,12 @@ public class User implements INavEntity {
 				}
 				
 			}
-			returnStr += jsonArray.toJSONString();
+			
 
 		} catch (SQLException e) {
-			returnStr += e.getMessage() + " " + query;
+			JSONObject obj = new JSONObject();
+			obj.put("SQLException", e.getMessage());
+			jsonArray.add(obj);
 		}
 
 		return jsonArray;
@@ -413,9 +409,12 @@ public class User implements INavEntity {
 		
 		return jsonArray;
 	}
-
-	@Override
+	
 	public String getJSONString() {
+		return getJSON().toJSONString();
+	}
+	
+	public JSONObject getJSON() {
 		JSONObject jsonObject = new JSONObject();
 		jsonObject.put("user_id", user_id);
 		jsonObject.put("username", username);
@@ -426,7 +425,7 @@ public class User implements INavEntity {
 		jsonObject.put("email", email);
 		jsonObject.put("role_id", role_id);
 		jsonObject.put("active", active);
-		return jsonObject.toJSONString();
+		return jsonObject;
 	}
 
 	public int getUser_id() {

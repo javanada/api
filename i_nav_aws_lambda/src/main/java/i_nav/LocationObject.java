@@ -49,48 +49,7 @@ public class LocationObject implements INavEntity {
 		
 	}
 	
-	public static JSONArray setEdgeDirected(String sourceObjectId, String sourceLocationId, String destObjectId, String destLocationId) {
-		
-		JSONArray jsonArray = new JSONArray();
-		
-		JSONArray arrSource = getLocationObjects(sourceObjectId, sourceLocationId, null);
-		JSONArray arrDest = getLocationObjects(destObjectId, destLocationId, null);
-		
-		if (arrSource.size() == 1 && arrDest.size() == 1) {
-			
-			JSONObject source = (JSONObject) arrSource.get(0);
-			JSONObject dest = (JSONObject) arrDest.get(0);
-			
-			LocationObject sourceObject = new LocationObject(source);
-			LocationObject destObject = new LocationObject(dest);
-			
-			LocationObjectVertex sourceVertex = new LocationObjectVertex();
-			LocationObjectVertex destVertex = new LocationObjectVertex();
-			
-			sourceVertex.setLocation_id(sourceObject.getLocation_id());
-			sourceVertex.setObject_id(sourceObject.getObject_id());
-			sourceVertex.setX(sourceObject.getX_coordinate());
-			sourceVertex.setY(sourceObject.getY_coordinate());
-			
-			destVertex.setLocation_id(destObject.getLocation_id());
-			destVertex.setObject_id(destObject.getObject_id());
-			destVertex.setX(destObject.getX_coordinate());
-			destVertex.setY(destObject.getY_coordinate());
-			
-			CloudGraphListDirected graph1 = new CloudGraphListDirected("i_nav_graph1", true);
-			graph1.SetEdgeDirected(sourceVertex, destVertex, 15);
-			
-		} else {
-			return jsonArray;
-		}
-		
-		
-		JSONObject ret = new JSONObject();
-		ret.put("success", "maybe");
-		jsonArray.add(ret);
-		
-		return jsonArray;
-	}
+	
 	
 	public static JSONArray newLocationObject(JSONObject newLocationObject) {
 		JSONArray jsonArray = new JSONArray();
