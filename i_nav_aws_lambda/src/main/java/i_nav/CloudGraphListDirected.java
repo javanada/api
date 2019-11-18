@@ -26,14 +26,14 @@ public class CloudGraphListDirected {
 	private String graphName;
 	
 	
-	public CloudGraphListDirected(String graphName, boolean lambda) {
+	public CloudGraphListDirected(String graphName, boolean isLambda) {
 		this.graphName = graphName;
 		adj = new HashMap<String, List<Edge>>();
 		Mark = new LinkedList<String>();
 		numEdges = 0;
 		
 		
-		dbGraphAccess = new DBAccessGraphDynamoDB(lambda);
+		dbGraphAccess = new DBAccessGraphDynamoDB(isLambda);
 		dbGraphAccess.createTable(graphName);
 		
 	}
@@ -89,6 +89,10 @@ public class CloudGraphListDirected {
 			adj.put("" + v1.getObject_id(), new LinkedList<Edge>());
 			Mark.add("" + v1.getObject_id());
 		}
+		double distance_x = v2.getX() - v1.getX();
+		double distance_y = v2.getY() - v1.getY();
+		weight = (int) Math.sqrt(distance_x * distance_x + distance_y * distance_y);
+		
 		Edge e = new Edge(v1, v2, weight);
 		adj.get("" + v1.getObject_id()).add(e);
 		

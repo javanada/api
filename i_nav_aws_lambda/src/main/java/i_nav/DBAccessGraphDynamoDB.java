@@ -350,6 +350,11 @@ public class DBAccessGraphDynamoDB implements DBAccessGraph {
 		
 		List<Map<String, AttributeValue>> cloudNodes = getAllNodes(graphName, locationId);
 		
+		if (cloudNodes == null) {
+			Map<LocationObjectVertex, List<Edge>> empty = new HashMap<LocationObjectVertex, List<Edge>>();
+			return empty;
+		}
+		
 		List<LocationObjectVertex> locationObjects = new ArrayList<LocationObjectVertex>();
 		Map<LocationObjectVertex, List<Edge>> pointsAndEdges = new HashMap<LocationObjectVertex, List<Edge>>();
 		
@@ -471,7 +476,7 @@ public class DBAccessGraphDynamoDB implements DBAccessGraph {
 				scanFilter.put("locationId", condition);
 			}
 			
-			ScanRequest scanRequest = new ScanRequest(tableName);
+			ScanRequest scanRequest = new ScanRequest(tableName).withScanFilter(scanFilter);
 			ScanResult scanResult = dynamoDB.scan(scanRequest);
 			
 			if (dynamoLog) {
