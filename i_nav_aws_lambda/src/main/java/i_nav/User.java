@@ -40,9 +40,9 @@ public class User implements INavEntity {
 	private boolean active;
 
 	public static JSONArray updateUser(JSONObject userUpdate) {
-		/*JSONArray JSONArr = new JSONArray();
+		JSONArray JSONArr = new JSONArray();
 
-		String update = "UPDATE `user` ";
+		/*String update = "UPDATE `user` ";
 		String set = " SET user_id = user_id";
 
 		if (userUpdate.get("username") != null) {
@@ -113,12 +113,14 @@ public class User implements INavEntity {
 			JSONObject obj = new JSONObject();
 			obj.put("SQLException", e.getMessage());
 			JSONArr.add(obj);
-		}
+		}*/
 
-		return JSONArr;*/
+		return JSONArr;
 	}
 	public static JSONArray deleteUser(String id) {
+		JSONArray JSONArr = new JSONArray();
 
+		return JSONArr;
 	}
 	public User() {
 		
