@@ -40,7 +40,7 @@ public class User implements INavEntity {
 	private boolean active;
 
 	public static JSONArray updateUser(JSONObject userUpdate) {
-		JSONArray JSONArr = new JSONArray();
+		/*JSONArray JSONArr = new JSONArray();
 
 		String update = "UPDATE `user` ";
 		String set = " SET user_id = user_id";
@@ -115,7 +115,10 @@ public class User implements INavEntity {
 			JSONArr.add(obj);
 		}
 
-		return JSONArr;
+		return JSONArr;*/
+	}
+	public static JSONArray deleteUser(String id) {
+
 	}
 	public User() {
 		
