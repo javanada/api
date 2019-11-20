@@ -24,47 +24,67 @@ public class Location implements INavEntity {
 	private int address_id;
 	private boolean active;
 
-	public static JSONArray updateLocation(JSONObject updateLoc){
+	public static JSONArray updateLocation(JSONObject updateLoc) {
 		JSONArray JSONArr = new JSONArray();
 
-		String update = "UPDATE `locations`";
-		String set = " SET `short_name` = ?";//, `long_name` = ?, `description` = ?, `min_x_coordinate` = ?, `min_y_coordinate` = ?, `max_x_coordinate` = ?, `max_y_coordinate` = ?;
+		String update = "UPDATE `locations` ";
+		String set = " SET location_id = location_id";
+
+		if (updateLoc.get("short_name") != null) {
+			set += ", `short_name` = ? ";
+		}
+		if (updateLoc.get("long_name") != null) {
+			set += ", `long_name` = ? ";
+		}
+		if (updateLoc.get("description") != null) {
+			set += ", `description` = ? ";
+		}
+		if (updateLoc.get("location_type_id") != null) {
+			set += ", `location_type_id` = ? ";
+		}
+		if (updateLoc.get("address_id") != null) {
+			set += ", `address_id` = ? ";
+		}
+
 		String where = " WHERE `location_id` = ?";
 
 		String query = update + set + where;
 
 		try {
 			Connection conn = DriverManager.getConnection(url, username, password);
-			PreparedStatement stmt = conn.prepareStatement(query);
+			PreparedStatement stmt = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
 
-			if (updateLoc.get("short_name").toString() != null) {
-				stmt.setString(1, updateLoc.get("short_name").toString());
+			int counter = 1;
+
+			if (updateLoc.get("short_name") != null){
+				stmt.setString(counter++, updateLoc.get("short_name").toString());
+			}
+			if (updateLoc.get("long_name") != null) {
+				stmt.setString(counter++, updateLoc.get("long_name").toString());
+			}
+			if (updateLoc.get("description") != null) {
+				stmt.setString(counter++, updateLoc.get("description").toString());
+			}
+			if (updateLoc.get("location_type_id") != null) {
+				stmt.setString(counter++, updateLoc.get("location_type_id").toString());
+			}
+			if (updateLoc.get("address_id") != null) {
+				stmt.setString(counter++, updateLoc.get("address_id").toString());
 			}
 
-			stmt.setInt(2, Integer.parseInt(updateLoc.get("location_id").toString()));
+			stmt.setInt(counter, Integer.parseInt(updateLoc.get("location_id").toString()));
 
 			stmt.executeUpdate();
-			/*ResultSet result = stmt.executeQuery();
-
-			while (result.next()){
-
-				updateLoc.setShort_name(result.getString(1));
-				updateLoc.setLong_name(result.getString(2));
-				updateLoc.setDescription(result.getString(3));
-				updateLoc.setMin_x_coordinate(result.getDouble(8));
-				updateLoc.setMin_y_coordinate(result.getDouble(9));
-				updateLoc.setMax_x_coordinate(result.getDouble(10));
-				updateLoc.setMax_y_coordinate(result.getDouble(11));
-			}
+			ResultSet resultSet = stmt.getGeneratedKeys();
 
 			if (resultSet.next()) {
-				long id = result.getLong(1);
-				JSONArr = Location.getLocations("" + id);
-			}*/
+				long id = resultSet.getLong(1);
+				JSONArr = Location.getLocations("" + id, null);
+			}
 
-		} catch (Exception e) {
+		} catch (SQLException e) {
 			JSONObject obj = new JSONObject();
-			obj.put("Exception Occured", e.getMessage());
+			obj.put("SQLException", e.getMessage());
 			JSONArr.add(obj);
 		}
 
@@ -74,7 +94,7 @@ public class Location implements INavEntity {
 		JSONArray jsonArr = new JSONArray();
 
 		String update = "UPDATE `locations` ";
-		String set = "SET `active` = `false`";
+		String set = "SET `active` = 0";
 		String where = "";
 
 		if (id != null) {
@@ -89,22 +109,9 @@ public class Location implements INavEntity {
 
 			stmt.executeUpdate();
 
-			/*while (resultSet.next()){
-				Location location = new Location();
-
-				if (location.isActive()){
-					location.setActive(false);
-				}
-				//stmt.executeUpdate();
-			}*/
-
-			//JSONObject locationJson = (JSONObject)parser.parse(location.getJSONString());
-			//jsonArr.add(locationJson);
-
-			//stmt.executeUpdate();
-		} catch (Exception e) {
+		} catch (SQLException e) {
 			JSONObject obj = new JSONObject();
-			obj.put("Exception Occured", e.getMessage());
+			obj.put("SQLException", e.getMessage());
 			jsonArr.add(obj);
 		}
 

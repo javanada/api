@@ -38,7 +38,88 @@ public class User implements INavEntity {
 	private String email;
 	private int role_id;
 	private boolean active;
-	
+
+	public static JSONArray updateUser(JSONObject userUpdate) {
+		/*JSONArray JSONArr = new JSONArray();
+
+		String update = "UPDATE `user` ";
+		String set = " SET user_id = user_id";
+
+		if (userUpdate.get("username") != null) {
+			set += ", `username` = ? ";
+		}
+		if (userUpdate.get("salt") != null) {
+			set += ", `salt` = ? ";
+		}
+		if (userUpdate.get("password") != null) {
+			set += ", `password` = ? ";
+		}
+		if (userUpdate.get("first_name") != null) {
+			set += ", `first_name` = ? ";
+		}
+		if (userUpdate.get("last_name") != null) {
+			set += ", `last_name` = ? ";
+		}
+		if (userUpdate.get("email") != null) {
+			set += ", `email` = ? ";
+		}
+		if (userUpdate.get("role_id") != null) {
+			set += ", `role_id` = ? ";
+		}
+
+		String where = " WHERE `user_id` = ?";
+
+		String query = update + set + where;
+
+		try {
+			Connection conn = DriverManager.getConnection(url, INavEntity.username, INavEntity.password);
+			PreparedStatement stmt = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
+
+			int counter = 1;
+
+			if (userUpdate.get("username") != null){
+				stmt.setString(counter++, userUpdate.get("username").toString());
+			}
+			if (userUpdate.get("salt") != null) {
+				stmt.setString(counter++, userUpdate.get("salt").toString());
+			}
+			if (userUpdate.get("password") != null) {
+				stmt.setString(counter++, userUpdate.get("password").toString());
+			}
+			if (userUpdate.get("first_name") != null) {
+				stmt.setString(counter++, userUpdate.get("first_name").toString());
+			}
+			if (userUpdate.get("last_name") != null) {
+				stmt.setString(counter++, userUpdate.get("last_name").toString());
+			}
+			if (userUpdate.get("email") != null) {
+				stmt.setString(counter++, userUpdate.get("email").toString());
+			}
+			if (userUpdate.get("role_id") != null) {
+				stmt.setInt(counter++, Integer.parseInt(userUpdate.get("role_id").toString()));
+			}
+
+			stmt.setInt(counter, Integer.parseInt(userUpdate.get("user_id").toString()));
+
+			stmt.executeUpdate();
+			ResultSet resultSet = stmt.getGeneratedKeys();
+
+			if (resultSet.next()) {
+				long id = resultSet.getLong(1);
+				JSONArr = User.getUsers("" + id, null);
+			}
+
+		} catch (SQLException e) {
+			JSONObject obj = new JSONObject();
+			obj.put("SQLException", e.getMessage());
+			JSONArr.add(obj);
+		}
+
+		return JSONArr;*/
+	}
+	public static JSONArray deleteUser(String id) {
+
+	}
 	public User() {
 		
 	}
