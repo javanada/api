@@ -113,7 +113,7 @@ public class INavLambdaHandler implements RequestStreamHandler {
 				responseBodyArray.add(obj);
 			}
 			
-		} else if (entity.equals("location/update")){//need to be fixed
+		} else if (entity.equals("location/update")){
 
 			try {
 				responseBodyArray = Location.updateLocation((JSONObject)parser.parse(requestBody));
@@ -122,7 +122,7 @@ public class INavLambdaHandler implements RequestStreamHandler {
 				obj.put("parseExceptin", e.getMessage());
 				responseBodyArray.add(obj);
 			}
-		} else if (entity.equals("location/delete")){//need to be checked
+		} else if (entity.equals("location/delete")){
 			responseBodyArray = Location.deleteLocation(((JSONObject)event).get("id").toString());
 		} else if (entity.equals("locations")) {
 			
@@ -194,6 +194,17 @@ public class INavLambdaHandler implements RequestStreamHandler {
 			
 			responseBodyArray = Address.getAddresses(null);
 			
+		} else if (entity.equals("address/update")){
+
+			try {
+				responseBodyArray = Address.updateAddress((JSONObject)parser.parse(requestBody));
+			} catch (ParseException e) {
+				JSONObject obj = new JSONObject();
+				obj.put("parseExceptin", e.getMessage());
+				responseBodyArray.add(obj);
+			}
+		} else if (entity.equals("address/delete")){
+			responseBodyArray = Address.deleteAddress(((JSONObject)event).get("id").toString());
 		} else if (entity.equals("address")) {
 			
 			String addressId = ((JSONObject)event).get("id").toString();
@@ -237,6 +248,15 @@ public class INavLambdaHandler implements RequestStreamHandler {
 			String userId = ((JSONObject)event).get("id").toString();
 			responseBodyArray = User.getUsers(userId, null);
 			
+		} else if (entity.equals("user/update")){
+
+			try {
+				responseBodyArray = User.updateUser((JSONObject)parser.parse(requestBody));
+			} catch (ParseException e) {
+				JSONObject obj = new JSONObject();
+				obj.put("parseExceptin", e.getMessage());
+				responseBodyArray.add(obj);
+			}
 		} else if (entity.equals("user/new")) {
 			
 			try {
