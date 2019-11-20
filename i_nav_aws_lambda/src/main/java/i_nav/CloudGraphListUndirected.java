@@ -12,7 +12,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-public class CloudGraphListDirected {
+public class CloudGraphListUndirected { // should be undirected
 	
 	private Map<String, List<Edge>> adj; // need to use String, not LocationObjectVertex... should be ID
 	private int numEdges;
@@ -26,7 +26,7 @@ public class CloudGraphListDirected {
 	private String graphName;
 	
 	
-	public CloudGraphListDirected(String graphName, boolean isLambda) {
+	public CloudGraphListUndirected(String graphName, boolean isLambda) {
 		this.graphName = graphName;
 		adj = new HashMap<String, List<Edge>>();
 		Mark = new LinkedList<String>();
@@ -81,7 +81,9 @@ public class CloudGraphListDirected {
 		dbGraphAccess.addGraphVertex(locationObjectJson.get("object_id").toString(), null, vertex.toJSONString(), locationObjectJson.get("location_id").toString(), graphName);
 	}
 	
-	public void SetEdgeDirected(LocationObjectVertex v1, LocationObjectVertex v2, int weight) {
+	public void setEdgeUndirected(LocationObjectVertex v1, LocationObjectVertex v2, int weight) {
+		
+		// todo: this should set undirected edge, fix
 		
 		getPoints("" + v1.getLocation_id());
 		
@@ -179,7 +181,7 @@ public class CloudGraphListDirected {
 	public static JSONArray getEdges(String locationId) {
 		JSONArray jsonArray = new JSONArray();
 		
-		CloudGraphListDirected graph1 = new CloudGraphListDirected("i_nav_graph1", true);
+		CloudGraphListUndirected graph1 = new CloudGraphListUndirected("i_nav_graph1", true);
 		graph1.getPoints(locationId);
 		List<Edge> list = graph1.getEdges();
 		
@@ -218,8 +220,8 @@ public class CloudGraphListDirected {
 			destVertex.setX(destObject.getX_coordinate());
 			destVertex.setY(destObject.getY_coordinate());
 			
-			CloudGraphListDirected graph1 = new CloudGraphListDirected("i_nav_graph1", true);
-			graph1.SetEdgeDirected(sourceVertex, destVertex, 15);
+			CloudGraphListUndirected graph1 = new CloudGraphListUndirected("i_nav_graph1", true);
+			graph1.setEdgeUndirected(sourceVertex, destVertex, 15);
 			
 			JSONObject ret = new JSONObject();
 			ret.put("success", "maybe");
@@ -233,6 +235,11 @@ public class CloudGraphListDirected {
 		
 		
 		return jsonArray;
+	}
+
+	public List<Edge> neighbors(int u) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 	
 }
