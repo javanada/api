@@ -81,11 +81,11 @@ public class CloudGraphListUndirected { // should be undirected
 		dbGraphAccess.addGraphVertex(locationObjectJson.get("object_id").toString(), null, vertex.toJSONString(), locationObjectJson.get("location_id").toString(), graphName);
 	}
 	
-	public void setEdgeUndirected(LocationObjectVertex v1, LocationObjectVertex v2, int weight) {
+	public void setEdgeDirected(LocationObjectVertex v1, LocationObjectVertex v2, int weight) {
 		
 		// todo: this should set undirected edge, fix
 		
-		getPoints("" + v1.getLocation_id());
+		
 		
 		if (adj.get("" + v1.getObject_id()) == null) {
 			adj.put("" + v1.getObject_id(), new LinkedList<Edge>());
@@ -192,7 +192,7 @@ public class CloudGraphListUndirected { // should be undirected
 		return jsonArray;
 	}
 	
-	public static JSONArray setEdgeDirected(String sourceObjectId, String sourceLocationId, String destObjectId, String destLocationId) {
+	public static JSONArray setEdgeUndirected(String sourceObjectId, String sourceLocationId, String destObjectId, String destLocationId) {
 		
 		JSONArray jsonArray = new JSONArray();
 		
@@ -221,7 +221,12 @@ public class CloudGraphListUndirected { // should be undirected
 			destVertex.setY(destObject.getY_coordinate());
 			
 			CloudGraphListUndirected graph1 = new CloudGraphListUndirected("i_nav_graph1", true);
-			graph1.setEdgeUndirected(sourceVertex, destVertex, 15);
+			graph1.getPoints(sourceLocationId);
+			if (!sourceLocationId.equals(destLocationId)) {
+				graph1.getPoints(destLocationId);
+			}
+			graph1.setEdgeDirected(sourceVertex, destVertex, 0);
+			graph1.setEdgeDirected(destVertex, sourceVertex, 0);
 			
 			JSONObject ret = new JSONObject();
 			ret.put("success", "maybe");

@@ -277,13 +277,13 @@ public class INavLambdaHandler implements RequestStreamHandler {
 				responseBodyArray.add(obj);
 			}
 			
-		} else if (entity.equals("set-edge-directed")) {
+		} else if (entity.equals("set-edge-directed")) { // undirected
 			
 			String sourceObjectId = ((JSONObject)event).get("source_object_id").toString();
 			String sourceLocationId = ((JSONObject)event).get("source_location_id").toString();
 			String destObjectId = ((JSONObject)event).get("dest_object_id").toString();
 			String destLocationId = ((JSONObject)event).get("dest_location_id").toString();
-			responseBodyArray = CloudGraphListUndirected.setEdgeDirected(sourceObjectId, sourceLocationId, destObjectId, destLocationId);
+			responseBodyArray = CloudGraphListUndirected.setEdgeUndirected(sourceObjectId, sourceLocationId, destObjectId, destLocationId);
 			
 		} else if (entity.equals("edges/location")) {
 			
