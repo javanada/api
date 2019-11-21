@@ -277,7 +277,7 @@ public class INavLambdaHandler implements RequestStreamHandler {
 				responseBodyArray.add(obj);
 			}
 			
-		} else if (entity.equals("set-edge-directed")) { // undirected
+		} else if (entity.equals("edge/set-undirected")) { // undirected
 			
 			String sourceObjectId = ((JSONObject)event).get("source_object_id").toString();
 			String sourceLocationId = ((JSONObject)event).get("source_location_id").toString();
