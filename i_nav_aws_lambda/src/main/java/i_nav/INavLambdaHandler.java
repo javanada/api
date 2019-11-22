@@ -151,6 +151,8 @@ public class INavLambdaHandler implements RequestStreamHandler {
 				obj.put("parseExceptin", e.getMessage());
 				responseBodyArray.add(obj);
 			}
+		} else if (entity.equals("object/delete")){
+			responseBodyArray = LocationObject.deleteObject(((JSONObject)event).get("id").toString());
 		} else if (entity.equals("object/new")) {
 			
 			try {
