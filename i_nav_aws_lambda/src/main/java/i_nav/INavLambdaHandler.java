@@ -180,6 +180,15 @@ public class INavLambdaHandler implements RequestStreamHandler {
 			String locationTypeId = ((JSONObject)event).get("id").toString();
 			responseBodyArray = LocationType.getLocationTypes(locationTypeId);
 			
+		} else if (entity.equals("location-type/update")){
+
+			try {
+				responseBodyArray = LocationType.updateLocType((JSONObject)parser.parse(requestBody));
+			} catch (ParseException e) {
+				JSONObject obj = new JSONObject();
+				obj.put("parseExceptin", e.getMessage());
+				responseBodyArray.add(obj);
+			}
 		} else if (entity.equals("location-type/new")) {
 			
 			try {

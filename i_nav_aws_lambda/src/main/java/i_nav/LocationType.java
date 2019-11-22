@@ -22,8 +22,8 @@ public class LocationType implements INavEntity {
 	public static JSONArray updateLocType(JSONObject updateLocType) {
 		JSONArray JSONArr = new JSONArray();
 
-		/*String update = "UPDATE `roles` ";
-		String set = " SET role_id = role_id";
+		String update = "UPDATE `location_types` ";
+		String set = " SET location_type_id = location_type_id";
 
 		if (updateLocType.get("short_name") != null) {
 			set += ", `short_name` = ? ";
@@ -31,11 +31,11 @@ public class LocationType implements INavEntity {
 		if (updateLocType.get("long_name") != null) {
 			set += ", `long_name` = ? ";
 		}
-		if (updateRole.get("description") != null) {
+		if (updateLocType.get("description") != null) {
 			set += ", `description` = ? ";
 		}
 
-		String where = " WHERE `role_id` = ?";
+		String where = " WHERE `location_type_id` = ?";
 
 		String query = update + set + where;
 
@@ -45,17 +45,17 @@ public class LocationType implements INavEntity {
 
 			int counter = 1;
 
-			if (updateRole.get("short_name") != null){
-				stmt.setString(counter++, updateRole.get("short_name").toString());
+			if (updateLocType.get("short_name") != null){
+				stmt.setString(counter++, updateLocType.get("short_name").toString());
 			}
-			if (updateRole.get("long_name") != null) {
-				stmt.setString(counter++, updateRole.get("long_name").toString());
+			if (updateLocType.get("long_name") != null) {
+				stmt.setString(counter++, updateLocType.get("long_name").toString());
 			}
-			if (updateRole.get("description") != null) {
-				stmt.setString(counter++, updateRole.get("description").toString());
+			if (updateLocType.get("description") != null) {
+				stmt.setString(counter++, updateLocType.get("description").toString());
 			}
 
-			stmt.setInt(counter, Integer.parseInt(updateRole.get("role_id").toString()));
+			stmt.setInt(counter, Integer.parseInt(updateLocType.get("location_type_id").toString()));
 
 			stmt.executeUpdate();
 			ResultSet resultSet = stmt.getGeneratedKeys();
@@ -69,7 +69,7 @@ public class LocationType implements INavEntity {
 			JSONObject obj = new JSONObject();
 			obj.put("SQLException", e.getMessage());
 			JSONArr.add(obj);
-		}*/
+		}
 
 		return JSONArr;
 	}
