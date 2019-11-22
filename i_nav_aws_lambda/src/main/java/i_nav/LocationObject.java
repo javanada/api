@@ -27,7 +27,137 @@ public class LocationObject implements INavEntity {
 	private double latitude;
 	private double longitude;
 	private boolean active;
-	
+
+	public static JSONArray updateObject(JSONObject updateObj) {
+		JSONArray JSONArr = new JSONArray();
+
+		String update = "UPDATE `objects` ";
+		String set = " SET object_id = object_id";
+
+		if (updateObj.get("short_name") != null) {
+			set += ", `short_name` = ? ";
+		}
+		if (updateObj.get("long_name") != null) {
+			set += ", `long_name` = ? ";
+		}
+		if (updateObj.get("description") != null) {
+			set += ", `description` = ? ";
+		}
+		if (updateObj.get("object_type_id") != null) {
+			set += ", `object_type_id` = ? ";
+		}
+		if (updateObj.get("location_id") != null) {
+			set += ", `location_id` = ? ";
+		}
+		if (updateObj.get("x_coordinate") != null) {
+			set += ", `x_coordinate` = ? ";
+		}
+		if (updateObj.get("y_coordinate") != null) {
+			set += ", `y_coordinate` = ? ";
+		}
+		if (updateObj.get("image_x") != null) {
+			set += ", `image_x` = ? ";
+		}
+		if (updateObj.get("image_y") != null) {
+			set += ", `image_y` = ? ";
+		}
+		if (updateObj.get("latitude") != null) {
+			set += ", `latitude` = ? ";
+		}
+		if (updateObj.get("longitude") != null) {
+			set += ", `longitude` = ? ";
+		}
+
+
+		String where = " WHERE `object_id` = ?";
+
+		String query = update + set + where;
+
+		try {
+			Connection conn = DriverManager.getConnection(url, username, password);
+			PreparedStatement stmt = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
+
+			int counter = 1;
+
+			if (updateObj.get("short_name") != null){
+				stmt.setString(counter++, updateObj.get("short_name").toString());
+			}
+			if (updateObj.get("long_name") != null) {
+				stmt.setString(counter++, updateObj.get("long_name").toString());
+			}
+			if (updateObj.get("description") != null) {
+				stmt.setString(counter++, updateObj.get("description").toString());
+			}
+			if (updateObj.get("object_type_id") != null) {
+				stmt.setString(counter++, updateObj.get("object_type_id").toString());
+			}
+			if (updateObj.get("location_id") != null) {
+				stmt.setString(counter++, updateObj.get("location_id").toString());
+			}
+			if (updateObj.get("x_coordinate") != null) {
+				stmt.setString(counter++, updateObj.get("x_coordinate").toString());
+			}
+			if (updateObj.get("y_coordinate") != null) {
+				stmt.setString(counter++, updateObj.get("y_coordinate").toString());
+			}
+			if (updateObj.get("image_x") != null) {
+				stmt.setString(counter++, updateObj.get("image_x").toString());
+			}
+			if (updateObj.get("image_y") != null) {
+				stmt.setString(counter++, updateObj.get("image_y").toString());
+			}
+			if (updateObj.get("latitude") != null) {
+				stmt.setString(counter++, updateObj.get("latitude").toString());
+			}
+			if (updateObj.get("longitude") != null) {
+				stmt.setString(counter++, updateObj.get("longitude").toString());
+			}
+
+			stmt.setInt(counter, Integer.parseInt(updateObj.get("object_id").toString()));
+
+			stmt.executeUpdate();
+			ResultSet resultSet = stmt.getGeneratedKeys();
+
+			if (resultSet.next()) {
+				long id = resultSet.getLong(1);
+				JSONArr = LocationObject.getLocationObjects("" + id, null, null);
+			}
+
+		} catch (SQLException e) {
+			JSONObject obj = new JSONObject();
+			obj.put("SQLException", e.getMessage());
+			JSONArr.add(obj);
+		}
+
+		return JSONArr;
+	}
+	public static JSONArray deleteObject(String id){
+		JSONArray jsonArr = new JSONArray();
+
+		String update = "UPDATE `objects` ";
+		String set = "SET `active` = 0";
+		String where = "";
+
+		if (id != null) {
+			where = " WHERE `object_id` = " + id;
+		}
+
+		String query = update + set + where;
+
+		try {
+			Connection conn = DriverManager.getConnection(url, username, password);
+			PreparedStatement stmt = conn.prepareStatement(query);
+
+			stmt.executeUpdate();
+
+		} catch (SQLException e) {
+			JSONObject obj = new JSONObject();
+			obj.put("SQLException", e.getMessage());
+			jsonArr.add(obj);
+		}
+
+		return jsonArr;
+	}
 	public LocationObject() {
 		
 	}
