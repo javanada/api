@@ -15,6 +15,7 @@ import org.json.simple.parser.ParseException;
 public class CloudGraphListUndirected { // should be undirected
 	
 	private Map<String, List<Edge>> adj; // need to use String, not LocationObjectVertex... should be ID
+	private Map<LocationObjectVertex, List<Edge>> adjVertex;
 	private int numEdges;
 	private List<String> Mark;
 	private int maxWeight;
@@ -29,6 +30,7 @@ public class CloudGraphListUndirected { // should be undirected
 	public CloudGraphListUndirected(String graphName, boolean isLambda) {
 		this.graphName = graphName;
 		adj = new HashMap<String, List<Edge>>();
+		adjVertex = new HashMap<LocationObjectVertex, List<Edge>>();
 		Mark = new LinkedList<String>();
 		numEdges = 0;
 		
@@ -89,6 +91,7 @@ public class CloudGraphListUndirected { // should be undirected
 		
 		if (adj.get("" + v1.getObject_id()) == null) {
 			adj.put("" + v1.getObject_id(), new LinkedList<Edge>());
+			adjVertex.put(v1, new LinkedList<Edge>());
 			Mark.add("" + v1.getObject_id());
 		}
 		double distance_x = v2.getX() - v1.getX();
@@ -163,11 +166,6 @@ public class CloudGraphListUndirected { // should be undirected
 		return Mark.size();
 	}
 	
-	public List<Edge> neighbors(LocationObject i) {
-		
-		return adj.get(i);
-	}
-
 	public List<Edge> getEdges() {
 		List<Edge> list = new ArrayList<Edge>();
 		for (String item : adj.keySet()) {
@@ -242,9 +240,13 @@ public class CloudGraphListUndirected { // should be undirected
 		return jsonArray;
 	}
 
-	public List<Edge> neighbors(int u) {
-		// TODO Auto-generated method stub
-		return null;
+	public List<Map<LocationObjectVertex, Edge>> neighbors(LocationObjectVertex u) {
+		
+		List<Map<LocationObjectVertex, Edge>> ret = new ArrayList<Map<LocationObjectVertex, Edge>>();
+		for (String s : adj.keySet()) {
+			
+		}
+		return ret;
 	}
 	
 }

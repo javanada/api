@@ -24,6 +24,7 @@ public class Location implements INavEntity {
 	private int address_id;
 	private boolean active;
 
+	
 	public static JSONArray updateLocation(JSONObject updateLoc) {
 		JSONArray JSONArr = new JSONArray();
 

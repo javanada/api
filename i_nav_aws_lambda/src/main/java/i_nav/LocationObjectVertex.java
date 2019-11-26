@@ -1,5 +1,7 @@
 package i_nav;
 
+import java.util.Objects;
+
 import org.json.simple.JSONObject;
 
 public class LocationObjectVertex {
@@ -55,4 +57,16 @@ public class LocationObjectVertex {
 		return jsonObject;
 	}
 	
+	@Override
+	public boolean equals(Object other) {
+		if (other instanceof LocationObjectVertex) {
+			return object_id == ((LocationObjectVertex)other).object_id;
+		}
+		return false;
+	}
+	
+	@Override
+	public int hashCode() {
+		return Objects.hash(object_id);
+	}
 }
