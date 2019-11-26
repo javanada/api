@@ -97,7 +97,7 @@ public class Address implements INavEntity {
 	public static JSONArray deleteAddress(String id){//no active variable
 		JSONArray jsonArr = new JSONArray();
 
-		String update = "UPDATE `addresses` ";
+		/*String update = "UPDATE `addresses` ";
 		String set = "SET `active` = 0";
 		String where = "";
 
@@ -117,7 +117,7 @@ public class Address implements INavEntity {
 			JSONObject obj = new JSONObject();
 			obj.put("SQLException", e.getMessage());
 			jsonArr.add(obj);
-		}
+		}*/
 
 		return jsonArr;
 	}
@@ -153,7 +153,7 @@ public class Address implements INavEntity {
 				address.setState(resultSet.getString(5));
 				address.setZipcode(resultSet.getString(6));
 				address.setZipcode_ext(resultSet.getString(7));
-				
+
 				JSONParser parser = new JSONParser();
 				try {
 					
@@ -195,7 +195,7 @@ public class Address implements INavEntity {
 			if (newAddress.get("state") != null) { stmt.setString(4, newAddress.get("state").toString()); } else { stmt.setNull(4, java.sql.Types.VARCHAR); }
 			if (newAddress.get("zipcode") != null) { stmt.setString(5, newAddress.get("zipcode").toString()); } else { stmt.setNull(5, java.sql.Types.VARCHAR); }
 			if (newAddress.get("zipcode_ext") != null) { stmt.setString(6, newAddress.get("zipcode_ext").toString()); } else { stmt.setNull(6, java.sql.Types.VARCHAR); }
-			
+
 			stmt.executeUpdate();
 			ResultSet resultSet = stmt.getGeneratedKeys();
 			if (resultSet.next()) {
@@ -282,6 +282,6 @@ public class Address implements INavEntity {
 	public void setState(String state) {
 		this.state = state;
 	}
-	
-	
+
+
 }

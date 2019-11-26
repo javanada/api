@@ -142,7 +142,18 @@ public class INavLambdaHandler implements RequestStreamHandler {
 			String objectId = ((JSONObject)event).get("id").toString();
 			responseBodyArray = LocationObject.getLocationObjects(objectId, null, null);
 			
-		}  else if (entity.equals("object/new")) {
+		} else if (entity.equals("object/update")){
+
+			try {
+				responseBodyArray = LocationObject.updateObject((JSONObject)parser.parse(requestBody));
+			} catch (ParseException e) {
+				JSONObject obj = new JSONObject();
+				obj.put("parseExceptin", e.getMessage());
+				responseBodyArray.add(obj);
+			}
+		} else if (entity.equals("object/delete")){
+			responseBodyArray = LocationObject.deleteObject(((JSONObject)event).get("id").toString());
+		} else if (entity.equals("object/new")) {
 			
 			try {
 				responseBodyArray = LocationObject.newLocationObject((JSONObject)parser.parse(requestBody));
@@ -171,6 +182,15 @@ public class INavLambdaHandler implements RequestStreamHandler {
 				responseBodyArray.add(obj);
 			}
 			
+		} else if (entity.equals("object-type/update")){
+
+			try {
+				responseBodyArray = LocationObjectType.updateObjLoc((JSONObject)parser.parse(requestBody));
+			} catch (ParseException e) {
+				JSONObject obj = new JSONObject();
+				obj.put("parseExceptin", e.getMessage());
+				responseBodyArray.add(obj);
+			}
 		} else if (entity.equals("location-types")) {
 			
 			responseBodyArray = LocationType.getLocationTypes(null);
@@ -180,6 +200,15 @@ public class INavLambdaHandler implements RequestStreamHandler {
 			String locationTypeId = ((JSONObject)event).get("id").toString();
 			responseBodyArray = LocationType.getLocationTypes(locationTypeId);
 			
+		} else if (entity.equals("location-type/update")){
+
+			try {
+				responseBodyArray = LocationType.updateLocType((JSONObject)parser.parse(requestBody));
+			} catch (ParseException e) {
+				JSONObject obj = new JSONObject();
+				obj.put("parseExceptin", e.getMessage());
+				responseBodyArray.add(obj);
+			}
 		} else if (entity.equals("location-type/new")) {
 			
 			try {
@@ -229,6 +258,15 @@ public class INavLambdaHandler implements RequestStreamHandler {
 			String roleId = ((JSONObject)event).get("id").toString();
 			responseBodyArray = Role.getRoles(roleId);
 			
+		} else if (entity.equals("role/update")){
+
+			try {
+				responseBodyArray = Role.updateRole((JSONObject)parser.parse(requestBody));
+			} catch (ParseException e) {
+				JSONObject obj = new JSONObject();
+				obj.put("parseExceptin", e.getMessage());
+				responseBodyArray.add(obj);
+			}
 		} else if (entity.equals("role/new")) {
 			
 			try {
