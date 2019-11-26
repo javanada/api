@@ -18,8 +18,66 @@ public class LocationType implements INavEntity {
 	private String short_name;
 	private String long_name;
 	private String description;
-	
-	
+
+	public static JSONArray updateLocType(JSONObject updateLocType) {
+		JSONArray JSONArr = new JSONArray();
+
+		String update = "UPDATE `location_types` ";
+		String set = " SET location_type_id = location_type_id";
+
+		if (updateLocType.get("short_name") != null) {
+			set += ", `short_name` = ? ";
+		}
+		if (updateLocType.get("long_name") != null) {
+			set += ", `long_name` = ? ";
+		}
+		if (updateLocType.get("description") != null) {
+			set += ", `description` = ? ";
+		}
+
+		String where = " WHERE `location_type_id` = ?";
+
+		String query = update + set + where;
+
+		try {
+			Connection conn = DriverManager.getConnection(url, username, password);
+			PreparedStatement stmt = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
+
+			int counter = 1;
+
+			if (updateLocType.get("short_name") != null){
+				stmt.setString(counter++, updateLocType.get("short_name").toString());
+			}
+			if (updateLocType.get("long_name") != null) {
+				stmt.setString(counter++, updateLocType.get("long_name").toString());
+			}
+			if (updateLocType.get("description") != null) {
+				stmt.setString(counter++, updateLocType.get("description").toString());
+			}
+
+			stmt.setInt(counter, Integer.parseInt(updateLocType.get("location_type_id").toString()));
+
+			stmt.executeUpdate();
+			ResultSet resultSet = stmt.getGeneratedKeys();
+
+			if (resultSet.next()) {
+				long id = resultSet.getLong(1);
+				JSONArr = Role.getRoles("" + id);
+			}
+
+		} catch (SQLException e) {
+			JSONObject obj = new JSONObject();
+			obj.put("SQLException", e.getMessage());
+			JSONArr.add(obj);
+		}
+
+		return JSONArr;
+	}
+	public static JSONArray deleteLocType(String id) {
+		JSONArray jsonArr = new JSONArray();
+
+		return jsonArr;
+	}
 	public static JSONArray newLocationType(JSONObject newLocationType) {
 		JSONArray jsonArray = new JSONArray();
 		
