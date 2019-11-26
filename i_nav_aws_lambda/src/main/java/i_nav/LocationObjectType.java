@@ -73,6 +73,11 @@ public class LocationObjectType implements INavEntity {
 
 		return JSONArr;
 	}
+	public static JSONArray deleteObjTypes(String id){
+		JSONArray JSONArr = new JSONArray();
+
+		return JSONArr;
+	}
 	public static JSONArray getLocationObjectTypes(String id) {
 		
 		String returnStr = "";
