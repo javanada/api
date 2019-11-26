@@ -55,7 +55,7 @@ public class LocationObjectType implements INavEntity {
 				stmt.setString(counter++, updateObjLoc.get("description").toString());
 			}
 
-			stmt.setInt(counter, Integer.parseInt(updateObjLoc.get("location_id").toString()));
+			stmt.setInt(counter, Integer.parseInt(updateObjLoc.get("object_type_id").toString()));
 
 			stmt.executeUpdate();
 			ResultSet resultSet = stmt.getGeneratedKeys();
