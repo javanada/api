@@ -341,6 +341,49 @@ public class DBAccessGraphDynamoDB implements DBAccessGraph {
 		return null;
 	}
 	
+	public LocationObjectVertex getVertex(String graphName, String objectId) {
+		
+		Map<String, AttributeValue> cloudNode = getNode(graphName, objectId);
+		if (cloudNode == null) {
+			return null;
+		}
+		String locationObject = "";
+		String adj = "";
+		if (cloudNode.get("location") != null) {
+			locationObject = cloudNode.get("location").getS();
+		}
+		if (cloudNode.get("adj") != null) {
+			adj = cloudNode.get("adj").getS();
+		}
+		
+		JSONParser parser;
+		JSONObject locationObjectJson;
+		parser = new JSONParser();
+		
+		try {
+			if (locationObject != null) {
+				
+				locationObjectJson = (JSONObject)parser.parse(locationObject);
+				
+				LocationObjectVertex item = new LocationObjectVertex();
+				if (locationObjectJson.get("object_id") != null) { item.setObject_id(Integer.parseInt(locationObjectJson.get("object_id").toString())); }
+				if (locationObjectJson.get("location_id") != null) { item.setLocation_id(Integer.parseInt(locationObjectJson.get("location_id").toString())); }
+				if (locationObjectJson.get("x") != null) { item.setX(Integer.parseInt(locationObjectJson.get("x").toString())); }
+				if (locationObjectJson.get("y") != null) { item.setY(Integer.parseInt(locationObjectJson.get("y").toString())); }
+				
+				return item;
+			}
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		
+		
+		
+		return null;
+	}
+	
 	public Map<LocationObjectVertex, List<Edge>> getCloudVerticesAndEdges(String graphName, String locationId) {
 		
 		JSONParser parser;

@@ -26,6 +26,10 @@ public class CloudGraphListUndirected { // should be undirected
 	private DBAccessGraph dbGraphAccess;
 	private String graphName;
 	
+	public Map<String, List<Edge>> getAdj() {
+		return adj;
+	}
+	
 	
 	public CloudGraphListUndirected(String graphName, boolean isLambda) {
 		this.graphName = graphName;
@@ -39,6 +43,12 @@ public class CloudGraphListUndirected { // should be undirected
 		dbGraphAccess.createTable(graphName);
 		
 	}
+	
+	public LocationObjectVertex getVertex(String id) {
+		
+		return dbGraphAccess.getVertex(graphName, id);
+	}
+	
 	
 	public LocationObjectVertex setVertex(int x, int y) {
 		return null;
@@ -239,14 +249,61 @@ public class CloudGraphListUndirected { // should be undirected
 		
 		return jsonArray;
 	}
+	
+	public static JSONArray getShortestPath(String sourceObjectId, String destObjectId, boolean isLambda) {
+		
+		JSONArray jsonArray = new JSONArray();
+		
+		CloudGraphListUndirected graph1 = new CloudGraphListUndirected("i_nav_graph1", isLambda);
+		graph1.getPoints(null);
+		Search search = new Search(graph1);
+		LocationObjectVertex start = graph1.getVertex(sourceObjectId);
+		LocationObjectVertex end = graph1.getVertex(destObjectId);
+		search.dijkstra(start, end);
+		ArrayList<Edge> path = search.getPathToVertex();
+		if (path != null) {
+			for (Edge e : path) {
+				jsonArray.add(e.getJson());
+			}
+		} else {
+			jsonArray.add("path is null");
+		}
+		
+//		if (start != null) { jsonArray.add(start.toJSON()); }
+//		if (end != null) { jsonArray.add(end.toJSON()); }
+		
+		return jsonArray;
+	}
 
-	public List<Map<LocationObjectVertex, Edge>> neighbors(LocationObjectVertex u) {
+	public List<LocationObjectVertex> neighbors(LocationObjectVertex u) {
+		
+		List<LocationObjectVertex> uNeighbors = new ArrayList<LocationObjectVertex>();
+		
+		if (u == null) {
+			return uNeighbors;
+		}
 		
 		List<Map<LocationObjectVertex, Edge>> ret = new ArrayList<Map<LocationObjectVertex, Edge>>();
+		
+		System.out.println("adj size: " + adj.size());
 		for (String s : adj.keySet()) {
-			
+			System.out.print(", " + s);
 		}
-		return ret;
+		System.out.println();
+		if (adj.containsKey("" + u.getObject_id())) {
+			for (Edge e : adj.get("" + u.getObject_id())) {
+				if (e != null) {
+					LocationObjectVertex v1 = e.v1();
+					LocationObjectVertex v2 = e.v2();
+					if (v1.equals(u)) {
+						uNeighbors.add(v2);
+					} else {
+						uNeighbors.add(v1);
+					}
+				}
+			}
+		}
+		return uNeighbors;
 	}
 	
 }

@@ -329,6 +329,13 @@ public class INavLambdaHandler implements RequestStreamHandler {
 
 			String parentId = ((JSONObject) event).get("id").toString();
 			responseBodyArray = Location.getLocations(null, parentId);
+			
+		} else if (entity.equals("path/shortest-source-dest")) {
+
+			String sourceObjectId = ((JSONObject) event).get("source_object_id").toString();
+			String destObjectId = ((JSONObject) event).get("dest_object_id").toString();
+			
+			responseBodyArray = CloudGraphListUndirected.getShortestPath(sourceObjectId, destObjectId, true);
 		}
 
 //		try {
@@ -367,7 +374,7 @@ public class INavLambdaHandler implements RequestStreamHandler {
 	}
 	
 	public void authTrigger(InputStream inputStream, OutputStream outputStream, Context context) throws IOException {
-		LambdaLogger logger = context.getLogger();
+//		LambdaLogger logger = context.getLogger();
 		BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
 		JSONObject event = null;
 		try {
@@ -388,7 +395,7 @@ public class INavLambdaHandler implements RequestStreamHandler {
 		newUser.put("role_id", "1");
 		
 		((JSONObject)event.get("response")).put("testuser", newUser);
-		logger.log(event.toJSONString());
+//		logger.log(event.toJSONString());
 		
 		User.newCognitoUser(newUser);
 		
