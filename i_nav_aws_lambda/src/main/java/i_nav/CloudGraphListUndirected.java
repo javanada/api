@@ -200,7 +200,7 @@ public class CloudGraphListUndirected { // should be undirected
 		return jsonArray;
 	}
 	
-	public static JSONArray setEdgeUndirected(String sourceObjectId, String sourceLocationId, String destObjectId, String destLocationId) {
+	public static JSONArray setEdgeUndirected(CloudGraphListUndirected graph, String sourceObjectId, String sourceLocationId, String destObjectId, String destLocationId) {
 		
 		JSONArray jsonArray = new JSONArray();
 		
@@ -228,13 +228,18 @@ public class CloudGraphListUndirected { // should be undirected
 			destVertex.setX(destObject.getX_coordinate());
 			destVertex.setY(destObject.getY_coordinate());
 			
-			CloudGraphListUndirected graph1 = new CloudGraphListUndirected("i_nav_graph1", true);
-			graph1.getPoints(sourceLocationId);
-			if (!sourceLocationId.equals(destLocationId)) {
-				graph1.getPoints(destLocationId);
+			if (graph == null)  {
+				graph = new CloudGraphListUndirected("i_nav_graph1", true);			
+				graph.getPoints(sourceLocationId);
+				if (!sourceLocationId.equals(destLocationId)) {
+					graph.getPoints(destLocationId);
+				}
 			}
-			graph1.setEdgeDirected(sourceVertex, destVertex, 0);
-			graph1.setEdgeDirected(destVertex, sourceVertex, 0);
+//			graph1.adj.put(sourceObjectId, graph1.dbGraphAccess.getCloudVertexEdges(graph1.graphName, sourceObjectId));
+//			graph1.adj.put(destObjectId, graph1.dbGraphAccess.getCloudVertexEdges(graph1.graphName, destObjectId));
+			
+			graph.setEdgeDirected(sourceVertex, destVertex, 0);
+			graph.setEdgeDirected(destVertex, sourceVertex, 0);
 			
 			JSONObject ret = new JSONObject();
 			ret.put("success", "maybe");
@@ -263,7 +268,11 @@ public class CloudGraphListUndirected { // should be undirected
 		ArrayList<Edge> path = search.getPathToVertex();
 		if (path != null) {
 			for (Edge e : path) {
-				jsonArray.add(e.getJson());
+				JSONObject obj = e.getJson();
+				double dist = Math.sqrt(((e.v1().getX() - e.v2().getX()) * (e.v1().getX() - e.v2().getX()) + (e.v1().getY() - e.v2().getY()) * (e.v1().getY() - e.v2().getY())));
+				String str = "walk " + Math.round(dist) + " ft. from " + e.v1().getObject_id() + " to " + e.v2().getObject_id();
+				obj.put("directions", str);
+				jsonArray.add(obj);
 			}
 		} else {
 			jsonArray.add("path is null");

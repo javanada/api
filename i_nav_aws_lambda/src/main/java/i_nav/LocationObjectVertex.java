@@ -11,6 +11,16 @@ public class LocationObjectVertex {
 	private int x;
 	private int y;
 	
+	public LocationObjectVertex() {
+		
+	}
+	
+	public LocationObjectVertex(JSONObject jsonObject) {
+		object_id = Integer.parseInt(jsonObject.get("object_id") != null ? jsonObject.get("object_id").toString() : "0");
+		location_id = Integer.parseInt(jsonObject.get("location_id") != null ? jsonObject.get("location_id").toString() : "0");
+		x = Integer.parseInt(jsonObject.get("x").toString());
+		y = Integer.parseInt(jsonObject.get("y").toString());
+	}
 	
 	public int getObject_id() {
 		return object_id;

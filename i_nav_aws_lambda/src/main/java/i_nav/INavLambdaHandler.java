@@ -159,6 +159,16 @@ public class INavLambdaHandler implements RequestStreamHandler {
 				responseBodyArray.add(obj);
 			}
 
+		} else if (entity.equals("objects/new")) {
+
+			try {
+				responseBodyArray = LocationObject.newLocationObjects((JSONArray) parser.parse(requestBody));
+			} catch (ParseException e) {
+				JSONObject obj = new JSONObject();
+				obj.put("parseException", e.getMessage());
+				responseBodyArray.add(obj);
+			}
+
 		} else if (entity.equals("object-types")) {
 
 			responseBodyArray = LocationObjectType.getLocationObjectTypes(null);
@@ -317,7 +327,9 @@ public class INavLambdaHandler implements RequestStreamHandler {
 			String sourceLocationId = ((JSONObject) event).get("source_location_id").toString();
 			String destObjectId = ((JSONObject) event).get("dest_object_id").toString();
 			String destLocationId = ((JSONObject) event).get("dest_location_id").toString();
-			responseBodyArray = CloudGraphListUndirected.setEdgeUndirected(sourceObjectId, sourceLocationId,
+			
+			
+			responseBodyArray = CloudGraphListUndirected.setEdgeUndirected(null, sourceObjectId, sourceLocationId,
 					destObjectId, destLocationId);
 
 		} else if (entity.equals("edges/location")) {

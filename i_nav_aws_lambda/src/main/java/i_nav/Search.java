@@ -110,10 +110,7 @@ public class Search {
 			return;
 		}
 		mark.put(current, true);
-		if (c > 100) {
-			return;
-		}
-		c++;
+		
 		List<LocationObjectVertex> neighbors = G.neighbors(current);
 		
 		for (LocationObjectVertex n : neighbors) {

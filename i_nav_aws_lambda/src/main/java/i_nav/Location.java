@@ -23,6 +23,20 @@ public class Location implements INavEntity {
 	private int location_type_id;
 	private int address_id;
 	private boolean active;
+	
+	public Location() {
+	}
+	
+	public Location(JSONObject jsonObject) {
+		location_id = Integer.parseInt(jsonObject.get("location_id").toString());
+		short_name = jsonObject.get("short_name") != null ? jsonObject.get("short_name").toString() : "";
+		long_name = jsonObject.get("long_name") != null ? jsonObject.get("long_name").toString() : "";
+		description = jsonObject.get("description") != null ? jsonObject.get("description").toString() : "";
+		image = jsonObject.get("image") != null ? jsonObject.get("image").toString() : "";
+		location_type_id = Integer.parseInt(jsonObject.get("location_type_id") != null ? jsonObject.get("location_type_id").toString() : "");
+		address_id = Integer.parseInt(jsonObject.get("address_id") != null ? jsonObject.get("address_id").toString() : "");
+		active = Boolean.parseBoolean(jsonObject.get("active").toString());
+	}
 
 	
 	public static JSONArray updateLocation(JSONObject updateLoc) {
