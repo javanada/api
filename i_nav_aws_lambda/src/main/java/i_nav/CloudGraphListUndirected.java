@@ -275,7 +275,7 @@ public class CloudGraphListUndirected { // should be undirected
 				jsonArray.add(obj);
 			}
 		} else {
-			jsonArray.add("path is null");
+//			jsonArray.add("path is null");
 		}
 		
 //		if (start != null) { jsonArray.add(start.toJSON()); }
