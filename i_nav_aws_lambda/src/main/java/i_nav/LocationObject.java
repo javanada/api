@@ -368,6 +368,8 @@ public class LocationObject implements INavEntity {
 				location.setLong_name(resultSet.getString("location_long_name"));
 				location.setDescription(resultSet.getString("location_description"));
 				location.setImage(resultSet.getString("canvas_image"));
+				location.setActive(true);
+				location.setAddress_id(resultSet.getInt("address_id"));
 				
 				locationObject.setObject_id(resultSet.getInt("object_id"));
 				locationObject.setLocation_id(resultSet.getInt("location_location_id"));
@@ -381,6 +383,7 @@ public class LocationObject implements INavEntity {
 				locationObject.setLatitude(resultSet.getDouble("latitude"));
 				locationObject.setLongitude(resultSet.getDouble("longitude"));
 				locationObject.setObject_type_id(resultSet.getInt("object_type_id"));
+				locationObject.setActive(true);
 				
 				locationObjectType.setObject_type_id(resultSet.getInt("object_type_id"));
 				locationObjectType.setShort_name(resultSet.getString("object_type_short_name"));
