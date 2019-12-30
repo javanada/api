@@ -140,7 +140,7 @@ public class LocationObject implements INavEntity {
 		String where = "";
 
 		if (id != null) {
-			where = " WHERE `object_id` = " + id;
+			where = " WHERE `object_id` =  ? ";
 		}
 
 		String query = update + set + where;
@@ -148,6 +148,10 @@ public class LocationObject implements INavEntity {
 		try {
 			Connection conn = DriverManager.getConnection(url, username, password);
 			PreparedStatement stmt = conn.prepareStatement(query);
+			
+			if (id != null) {
+				stmt.setString(1, id);
+			}
 
 			stmt.executeUpdate();
 
