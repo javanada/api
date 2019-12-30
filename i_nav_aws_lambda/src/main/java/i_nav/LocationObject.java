@@ -6,6 +6,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -131,7 +132,7 @@ public class LocationObject implements INavEntity {
 
 		return JSONArr;
 	}
-	public static JSONArray deleteObject(String id){
+	public static JSONArray deleteObject(String id){ // need to update the graph here
 		JSONArray jsonArr = new JSONArray();
 
 		String update = "UPDATE `objects` ";
@@ -139,7 +140,7 @@ public class LocationObject implements INavEntity {
 		String where = "";
 
 		if (id != null) {
-			where = " WHERE `object_id` = " + id;
+			where = " WHERE `object_id` =  ? ";
 		}
 
 		String query = update + set + where;
@@ -147,6 +148,10 @@ public class LocationObject implements INavEntity {
 		try {
 			Connection conn = DriverManager.getConnection(url, username, password);
 			PreparedStatement stmt = conn.prepareStatement(query);
+			
+			if (id != null) {
+				stmt.setString(1, id);
+			}
 
 			stmt.executeUpdate();
 
@@ -163,25 +168,77 @@ public class LocationObject implements INavEntity {
 	}
 	public LocationObject(JSONObject jsonObject) {
 		
-		object_id = Integer.parseInt(jsonObject.get("object_id").toString());
-		location_id = Integer.parseInt(jsonObject.get("location_id").toString());
-		short_name = jsonObject.get("short_name").toString();
-		long_name = jsonObject.get("long_name").toString();
-		description = jsonObject.get("description").toString();
-		object_type_id = Integer.parseInt(jsonObject.get("object_type_id").toString());
-		x_coordinate = Integer.parseInt(jsonObject.get("x_coordinate").toString());
-		y_coordinate = Integer.parseInt(jsonObject.get("y_coordinate").toString());
-		image_x = Integer.parseInt(jsonObject.get("image_x").toString());
-		image_y = Integer.parseInt(jsonObject.get("image_y").toString());
-		latitude = Double.parseDouble(jsonObject.get("latitude").toString());
-		longitude = Double.parseDouble(jsonObject.get("longitude").toString());
-		active = Boolean.parseBoolean(jsonObject.get("active").toString());
+		object_id = Integer.parseInt(jsonObject.get("object_id") != null ? jsonObject.get("object_id").toString() : "0");
+		location_id = Integer.parseInt(jsonObject.get("location_id") != null ? jsonObject.get("location_id").toString() : "0");
+		short_name = jsonObject.get("short_name") != null ? jsonObject.get("short_name").toString() : "";
+		long_name = jsonObject.get("long_name") != null ? jsonObject.get("long_name").toString() : "";
+		description = jsonObject.get("description") != null ? jsonObject.get("description").toString() : "";
+		object_type_id = Integer.parseInt(jsonObject.get("object_type_id") != null ? jsonObject.get("object_type_id").toString() : "0");
+		x_coordinate = Integer.parseInt(jsonObject.get("x_coordinate") != null ? jsonObject.get("x_coordinate").toString() : "0");
+		y_coordinate = Integer.parseInt(jsonObject.get("y_coordinate") != null ? jsonObject.get("y_coordinate").toString() : "0");
+		image_x = Integer.parseInt(jsonObject.get("image_x") != null ? jsonObject.get("image_x").toString() : "0");
+		image_y = Integer.parseInt(jsonObject.get("image_y") != null ? jsonObject.get("image_y").toString() : "0");
+		latitude = Double.parseDouble(jsonObject.get("latitude") != null ? jsonObject.get("latitude").toString() : "0");
+		longitude = Double.parseDouble(jsonObject.get("longitude") != null ? jsonObject.get("longitude").toString() : "0");
+		active = Boolean.parseBoolean(jsonObject.get("active") != null ? jsonObject.get("active").toString() : "false");
 		
+	}
+	
+	public static JSONArray newLocationObjects(JSONArray newLocationObjects) {
+		String locationId = null;
+		JSONArray arr = new JSONArray();
+		for (Object obj : newLocationObjects) {
+			JSONObject jsonObject = (JSONObject) obj;
+			if (jsonObject.get("location_id") != null) {
+				locationId = jsonObject.get("location_id").toString();
+			}
+			JSONArray arrEach = newLocationObject(jsonObject);
+			if (arrEach.size() == 1) {
+				JSONObject each = (JSONObject) arrEach.get(0);
+				each.put("connected", jsonObject.get("connected"));
+				arr.add(each);
+			}
+		}
+		
+		CloudGraphListUndirected graph = new CloudGraphListUndirected("i_nav_graph1", true);			
+		graph.getPoints(locationId);
+		
+		ArrayList<String> alreadyConnected = new ArrayList<String>();
+		
+		for (Object obj : arr) {
+			JSONObject jsonObject = (JSONObject) obj;
+			LocationObject o = new LocationObject(jsonObject);
+			
+			// important: do this with only calling getPoints ONCE, not each time
+			
+			for (Object obj2 : arr) {
+				
+				JSONObject jsonObject2 = (JSONObject) obj2;
+				LocationObject o2 = new LocationObject(jsonObject2);
+				
+				if (jsonObject.get("connected") != null && jsonObject.get("connected").equals(true) &&  
+					jsonObject2.get("connected") != null && jsonObject2.get("connected").equals(true) && 
+					!obj2.equals(obj) && 
+					!alreadyConnected.contains("" + o.getObject_id() + o2.getObject_id()) && 
+					!alreadyConnected.contains("" + o2.getObject_id() + o.getObject_id())
+					) {
+						
+						alreadyConnected.add("" + o.getObject_id() + o2.getObject_id());
+						alreadyConnected.add("" + o2.getObject_id() + o.getObject_id());
+						CloudGraphListUndirected.setEdgeUndirected(graph, "" + o.getObject_id(), "" + o.getLocation_id(), "" + o2.getObject_id(), "" + o2.getLocation_id());
+						
+				}
+				
+			}
+			
+		}
+		
+		return newLocationObjects;
 	}
 	
 	
 	
-	public static JSONArray newLocationObject(JSONObject newLocationObject) {
+	public static JSONArray newLocationObject(JSONObject newLocationObject) { // would be faster if it re-uses the same graph reference
 		JSONArray jsonArray = new JSONArray();
 		
 		String query = "INSERT INTO `objects` (`location_id`, `short_name`, `long_name`, `description`, `object_type_id`, `x_coordinate`, `y_coordinate`,  `image_x`, `image_y`, `latitude`, `longitude`, `active`) " + 
@@ -235,7 +292,7 @@ public class LocationObject implements INavEntity {
                 jsonArray = LocationObject.getLocationObjects("" + id, null, null);
                 
                 if (jsonArray.size() > 0) {
-	                CloudGraphListDirected graph1 = new CloudGraphListDirected("i_nav_graph1", true);
+	                CloudGraphListUndirected graph1 = new CloudGraphListUndirected("i_nav_graph1", true);
 	                graph1.setVertex((JSONObject)jsonArray.get(0));
                 }
             }
@@ -315,6 +372,8 @@ public class LocationObject implements INavEntity {
 				location.setLong_name(resultSet.getString("location_long_name"));
 				location.setDescription(resultSet.getString("location_description"));
 				location.setImage(resultSet.getString("canvas_image"));
+				location.setActive(true);
+				location.setAddress_id(resultSet.getInt("address_id"));
 				
 				locationObject.setObject_id(resultSet.getInt("object_id"));
 				locationObject.setLocation_id(resultSet.getInt("location_location_id"));
@@ -328,6 +387,7 @@ public class LocationObject implements INavEntity {
 				locationObject.setLatitude(resultSet.getDouble("latitude"));
 				locationObject.setLongitude(resultSet.getDouble("longitude"));
 				locationObject.setObject_type_id(resultSet.getInt("object_type_id"));
+				locationObject.setActive(true);
 				
 				locationObjectType.setObject_type_id(resultSet.getInt("object_type_id"));
 				locationObjectType.setShort_name(resultSet.getString("object_type_short_name"));
@@ -499,6 +559,7 @@ public class LocationObject implements INavEntity {
 	public void setImage_y(int image_y) {
 		this.image_y = image_y;
 	}
+	
 	
 	
 }

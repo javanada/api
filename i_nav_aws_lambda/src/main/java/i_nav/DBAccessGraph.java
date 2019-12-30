@@ -23,5 +23,7 @@ public interface DBAccessGraph {
 	public long getAddTime();
 	public long getReadTime();
 	public long getUpdateTime();
+	public LocationObjectVertex getVertex(String graphName, String id);
+	public List<Edge> getCloudVertexEdges(String graphName, String nodeId);
 	
 }

@@ -12,9 +12,10 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-public class CloudGraphListDirected {
+public class CloudGraphListUndirected { // should be undirected
 	
 	private Map<String, List<Edge>> adj; // need to use String, not LocationObjectVertex... should be ID
+	private Map<LocationObjectVertex, List<Edge>> adjVertex;
 	private int numEdges;
 	private List<String> Mark;
 	private int maxWeight;
@@ -25,18 +26,29 @@ public class CloudGraphListDirected {
 	private DBAccessGraph dbGraphAccess;
 	private String graphName;
 	
+	public Map<String, List<Edge>> getAdj() {
+		return adj;
+	}
 	
-	public CloudGraphListDirected(String graphName, boolean lambda) {
+	
+	public CloudGraphListUndirected(String graphName, boolean isLambda) {
 		this.graphName = graphName;
 		adj = new HashMap<String, List<Edge>>();
+		adjVertex = new HashMap<LocationObjectVertex, List<Edge>>();
 		Mark = new LinkedList<String>();
 		numEdges = 0;
 		
 		
-		dbGraphAccess = new DBAccessGraphDynamoDB(lambda);
+		dbGraphAccess = new DBAccessGraphDynamoDB(isLambda);
 		dbGraphAccess.createTable(graphName);
 		
 	}
+	
+	public LocationObjectVertex getVertex(String id) {
+		
+		return dbGraphAccess.getVertex(graphName, id);
+	}
+	
 	
 	public LocationObjectVertex setVertex(int x, int y) {
 		return null;
@@ -81,14 +93,21 @@ public class CloudGraphListDirected {
 		dbGraphAccess.addGraphVertex(locationObjectJson.get("object_id").toString(), null, vertex.toJSONString(), locationObjectJson.get("location_id").toString(), graphName);
 	}
 	
-	public void SetEdgeDirected(LocationObjectVertex v1, LocationObjectVertex v2, int weight) {
+	public void setEdgeDirected(LocationObjectVertex v1, LocationObjectVertex v2, int weight) {
 		
-		getPoints("" + v1.getLocation_id());
+		// todo: this should set undirected edge, fix
+		
+		
 		
 		if (adj.get("" + v1.getObject_id()) == null) {
 			adj.put("" + v1.getObject_id(), new LinkedList<Edge>());
+			adjVertex.put(v1, new LinkedList<Edge>());
 			Mark.add("" + v1.getObject_id());
 		}
+		double distance_x = v2.getX() - v1.getX();
+		double distance_y = v2.getY() - v1.getY();
+		weight = (int) Math.sqrt(distance_x * distance_x + distance_y * distance_y);
+		
 		Edge e = new Edge(v1, v2, weight);
 		adj.get("" + v1.getObject_id()).add(e);
 		
@@ -157,11 +176,6 @@ public class CloudGraphListDirected {
 		return Mark.size();
 	}
 	
-	public List<Edge> neighbors(LocationObject i) {
-		
-		return adj.get(i);
-	}
-
 	public List<Edge> getEdges() {
 		List<Edge> list = new ArrayList<Edge>();
 		for (String item : adj.keySet()) {
@@ -175,7 +189,7 @@ public class CloudGraphListDirected {
 	public static JSONArray getEdges(String locationId) {
 		JSONArray jsonArray = new JSONArray();
 		
-		CloudGraphListDirected graph1 = new CloudGraphListDirected("i_nav_graph1", true);
+		CloudGraphListUndirected graph1 = new CloudGraphListUndirected("i_nav_graph1", true);
 		graph1.getPoints(locationId);
 		List<Edge> list = graph1.getEdges();
 		
@@ -186,7 +200,7 @@ public class CloudGraphListDirected {
 		return jsonArray;
 	}
 	
-	public static JSONArray setEdgeDirected(String sourceObjectId, String sourceLocationId, String destObjectId, String destLocationId) {
+	public static JSONArray setEdgeUndirected(CloudGraphListUndirected graph, String sourceObjectId, String sourceLocationId, String destObjectId, String destLocationId) {
 		
 		JSONArray jsonArray = new JSONArray();
 		
@@ -214,8 +228,18 @@ public class CloudGraphListDirected {
 			destVertex.setX(destObject.getX_coordinate());
 			destVertex.setY(destObject.getY_coordinate());
 			
-			CloudGraphListDirected graph1 = new CloudGraphListDirected("i_nav_graph1", true);
-			graph1.SetEdgeDirected(sourceVertex, destVertex, 15);
+			if (graph == null)  {
+				graph = new CloudGraphListUndirected("i_nav_graph1", true);			
+				graph.getPoints(sourceLocationId);
+				if (!sourceLocationId.equals(destLocationId)) {
+					graph.getPoints(destLocationId);
+				}
+			}
+//			graph1.adj.put(sourceObjectId, graph1.dbGraphAccess.getCloudVertexEdges(graph1.graphName, sourceObjectId));
+//			graph1.adj.put(destObjectId, graph1.dbGraphAccess.getCloudVertexEdges(graph1.graphName, destObjectId));
+			
+			graph.setEdgeDirected(sourceVertex, destVertex, 0);
+			graph.setEdgeDirected(destVertex, sourceVertex, 0);
 			
 			JSONObject ret = new JSONObject();
 			ret.put("success", "maybe");
@@ -229,6 +253,66 @@ public class CloudGraphListDirected {
 		
 		
 		return jsonArray;
+	}
+	
+	public static JSONArray getShortestPath(String sourceObjectId, String destObjectId, boolean isLambda) {
+		
+		JSONArray jsonArray = new JSONArray();
+		
+		CloudGraphListUndirected graph1 = new CloudGraphListUndirected("i_nav_graph1", isLambda);
+		graph1.getPoints(null);
+		Search search = new Search(graph1);
+		LocationObjectVertex start = graph1.getVertex(sourceObjectId);
+		LocationObjectVertex end = graph1.getVertex(destObjectId);
+		search.dijkstra(start, end);
+		ArrayList<Edge> path = search.getPathToVertex();
+		if (path != null) {
+			for (Edge e : path) {
+				JSONObject obj = e.getJson();
+				double dist = Math.sqrt(((e.v1().getX() - e.v2().getX()) * (e.v1().getX() - e.v2().getX()) + (e.v1().getY() - e.v2().getY()) * (e.v1().getY() - e.v2().getY())));
+				String str = "walk " + Math.round(dist) + " ft. from " + e.v1().getObject_id() + " to " + e.v2().getObject_id();
+				obj.put("directions", str);
+				jsonArray.add(obj);
+			}
+		} else {
+//			jsonArray.add("path is null");
+		}
+		
+//		if (start != null) { jsonArray.add(start.toJSON()); }
+//		if (end != null) { jsonArray.add(end.toJSON()); }
+		
+		return jsonArray;
+	}
+
+	public List<LocationObjectVertex> neighbors(LocationObjectVertex u) {
+		
+		List<LocationObjectVertex> uNeighbors = new ArrayList<LocationObjectVertex>();
+		
+		if (u == null) {
+			return uNeighbors;
+		}
+		
+		List<Map<LocationObjectVertex, Edge>> ret = new ArrayList<Map<LocationObjectVertex, Edge>>();
+		
+		System.out.println("adj size: " + adj.size());
+		for (String s : adj.keySet()) {
+			System.out.print(", " + s);
+		}
+		System.out.println();
+		if (adj.containsKey("" + u.getObject_id())) {
+			for (Edge e : adj.get("" + u.getObject_id())) {
+				if (e != null) {
+					LocationObjectVertex v1 = e.v1();
+					LocationObjectVertex v2 = e.v2();
+					if (v1.equals(u)) {
+						uNeighbors.add(v2);
+					} else {
+						uNeighbors.add(v1);
+					}
+				}
+			}
+		}
+		return uNeighbors;
 	}
 	
 }

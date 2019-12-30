@@ -169,9 +169,10 @@ public class User implements INavEntity {
 		String query = select + join + where;
 		
 		JSONArray jsonArray = new JSONArray();
-
+		
+		Connection conn;
 		try {
-			Connection conn = DriverManager.getConnection(url, INavEntity.username, INavEntity.password);
+			conn = DriverManager.getConnection(url, INavEntity.username, INavEntity.password);
 			PreparedStatement stmt = conn.prepareStatement(query);
 			
 			if (id != null) {
@@ -209,14 +210,15 @@ public class User implements INavEntity {
 				}
 				
 			}
+			conn.close();
 			
 
 		} catch (SQLException e) {
 			JSONObject obj = new JSONObject();
 			obj.put("SQLException", e.getMessage());
 			jsonArray.add(obj);
-		}
-
+		} 
+		
 		return jsonArray;
 	}
 	
@@ -491,6 +493,40 @@ public class User implements INavEntity {
 		}
 		
 		return jsonArray;
+	}
+	
+	public static void newCognitoUser(JSONObject newUser) {
+		
+		if (getUsers(null, newUser.get("username").toString()).size() != 0) {
+			return;
+		}
+		
+		String query = "INSERT INTO `users` (`username`, `first_name`, `last_name`, `email`, `role_id`, `active`)  " + 
+				"VALUES (?, ?, ?, ?, ?, ?);";
+		
+		Connection conn;
+		try {
+			
+			conn = DriverManager.getConnection(url, INavEntity.username, INavEntity.password);
+			PreparedStatement stmt = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
+			
+			if (newUser.get("username") != null) { stmt.setString(1, newUser.get("username").toString()); } else { stmt.setNull(1, java.sql.Types.VARCHAR); }
+			if (newUser.get("first_name") != null) { stmt.setString(2, newUser.get("first_name").toString()); } else { stmt.setNull(2, java.sql.Types.VARCHAR); }
+			if (newUser.get("last_name") != null) { stmt.setString(3, newUser.get("last_name").toString()); } else { stmt.setNull(3, java.sql.Types.VARCHAR); }
+			if (newUser.get("email") != null) { stmt.setString(4, newUser.get("email").toString()); } else { stmt.setNull(4, java.sql.Types.VARCHAR); }
+			if (newUser.get("role_id") != null) { stmt.setInt(5, Integer.parseInt(newUser.get("role_id").toString())); } else { stmt.setNull(5, java.sql.Types.INTEGER); }
+			stmt.setInt(6, 1);
+			
+			stmt.executeUpdate();
+			ResultSet resultSet = stmt.getGeneratedKeys();
+			
+			if (resultSet.next()) { // success
+            }
+			
+			conn.close();
+			
+		} catch (SQLException e) {
+		}
 	}
 	
 	public String getJSONString() {
