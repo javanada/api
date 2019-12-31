@@ -200,6 +200,66 @@ public class CloudGraphListUndirected { // should be undirected
 		return jsonArray;
 	}
 	
+	public static JSONArray removeEdge(CloudGraphListUndirected graph, String source, String dest) {
+		JSONArray jsonArray = new JSONArray();
+		
+		if (graph == null)  {
+			graph = new CloudGraphListUndirected("i_nav_graph1", true);			
+		}
+		
+		JSONParser parser = new JSONParser();
+		try {
+			JSONArray arr = ((JSONArray)parser.parse(graph.dbGraphAccess.getAdj("i_nav_graph1", source)));
+			
+			JSONArray arrKeep = new JSONArray();
+			for (int i = 0; i < arr.size(); i++) {
+				JSONObject keep = ((JSONObject) arr.get(i));
+				JSONObject o = ((JSONObject) arr.get(i));
+				JSONObject v2 = ((JSONObject)o.get("v2"));
+				if (!dest.equals(v2.get("object_id").toString())) {
+					arrKeep.add(keep);
+				}
+			}
+			graph.dbGraphAccess.updateItem("i_nav_graph1", source, arrKeep.toJSONString());
+			
+		} catch (ParseException e) {
+			JSONObject obj = new JSONObject();
+			obj.put("ParseException", e.getMessage());
+			jsonArray.add(obj);
+			e.printStackTrace();
+		}
+		
+		return jsonArray;
+	}
+	
+	public static JSONArray removeVertex(CloudGraphListUndirected graph, String id) {
+		JSONArray jsonArray = new JSONArray();
+		
+		if (graph == null)  {
+			graph = new CloudGraphListUndirected("i_nav_graph1", true);			
+		}
+		
+		JSONParser parser = new JSONParser();
+		try {
+			JSONArray arr = ((JSONArray)parser.parse(graph.dbGraphAccess.getAdj("i_nav_graph1", id)));
+			
+			for (int i = 0; i < arr.size(); i++) {
+				JSONObject o = ((JSONObject) arr.get(i));
+				JSONObject v2 = ((JSONObject)o.get("v2"));
+				jsonArray.addAll(removeEdge(graph, v2.get("object_id").toString(), id));
+			}
+			graph.dbGraphAccess.updateItem("i_nav_graph1", id, "[]");
+			
+		} catch (ParseException e) {
+			JSONObject obj = new JSONObject();
+			obj.put("ParseException", e.getMessage());
+			jsonArray.add(obj);
+			e.printStackTrace();
+		}
+		
+		return jsonArray;
+	}
+	
 	public static JSONArray setEdgeUndirected(CloudGraphListUndirected graph, String sourceObjectId, String sourceLocationId, String destObjectId, String destLocationId) {
 		
 		JSONArray jsonArray = new JSONArray();

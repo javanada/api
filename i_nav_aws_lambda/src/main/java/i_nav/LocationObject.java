@@ -50,18 +50,18 @@ public class LocationObject implements INavEntity {
 		if (updateObj.get("location_id") != null) {
 			set += ", `location_id` = ? ";
 		}
-		if (updateObj.get("x_coordinate") != null) {
-			set += ", `x_coordinate` = ? ";
-		}
-		if (updateObj.get("y_coordinate") != null) {
-			set += ", `y_coordinate` = ? ";
-		}
-		if (updateObj.get("image_x") != null) {
-			set += ", `image_x` = ? ";
-		}
-		if (updateObj.get("image_y") != null) {
-			set += ", `image_y` = ? ";
-		}
+//		if (updateObj.get("x_coordinate") != null) {
+//			set += ", `x_coordinate` = ? ";
+//		}
+//		if (updateObj.get("y_coordinate") != null) {
+//			set += ", `y_coordinate` = ? ";
+//		}
+//		if (updateObj.get("image_x") != null) {
+//			set += ", `image_x` = ? ";
+//		}
+//		if (updateObj.get("image_y") != null) {
+//			set += ", `image_y` = ? ";
+//		}
 		if (updateObj.get("latitude") != null) {
 			set += ", `latitude` = ? ";
 		}
@@ -95,18 +95,18 @@ public class LocationObject implements INavEntity {
 			if (updateObj.get("location_id") != null) {
 				stmt.setString(counter++, updateObj.get("location_id").toString());
 			}
-			if (updateObj.get("x_coordinate") != null) {
-				stmt.setString(counter++, updateObj.get("x_coordinate").toString());
-			}
-			if (updateObj.get("y_coordinate") != null) {
-				stmt.setString(counter++, updateObj.get("y_coordinate").toString());
-			}
-			if (updateObj.get("image_x") != null) {
-				stmt.setString(counter++, updateObj.get("image_x").toString());
-			}
-			if (updateObj.get("image_y") != null) {
-				stmt.setString(counter++, updateObj.get("image_y").toString());
-			}
+//			if (updateObj.get("x_coordinate") != null) {
+//				stmt.setString(counter++, updateObj.get("x_coordinate").toString());
+//			}
+//			if (updateObj.get("y_coordinate") != null) {
+//				stmt.setString(counter++, updateObj.get("y_coordinate").toString());
+//			}
+//			if (updateObj.get("image_x") != null) {
+//				stmt.setString(counter++, updateObj.get("image_x").toString());
+//			}
+//			if (updateObj.get("image_y") != null) {
+//				stmt.setString(counter++, updateObj.get("image_y").toString());
+//			}
 			if (updateObj.get("latitude") != null) {
 				stmt.setString(counter++, updateObj.get("latitude").toString());
 			}
@@ -154,6 +154,9 @@ public class LocationObject implements INavEntity {
 			}
 
 			stmt.executeUpdate();
+			
+			CloudGraphListUndirected.removeVertex(null, id);
+			
 
 		} catch (SQLException e) {
 			JSONObject obj = new JSONObject();
