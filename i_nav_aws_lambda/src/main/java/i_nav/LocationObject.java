@@ -328,7 +328,7 @@ public class LocationObject implements INavEntity {
 				;
 		
 		if (id != null) {
-			where = " WHERE o.object_id = ? AND o.active = 1 ";
+			where = " WHERE o.object_id = ? ";
 		}
 		if (locationId != null) {
 			where += " AND l.location_id = ? ";
@@ -336,6 +336,7 @@ public class LocationObject implements INavEntity {
 		if (objectTypeId != null) {
 			where += " AND ot.object_type_id = ? ";
 		}
+		where += "  AND o.active = 1  ";
 		String query = select + from +  join + where;
 		
 		
