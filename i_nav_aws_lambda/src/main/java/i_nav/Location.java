@@ -60,6 +60,9 @@ public class Location implements INavEntity {
 		if (updateLoc.get("address_id") != null) {
 			set += ", `address_id` = ? ";
 		}
+		if (updateLoc.get("image") != null) {
+			set += ", `image` = ? ";
+		}
 
 		String where = " WHERE `location_id` = ?";
 
@@ -85,6 +88,9 @@ public class Location implements INavEntity {
 			}
 			if (updateLoc.get("address_id") != null) {
 				stmt.setString(counter++, updateLoc.get("address_id").toString());
+			}
+			if (updateLoc.get("image") != null) {
+				stmt.setString(counter++, updateLoc.get("image").toString());
 			}
 
 			stmt.setInt(counter, Integer.parseInt(updateLoc.get("location_id").toString()));

@@ -18,6 +18,8 @@ public class LocationObjectType implements INavEntity {
 	private String short_name;
 	private String long_name;
 	private String description;
+	private String image;
+	private boolean accessibility;
 
 	public static JSONArray updateObjLoc(JSONObject updateObjLoc) {
 		JSONArray JSONArr = new JSONArray();
@@ -33,6 +35,9 @@ public class LocationObjectType implements INavEntity {
 		}
 		if (updateObjLoc.get("description") != null) {
 			set += ", `description` = ? ";
+		}
+		if (updateObjLoc.get("image") != null) {
+			set += ", `image` = ? ";
 		}
 
 		String where = " WHERE `object_type_id` = ?";
@@ -53,6 +58,9 @@ public class LocationObjectType implements INavEntity {
 			}
 			if (updateObjLoc.get("description") != null) {
 				stmt.setString(counter++, updateObjLoc.get("description").toString());
+			}
+			if (updateObjLoc.get("image") != null) {
+				stmt.setString(counter++, updateObjLoc.get("image").toString());
 			}
 
 			stmt.setInt(counter, Integer.parseInt(updateObjLoc.get("object_type_id").toString()));
@@ -174,6 +182,7 @@ public class LocationObjectType implements INavEntity {
 		jsonObject.put("short_name", short_name);
 		jsonObject.put("long_name", long_name);
 		jsonObject.put("description", description);
+		jsonObject.put("image", image);
 		return jsonObject.toJSONString();
 	}
 
@@ -215,6 +224,18 @@ public class LocationObjectType implements INavEntity {
 
 	public void setObject_type_id(int object_type_id) {
 		this.object_type_id = object_type_id;
+	}
+	public String getImage() {
+		return image;
+	}
+	public void setImage(String image) {
+		this.image = image;
+	}
+	public boolean isAccessibility() {
+		return accessibility;
+	}
+	public void setAccessibility(boolean accessibility) {
+		this.accessibility = accessibility;
 	}
 
 }

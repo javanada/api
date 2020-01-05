@@ -318,7 +318,7 @@ public class LocationObject implements INavEntity {
 						" o.object_id, o.short_name as object_short_name, o.long_name as object_long_name, o.description as object_description, o.x_coordinate, o.y_coordinate, o.latitude, o.longitude, o.image_x, o.image_y, " + 
 						" l.location_id as location_location_id, l.short_name as location_short_name, l.long_name as location_long_name, l.description as location_description, l.image as canvas_image, " + 
 						" lt.location_type_id, lt.short_name as location_type_short_name, lt.description as location_type_description, " + 
-						" ot.object_type_id, ot.short_name as object_type_short_name,  ot.description as object_type_description," + 
+						" ot.object_type_id, ot.short_name as object_type_short_name,  ot.description as object_type_description, ot.image as object_type_image," + 
 						" a.address_id, a.address1, a.address2, a.city, a.state, a.zipcode, a.zipcode_ext "
 				;
 		
@@ -345,6 +345,7 @@ public class LocationObject implements INavEntity {
 		
 		
 		JSONArray jsonArray = new JSONArray();
+		boolean primarySet = false, secondarySet = false;
 
 		try {
 			Connection conn = DriverManager.getConnection(url, username, password);
@@ -363,6 +364,7 @@ public class LocationObject implements INavEntity {
 			}
 			ResultSet resultSet = stmt.executeQuery();
 
+			
 			
 			while (resultSet.next()) {
 				LocationObject locationObject = new LocationObject();
@@ -393,9 +395,16 @@ public class LocationObject implements INavEntity {
 				locationObject.setObject_type_id(resultSet.getInt("object_type_id"));
 				locationObject.setActive(true);
 				
+				if (locationObject.getObject_type_id() == 4) {
+					primarySet = true;
+				} else if (locationObject.getObject_type_id() == 5) {
+					secondarySet = true;
+				}
+				
 				locationObjectType.setObject_type_id(resultSet.getInt("object_type_id"));
 				locationObjectType.setShort_name(resultSet.getString("object_type_short_name"));
 				locationObjectType.setDescription(resultSet.getString("object_type_description"));
+				locationObjectType.setImage(resultSet.getString("object_type_image"));
 				
 				locationType.setLocation_type_id(resultSet.getInt("location_type_id"));
 				locationType.setShort_name(resultSet.getString("location_type_short_name"));
@@ -441,6 +450,8 @@ public class LocationObject implements INavEntity {
 			returnStr += e.getMessage() + " " + query;
 		}
 
+		
+		
 		return jsonArray;
 	}
 

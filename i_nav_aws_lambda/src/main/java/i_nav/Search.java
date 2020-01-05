@@ -32,32 +32,7 @@ public class Search {
 		return dist;
 	}
 	
-	public void calculatePath(LocationObjectVertex start, LocationObjectVertex end) {
-		this.start = start;
-		this.end = end;
-		dist = new HashMap<LocationObjectVertex, Integer>();
-		path = new HashMap<LocationObjectVertex, ArrayList<Edge>>();
-		
-		calculatePath(start, end, 0, new ArrayList<Edge>());
-		
-	}
 	
-	public void testPath(LocationObjectVertex start, LocationObjectVertex end) {
-		this.start = start;
-		this.end = end;
-		
-		List<LocationObjectVertex> neighbors = G.neighbors(start);
-		
-		for (LocationObjectVertex n : neighbors) {
-			System.out.println("NEIGHBOR of " + start.getObject_id() + ": " + n.getObject_id());
-			if (G.getAdj().containsKey("" + n.getObject_id())) {
-				List<Edge> edges = G.getAdj().get("" + n.getObject_id());
-				for (Edge e : edges) {
-					
-				}
-			}
-		}
-	}
 	
 	public void printInfo() {
 		System.out.println("DIST: ");
@@ -153,48 +128,4 @@ public class Search {
 		
 	}
 	
-	
-	private void calculatePath(LocationObjectVertex current, LocationObjectVertex end, int currentDistance, ArrayList<Edge> currentEdges) {
-		
-		System.out.println("current: " + current.getObject_id() + " currentDist: " + currentDistance);
-		if (!dist.containsKey(current)) {
-			dist.put(current, currentDistance);
-		}
-		if (!path.containsKey(current)) {
-			path.put(current, currentEdges);
-		}
-		
-		if (!current.equals(end)) {
-			
-//			List<Map<LocationObjectVertex, Edge>> neighbors = G.neighbors(current);
-//			
-//			for (Map<LocationObjectVertex, Edge> n : neighbors) {
-//				LocationObjectVertex neighbor = n.entrySet().iterator().next().getKey();
-//				Edge neighborEdge = n.entrySet().iterator().next().getValue();
-//				
-//				if (!dist.containsKey(neighbor)) {
-//					currentEdges.add(neighborEdge);
-//					calculatePath(neighbor, end, currentDistance + neighborEdge.weight(), currentEdges);
-//				}
-//			}
-			
-			List<LocationObjectVertex> neighbors = G.neighbors(current);
-			
-			for (LocationObjectVertex n : neighbors) {
-				System.out.println("NEIGHBOR of " + current.getObject_id() + ": " + n.getObject_id());
-				if (G.getAdj().containsKey("" + n.getObject_id())) {
-					List<Edge> edges = G.getAdj().get("" + n.getObject_id());
-					for (Edge e : edges) {
-						if (!dist.containsKey(n)) {
-							currentEdges.add(e);
-							calculatePath(n, end, currentDistance + e.weight(), currentEdges);
-						}
-					}
-				}
-			}
-			
-		} else {
-			System.out.println("we're done... current: " + current.getObject_id());
-		}
-	}
 }
