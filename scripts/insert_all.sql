@@ -42,6 +42,15 @@ VALUES
  (1, 6, 1),
  (3, 6, 1);
 
+INSERT INTO `users_locations` (`user_id`, `location_id`) 
+VALUES 
+ (1, 2, 1),
+ (1, 3, 1),
+ (1, 4, 1),
+ (1, 5, 1),
+ (1, 6, 1),
+ (3, 6, 1);
+
 
 
 -- These tables have special operations required for insertions. objects requires a graph vertex and users requires crypto

@@ -10,6 +10,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import org.json.simple.JSONArray;
@@ -157,8 +161,10 @@ public class User implements INavEntity {
 	
 	public static JSONArray getUsers(String id, String username) {
 		
-		String select = " SELECT * FROM users u ";
-		String join = "  ";
+		String select = " SELECT u.user_id, u.username, u.first_name, u.last_name, u.email, u.role_id, u.active AS user_active, l.location_id, l.short_name, l.long_name, l.description, l.image, l.location_type_id, l.address_id, l.active AS location_active ";
+		String from = " FROM users u ";
+		String join = " LEFT JOIN users_locations ul ON u.user_id = ul.user_id ";
+		join += " LEFT JOIN locations l ON l.location_id = ul.location_id "; 
 		String where = "  ";
 		
 		if (id != null) {
@@ -166,9 +172,11 @@ public class User implements INavEntity {
 		} else if (username != null) {
 			where = " WHERE u.username = ? ";
 		}
-		String query = select + join + where;
+		String query = select + from + join + where;
 		
 		JSONArray jsonArray = new JSONArray();
+		
+		int c = 1;
 		
 		Connection conn;
 		try {
@@ -176,41 +184,72 @@ public class User implements INavEntity {
 			PreparedStatement stmt = conn.prepareStatement(query);
 			
 			if (id != null) {
-				stmt.setString(1, id);
-			} else if (username != null) {
-				stmt.setString(1, username);
+				stmt.setString(c++, id);
+			}
+			if (username != null) {
+				stmt.setString(c++, username);
 			}
 			
 			ResultSet resultSet = stmt.executeQuery();
 			
+			Map<String, List<Location>> userLocations = new HashMap<String, List<Location>>();
+			Map<String, User> users = new HashMap<String, User>();
+			JSONParser parser = new JSONParser();
+			
 			while (resultSet.next()) {
 				
 				User user = new User();
-				user.setUser_id(resultSet.getInt(1));
-				user.setUsername(resultSet.getString(2));
-				user.setSalt(resultSet.getString(3));
-				user.setPassword(resultSet.getString(4));
-				user.setFirst_name(resultSet.getString(5));
-				user.setLast_name(resultSet.getString(6));
-				user.setEmail(resultSet.getString(7));
-				user.setRole_id(resultSet.getInt(8));
-				user.setActive(resultSet.getBoolean(9));
+				user.setUser_id(resultSet.getInt("user_id"));
+				user.setUsername(resultSet.getString("username"));
+				user.setFirst_name(resultSet.getString("first_name"));
+				user.setLast_name(resultSet.getString("last_name"));
+				user.setEmail(resultSet.getString("email"));
+				user.setRole_id(resultSet.getInt("role_id"));
+				user.setActive(resultSet.getBoolean("user_active"));
+				users.put("" + user.getUser_id(), user);
 				
-				JSONParser parser = new JSONParser();
+				Location l = new Location();
+				l.setLocation_id(resultSet.getInt("location_id"));
+				l.setShort_name(resultSet.getString("short_name"));
+				l.setLong_name(resultSet.getString("long_name"));
+				l.setDescription(resultSet.getString("description"));
+				l.setImage(resultSet.getString("image"));
+				l.setActive(resultSet.getBoolean("location_active"));
+				l.setAddress_id(resultSet.getInt("address_id"));
+				l.setLocation_type_id(resultSet.getInt("location_type_id"));
+				
+				if (!userLocations.containsKey("" + user.getUser_id())) {
+					userLocations.put("" + user.getUser_id(), new ArrayList<Location>());
+				}
+				if (resultSet.getInt("location_id") != 0) {
+					userLocations.get("" + user.getUser_id()).add(l);
+				}
+				
+				
+			}
+			conn.close();
+			
+			for (String userId : userLocations.keySet()) {
 				
 				try {
-					
+					User user = users.get(userId);
 					JSONObject userJson = (JSONObject) parser.parse(user.getJSONString());
-					jsonArray.add(userJson);
 					
-				} catch (ParseException e) {
+					JSONArray locations = new JSONArray();
+					for (Location location : userLocations.get(userId)) {
+						JSONObject locationJson = (JSONObject) parser.parse(location.getJSONString());
+						locations.add(locationJson);
+					}
+					userJson.put("locations", locations);
+					
+					jsonArray.add(userJson);
+				}  catch (ParseException e) {
 					JSONObject obj = new JSONObject();
 					obj.put("ParseException", e.getMessage());
 					jsonArray.add(obj);
 				}
 				
 			}
-			conn.close();
 			
 
 		} catch (SQLException e) {
