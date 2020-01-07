@@ -115,14 +115,10 @@ public class LocationObject implements INavEntity {
 			}
 
 			stmt.setInt(counter, Integer.parseInt(updateObj.get("object_id").toString()));
-
 			stmt.executeUpdate();
-			ResultSet resultSet = stmt.getGeneratedKeys();
-
-			if (resultSet.next()) {
-				long id = resultSet.getLong(1);
-				JSONArr = LocationObject.getLocationObjects("" + id, null, null);
-			}
+			
+			JSONArr = LocationObject.getLocationObjects(updateObj.get("object_id").toString(), null, null);
+			
 
 		} catch (SQLException e) {
 			JSONObject obj = new JSONObject();
