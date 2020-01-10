@@ -11,6 +11,12 @@
   <properties></properties>
   
   <dependencies>
+  	
+  	<dependency>
+	  <groupId>org.junit.platform</groupId>
+	  <artifactId>junit-platform-commons</artifactId>
+	  <version>1.6.0-RC1</version>
+	</dependency>
     
     <dependency>
 	  <groupId>com.amazonaws</groupId>

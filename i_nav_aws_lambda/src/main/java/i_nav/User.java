@@ -134,8 +134,6 @@ public class User implements INavEntity {
 		user_id = Integer.parseInt(jsonObject.get("user_id").toString());
 		role_id = Integer.parseInt(jsonObject.get("role_id").toString());
 		username = jsonObject.get("username").toString();
-		salt = jsonObject.get("salt").toString();
-		password = jsonObject.get("password").toString();
 		first_name = jsonObject.get("first_name").toString();
 		last_name = jsonObject.get("last_name").toString();
 		email = jsonObject.get("email").toString();
