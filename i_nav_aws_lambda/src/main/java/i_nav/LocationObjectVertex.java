@@ -4,6 +4,13 @@ import java.util.Objects;
 
 import org.json.simple.JSONObject;
 
+/**
+ * 
+ * @author CSCD490 Team5
+ * @version 1.0
+ * 
+ *
+ */
 public class LocationObjectVertex {
 	
 	private int object_id;

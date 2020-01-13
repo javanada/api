@@ -43,8 +43,11 @@ import com.amazonaws.services.dynamodbv2.util.TableUtils;
 
 
 /**
- * This sample demonstrates how to perform a few simple operations with the
- * Amazon DynamoDB service.
+ * 
+ * @author CSCD490 Team5
+ * @version 1.0
+ * 
+ *
  */
 public class DBAccessGraphDynamoDB implements DBAccessGraph {
 

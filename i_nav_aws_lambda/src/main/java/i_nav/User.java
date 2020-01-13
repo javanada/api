@@ -31,6 +31,13 @@ import com.amazonaws.services.apigateway.model.GetApiKeysRequest;
 import com.amazonaws.services.apigateway.model.GetUsagePlanRequest;
 import com.amazonaws.services.apigateway.model.UsagePlan;
 
+/**
+ * 
+ * @author CSCD490 Team5
+ * @version 1.0
+ * 
+ *
+ */
 public class User implements INavEntity {
 	
 	private int user_id;
