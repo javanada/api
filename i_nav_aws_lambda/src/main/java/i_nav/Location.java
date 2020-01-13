@@ -13,6 +13,13 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+/**
+ * 
+ * @author CSCD490 Team5
+ * @version 1.0
+ * 
+ *
+ */
 public class Location implements INavEntity {
 	
 	private int location_id;
@@ -60,6 +67,9 @@ public class Location implements INavEntity {
 		if (updateLoc.get("address_id") != null) {
 			set += ", `address_id` = ? ";
 		}
+		if (updateLoc.get("image") != null) {
+			set += ", `image` = ? ";
+		}
 
 		String where = " WHERE `location_id` = ?";
 
@@ -85,6 +95,9 @@ public class Location implements INavEntity {
 			}
 			if (updateLoc.get("address_id") != null) {
 				stmt.setString(counter++, updateLoc.get("address_id").toString());
+			}
+			if (updateLoc.get("image") != null) {
+				stmt.setString(counter++, updateLoc.get("image").toString());
 			}
 
 			stmt.setInt(counter, Integer.parseInt(updateLoc.get("location_id").toString()));

@@ -13,6 +13,13 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+/**
+ * 
+ * @author CSCD490 Team5
+ * @version 1.0
+ * 
+ *
+ */
 public class LocationObject implements INavEntity {
 	
 	private int object_id;
@@ -50,18 +57,18 @@ public class LocationObject implements INavEntity {
 		if (updateObj.get("location_id") != null) {
 			set += ", `location_id` = ? ";
 		}
-		if (updateObj.get("x_coordinate") != null) {
-			set += ", `x_coordinate` = ? ";
-		}
-		if (updateObj.get("y_coordinate") != null) {
-			set += ", `y_coordinate` = ? ";
-		}
-		if (updateObj.get("image_x") != null) {
-			set += ", `image_x` = ? ";
-		}
-		if (updateObj.get("image_y") != null) {
-			set += ", `image_y` = ? ";
-		}
+//		if (updateObj.get("x_coordinate") != null) {
+//			set += ", `x_coordinate` = ? ";
+//		}
+//		if (updateObj.get("y_coordinate") != null) {
+//			set += ", `y_coordinate` = ? ";
+//		}
+//		if (updateObj.get("image_x") != null) {
+//			set += ", `image_x` = ? ";
+//		}
+//		if (updateObj.get("image_y") != null) {
+//			set += ", `image_y` = ? ";
+//		}
 		if (updateObj.get("latitude") != null) {
 			set += ", `latitude` = ? ";
 		}
@@ -95,18 +102,18 @@ public class LocationObject implements INavEntity {
 			if (updateObj.get("location_id") != null) {
 				stmt.setString(counter++, updateObj.get("location_id").toString());
 			}
-			if (updateObj.get("x_coordinate") != null) {
-				stmt.setString(counter++, updateObj.get("x_coordinate").toString());
-			}
-			if (updateObj.get("y_coordinate") != null) {
-				stmt.setString(counter++, updateObj.get("y_coordinate").toString());
-			}
-			if (updateObj.get("image_x") != null) {
-				stmt.setString(counter++, updateObj.get("image_x").toString());
-			}
-			if (updateObj.get("image_y") != null) {
-				stmt.setString(counter++, updateObj.get("image_y").toString());
-			}
+//			if (updateObj.get("x_coordinate") != null) {
+//				stmt.setString(counter++, updateObj.get("x_coordinate").toString());
+//			}
+//			if (updateObj.get("y_coordinate") != null) {
+//				stmt.setString(counter++, updateObj.get("y_coordinate").toString());
+//			}
+//			if (updateObj.get("image_x") != null) {
+//				stmt.setString(counter++, updateObj.get("image_x").toString());
+//			}
+//			if (updateObj.get("image_y") != null) {
+//				stmt.setString(counter++, updateObj.get("image_y").toString());
+//			}
 			if (updateObj.get("latitude") != null) {
 				stmt.setString(counter++, updateObj.get("latitude").toString());
 			}
@@ -115,14 +122,10 @@ public class LocationObject implements INavEntity {
 			}
 
 			stmt.setInt(counter, Integer.parseInt(updateObj.get("object_id").toString()));
-
 			stmt.executeUpdate();
-			ResultSet resultSet = stmt.getGeneratedKeys();
-
-			if (resultSet.next()) {
-				long id = resultSet.getLong(1);
-				JSONArr = LocationObject.getLocationObjects("" + id, null, null);
-			}
+			
+			JSONArr = LocationObject.getLocationObjects(updateObj.get("object_id").toString(), null, null);
+			
 
 		} catch (SQLException e) {
 			JSONObject obj = new JSONObject();
@@ -154,6 +157,9 @@ public class LocationObject implements INavEntity {
 			}
 
 			stmt.executeUpdate();
+			
+			CloudGraphListUndirected.removeVertex(null, id);
+			
 
 		} catch (SQLException e) {
 			JSONObject obj = new JSONObject();
@@ -315,7 +321,7 @@ public class LocationObject implements INavEntity {
 						" o.object_id, o.short_name as object_short_name, o.long_name as object_long_name, o.description as object_description, o.x_coordinate, o.y_coordinate, o.latitude, o.longitude, o.image_x, o.image_y, " + 
 						" l.location_id as location_location_id, l.short_name as location_short_name, l.long_name as location_long_name, l.description as location_description, l.image as canvas_image, " + 
 						" lt.location_type_id, lt.short_name as location_type_short_name, lt.description as location_type_description, " + 
-						" ot.object_type_id, ot.short_name as object_type_short_name,  ot.description as object_type_description," + 
+						" ot.object_type_id, ot.short_name as object_type_short_name,  ot.description as object_type_description, ot.image as object_type_image," + 
 						" a.address_id, a.address1, a.address2, a.city, a.state, a.zipcode, a.zipcode_ext "
 				;
 		
@@ -328,7 +334,7 @@ public class LocationObject implements INavEntity {
 				;
 		
 		if (id != null) {
-			where = " WHERE o.object_id = ? AND o.active = 1 ";
+			where = " WHERE o.object_id = ? ";
 		}
 		if (locationId != null) {
 			where += " AND l.location_id = ? ";
@@ -336,11 +342,13 @@ public class LocationObject implements INavEntity {
 		if (objectTypeId != null) {
 			where += " AND ot.object_type_id = ? ";
 		}
+		where += "  AND o.active = 1  ";
 		String query = select + from +  join + where;
 		
 		
 		
 		JSONArray jsonArray = new JSONArray();
+		boolean primarySet = false, secondarySet = false;
 
 		try {
 			Connection conn = DriverManager.getConnection(url, username, password);
@@ -359,6 +367,7 @@ public class LocationObject implements INavEntity {
 			}
 			ResultSet resultSet = stmt.executeQuery();
 
+			
 			
 			while (resultSet.next()) {
 				LocationObject locationObject = new LocationObject();
@@ -389,9 +398,16 @@ public class LocationObject implements INavEntity {
 				locationObject.setObject_type_id(resultSet.getInt("object_type_id"));
 				locationObject.setActive(true);
 				
+				if (locationObject.getObject_type_id() == 4) {
+					primarySet = true;
+				} else if (locationObject.getObject_type_id() == 5) {
+					secondarySet = true;
+				}
+				
 				locationObjectType.setObject_type_id(resultSet.getInt("object_type_id"));
 				locationObjectType.setShort_name(resultSet.getString("object_type_short_name"));
 				locationObjectType.setDescription(resultSet.getString("object_type_description"));
+				locationObjectType.setImage(resultSet.getString("object_type_image"));
 				
 				locationType.setLocation_type_id(resultSet.getInt("location_type_id"));
 				locationType.setShort_name(resultSet.getString("location_type_short_name"));
@@ -437,6 +453,8 @@ public class LocationObject implements INavEntity {
 			returnStr += e.getMessage() + " " + query;
 		}
 
+		
+		
 		return jsonArray;
 	}
 

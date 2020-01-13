@@ -12,6 +12,13 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+/**
+ * 
+ * @author CSCD490 Team5
+ * @version 1.0
+ * 
+ *
+ */
 public class Role implements INavEntity {
 	
 	private int role_id;

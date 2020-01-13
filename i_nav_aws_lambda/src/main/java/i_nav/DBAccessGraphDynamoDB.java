@@ -43,8 +43,11 @@ import com.amazonaws.services.dynamodbv2.util.TableUtils;
 
 
 /**
- * This sample demonstrates how to perform a few simple operations with the
- * Amazon DynamoDB service.
+ * 
+ * @author CSCD490 Team5
+ * @version 1.0
+ * 
+ *
  */
 public class DBAccessGraphDynamoDB implements DBAccessGraph {
 
@@ -339,6 +342,22 @@ public class DBAccessGraphDynamoDB implements DBAccessGraph {
 		}
 		
 		return null;
+	}
+	
+	public String getAdj(String graphName, String objectId) {
+		
+		Map<String, AttributeValue> cloudNode = getNode(graphName, objectId);
+		if (cloudNode == null) {
+			return null;
+		}
+		
+		String adj = "";
+		
+		if (cloudNode.get("adj") != null) {
+			adj = cloudNode.get("adj").getS();
+		}
+		
+		return adj;
 	}
 	
 	public LocationObjectVertex getVertex(String graphName, String objectId) {

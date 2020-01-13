@@ -3,6 +3,13 @@ package i_nav;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
+/**
+ * 
+ * @author CSCD490 Team5
+ * @version 1.0
+ * 
+ *
+ */
 public class Edge {
 	
 	private LocationObjectVertex v1;

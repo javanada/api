@@ -12,6 +12,13 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+/**
+ * 
+ * @author CSCD490 Team5
+ * @version 1.0
+ * 
+ *
+ */
 public class CloudGraphListUndirected { // should be undirected
 	
 	private Map<String, List<Edge>> adj; // need to use String, not LocationObjectVertex... should be ID
@@ -200,6 +207,66 @@ public class CloudGraphListUndirected { // should be undirected
 		return jsonArray;
 	}
 	
+	public static JSONArray removeEdge(CloudGraphListUndirected graph, String source, String dest) {
+		JSONArray jsonArray = new JSONArray();
+		
+		if (graph == null)  {
+			graph = new CloudGraphListUndirected("i_nav_graph1", true);			
+		}
+		
+		JSONParser parser = new JSONParser();
+		try {
+			JSONArray arr = ((JSONArray)parser.parse(graph.dbGraphAccess.getAdj("i_nav_graph1", source)));
+			
+			JSONArray arrKeep = new JSONArray();
+			for (int i = 0; i < arr.size(); i++) {
+				JSONObject keep = ((JSONObject) arr.get(i));
+				JSONObject o = ((JSONObject) arr.get(i));
+				JSONObject v2 = ((JSONObject)o.get("v2"));
+				if (!dest.equals(v2.get("object_id").toString())) {
+					arrKeep.add(keep);
+				}
+			}
+			graph.dbGraphAccess.updateItem("i_nav_graph1", source, arrKeep.toJSONString());
+			
+		} catch (ParseException e) {
+			JSONObject obj = new JSONObject();
+			obj.put("ParseException", e.getMessage());
+			jsonArray.add(obj);
+			e.printStackTrace();
+		}
+		
+		return jsonArray;
+	}
+	
+	public static JSONArray removeVertex(CloudGraphListUndirected graph, String id) {
+		JSONArray jsonArray = new JSONArray();
+		
+		if (graph == null)  {
+			graph = new CloudGraphListUndirected("i_nav_graph1", true);			
+		}
+		
+		JSONParser parser = new JSONParser();
+		try {
+			JSONArray arr = ((JSONArray)parser.parse(graph.dbGraphAccess.getAdj("i_nav_graph1", id)));
+			
+			for (int i = 0; i < arr.size(); i++) {
+				JSONObject o = ((JSONObject) arr.get(i));
+				JSONObject v2 = ((JSONObject)o.get("v2"));
+				jsonArray.addAll(removeEdge(graph, v2.get("object_id").toString(), id));
+			}
+			graph.dbGraphAccess.updateItem("i_nav_graph1", id, "[]");
+			
+		} catch (ParseException e) {
+			JSONObject obj = new JSONObject();
+			obj.put("ParseException", e.getMessage());
+			jsonArray.add(obj);
+			e.printStackTrace();
+		}
+		
+		return jsonArray;
+	}
+	
 	public static JSONArray setEdgeUndirected(CloudGraphListUndirected graph, String sourceObjectId, String sourceLocationId, String destObjectId, String destLocationId) {
 		
 		JSONArray jsonArray = new JSONArray();
@@ -260,17 +327,58 @@ public class CloudGraphListUndirected { // should be undirected
 		JSONArray jsonArray = new JSONArray();
 		
 		CloudGraphListUndirected graph1 = new CloudGraphListUndirected("i_nav_graph1", isLambda);
-		graph1.getPoints(null);
-		Search search = new Search(graph1);
 		LocationObjectVertex start = graph1.getVertex(sourceObjectId);
 		LocationObjectVertex end = graph1.getVertex(destObjectId);
+		
+		graph1.getPoints("" + start.getLocation_id());
+		Search search = new Search(graph1);
+		
 		search.dijkstra(start, end);
 		ArrayList<Edge> path = search.getPathToVertex();
+		
+		JSONArray arr;
+//		arr = LocationObject.getLocationObjects(null, "" + start.getLocation_id(), null); // this is slow, arguably should be on the front end since front end already has this
+		arr = new JSONArray();
+		
+		HashMap<String, LocationObject> allObjects = new HashMap<String, LocationObject>();
+		for (int i = 0; i < arr.size(); i++) {
+			JSONObject o = ((JSONObject)arr.get(i));
+			LocationObject locationObject = new LocationObject(o);
+			allObjects.put("" + locationObject.getObject_id(), locationObject);
+		}
+		
 		if (path != null) {
-			for (Edge e : path) {
+			for (int i = 0; i < path.size(); i++) {
+				
+				Edge e = path.get(i);
+				
 				JSONObject obj = e.getJson();
 				double dist = Math.sqrt(((e.v1().getX() - e.v2().getX()) * (e.v1().getX() - e.v2().getX()) + (e.v1().getY() - e.v2().getY()) * (e.v1().getY() - e.v2().getY())));
-				String str = "walk " + Math.round(dist) + " ft. from " + e.v1().getObject_id() + " to " + e.v2().getObject_id();
+				
+				String from = "";
+				if (allObjects.containsKey("" + e.v1().getObject_id())) {
+					from = allObjects.get("" + e.v1().getObject_id()).getShort_name() + "#" + e.v1().getObject_id();
+				} else {
+					from = "" + e.v1().getObject_id();
+				}
+				String to = "";
+				if (allObjects.containsKey("" + e.v2().getObject_id())) {
+					to = allObjects.get("" + e.v2().getObject_id()).getShort_name() + "#" + e.v2().getObject_id();
+				} else {
+					to = "" + e.v2().getObject_id();
+				}
+				
+				String str = "Walk " + Math.round(dist) + " ft. ";
+				
+				if (i == path.size() - 1) {
+					str += " from {" + from + "}. Arrive at your destination, {" + to + "}";
+				} else {
+					str += " from {" + from + "} to {" + to + "}";
+					str += ", turn";
+				}
+				str += ".";
+				
+				
 				obj.put("directions", str);
 				jsonArray.add(obj);
 			}

@@ -5,6 +5,13 @@ import java.util.Map;
 
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 
+/**
+ * 
+ * @author CSCD490 Team5
+ * @version 1.0
+ * 
+ *
+ */
 public interface DBAccessGraph {
 	
 	public void init() throws Exception;
@@ -25,5 +32,6 @@ public interface DBAccessGraph {
 	public long getUpdateTime();
 	public LocationObjectVertex getVertex(String graphName, String id);
 	public List<Edge> getCloudVertexEdges(String graphName, String nodeId);
+	public String getAdj(String graphName, String objectId);
 	
 }

@@ -1,5 +1,12 @@
 package i_nav;
 
+/**
+ * 
+ * @author CSCD490 Team5
+ * @version 1.0
+ * 
+ *
+ */
 public interface INavEntity {
 	
 	String username = System.getenv("aws_username");
