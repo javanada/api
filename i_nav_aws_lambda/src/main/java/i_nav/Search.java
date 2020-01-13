@@ -128,4 +128,73 @@ public class Search {
 		
 	}
 	
+	public static List<Edge> getDirections(List<Edge> edges, Map<String, LocationObject> allObjects) {
+		
+		
+		for (int i = 0; i < edges.size(); i++) { // (Edge e : edges) {
+			Edge e = edges.get(i);
+			
+			double deltaY = (e.v2().getY() - e.v1().getY());
+            double deltaX = (e.v2().getX() - e.v1().getX());
+            double dist = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+
+            String from = "";
+            if (allObjects.containsKey("" + e.v1().getObject_id())) {
+                from = allObjects.get("" + e.v1().getObject_id()).getShort_name() + "#" + e.v1().getObject_id();
+            } else {
+                from = "" + e.v1().getObject_id();
+            }
+            String to = "";
+            if (allObjects.containsKey("" + e.v2().getObject_id())) {
+                to = allObjects.get("" + e.v2().getObject_id()).getShort_name() + "#" + e.v2().getObject_id();
+            } else {
+                to = "" + e.v2().getObject_id();
+            }
+            double angle = Math.atan(deltaY / deltaX);
+            angle = angle * (180 / Math.PI);
+            angle = Math.round(angle);
+
+            String direction = "";
+
+            if (deltaX > 0 && deltaY > 0) { // quadrant 1
+                direction = "NE";
+                angle = Math.abs(angle);
+            } else if (deltaX < 0 && deltaY > 0) { // quadrant 2
+                direction = "NW";
+                angle = Math.abs(angle) + 270;
+            } else if (deltaX < 0 && deltaY < 0) { // quadrant 3
+                direction = "SW";
+                angle = Math.abs(angle) + 180;
+            } else if (deltaX > 0 && deltaY < 0) { // quadrant 4
+                direction = "SE";
+                angle = Math.abs(angle) + 90;
+            } else if (deltaX == 0 && deltaY > 0) { // N
+                direction = "N";
+            } else if (deltaX == 0 && deltaY < 0) { // S
+                direction = "S";
+            } else if (deltaX > 0 && deltaY == 0) { // E
+                direction = "E";
+            } else if (deltaX < 0 && deltaY == 0) { // W
+                direction = "W";
+            }
+
+
+            System.out.println("###" + "v1: " + e.v1().getX() + ", " + e.v1().getY() + "    v2: " + e.v2().getX() + ", " + e.v2().getY());
+
+            String str = "Walk... " + angle + " deg (" + direction + ") " +  Math.round(dist) + " ft. ";
+
+            if (i == edges.size() - 1) {
+                str += "from " + from + ". Arrive at your destination, " + to + "";
+            } else {
+                str += "from " + from + " to " + to + "";
+                str += ", turn";
+            }
+            str += ".";
+
+            edges.get(i).setStep(str);
+            
+		}
+		return edges;
+	}
+	
 }
