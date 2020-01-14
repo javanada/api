@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 
 import i_nav_model.Location;
 import i_nav_model.LocationObject;
+import i_nav_model.Role;
 
 /**
  * 
@@ -18,7 +19,7 @@ import i_nav_model.LocationObject;
  * 
  *
  */
-class LocationObjectTypeTests {
+class RoleTests {
 
 	@BeforeAll
 	static void setUpBeforeClass() throws Exception {
@@ -37,13 +38,13 @@ class LocationObjectTypeTests {
 	}
 
 	@Test
-	void GetLocationByLocationId_ValidData_SizeOne() {
+	void GetRoleByRoleId_ValidData_SizeOne() {
 		
 		// Arrange
-		String locationId = "1";
+		String roleId = "1";
 		
 		// Act
-		JSONArray arr = Location.getLocations(locationId, null);
+		JSONArray arr = Role.getRoles(roleId);
 		
 		// Assert
 		Assertions.assertTrue(arr.size() == 1);

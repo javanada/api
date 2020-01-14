@@ -23,6 +23,14 @@ import java.util.Base64;
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
 import com.mysql.cj.xdevapi.JsonString;
 
+import i_nav_model.Address;
+import i_nav_model.Location;
+import i_nav_model.LocationObject;
+import i_nav_model.LocationObjectType;
+import i_nav_model.LocationType;
+import i_nav_model.Role;
+import i_nav_model.User;
+
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;

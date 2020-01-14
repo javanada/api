@@ -8,10 +8,10 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import i_nav.Location;
-import i_nav.LocationObject;
-import i_nav.LocationObjectType;
-import i_nav.LocationType;
+import i_nav_model.Location;
+import i_nav_model.LocationObject;
+import i_nav_model.LocationObjectType;
+import i_nav_model.LocationType;
 
 /**
  * 

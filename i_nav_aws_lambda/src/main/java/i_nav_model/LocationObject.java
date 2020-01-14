@@ -1,4 +1,4 @@
-package i_nav;
+package i_nav_model;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -12,6 +12,9 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+
+import i_nav.CloudGraphListUndirected;
+import i_nav.INavEntity;
 
 /**
  * 

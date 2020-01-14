@@ -8,6 +8,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import i_nav_model.Address;
 import i_nav_model.Location;
 import i_nav_model.LocationObject;
 
@@ -18,7 +19,7 @@ import i_nav_model.LocationObject;
  * 
  *
  */
-class LocationObjectTypeTests {
+class AddressTests {
 
 	@BeforeAll
 	static void setUpBeforeClass() throws Exception {
@@ -37,13 +38,13 @@ class LocationObjectTypeTests {
 	}
 
 	@Test
-	void GetLocationByLocationId_ValidData_SizeOne() {
+	void GetAddressByAddressId_ValidData_SizeOne() {
 		
 		// Arrange
-		String locationId = "1";
+		String addressId = "1";
 		
 		// Act
-		JSONArray arr = Location.getLocations(locationId, null);
+		JSONArray arr = Address.getAddresses(addressId);
 		
 		// Assert
 		Assertions.assertTrue(arr.size() == 1);
