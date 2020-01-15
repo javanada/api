@@ -12,6 +12,8 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+import i_nav_model.LocationObject;
+
 /**
  * 
  * @author CSCD490 Team5

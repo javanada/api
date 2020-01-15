@@ -1,4 +1,4 @@
-package i_nav;
+package i_nav_model;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -30,6 +30,8 @@ import com.amazonaws.services.apigateway.model.GetApiKeyRequest;
 import com.amazonaws.services.apigateway.model.GetApiKeysRequest;
 import com.amazonaws.services.apigateway.model.GetUsagePlanRequest;
 import com.amazonaws.services.apigateway.model.UsagePlan;
+
+import i_nav.INavEntity;
 
 /**
  * 

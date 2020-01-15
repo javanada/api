@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import i_nav_model.LocationObject;
+
 /**
  * 
  * @author CSCD490 Team5
