@@ -152,6 +152,34 @@ public class Location implements INavEntity {
 		
 		JSONArray jsonArray = new JSONArray();
 		
+		JSONObject obj = new JSONObject();
+		if (newLocation.get("short_name") == null) {
+			obj.put("missing short_name", "missing short_name");
+		}
+		if (newLocation.get("long_name") == null) {
+			obj.put("missing long_name", "missing long_name");
+		}
+		if (newLocation.get("description") == null) {
+			obj.put("missing description", "missing description");
+		}
+		if (newLocation.get("location_type_id") == null) {
+			obj.put("missing location_type_id", "missing location_type_id");
+		}
+		if (newLocation.get("address_id") == null) {
+			obj.put("missing address_id", "missing address_id");
+		}
+			
+		if (newLocation.get("short_name") == null ||
+			newLocation.get("long_name") == null ||
+			newLocation.get("description") == null ||
+			newLocation.get("location_type_id") == null ||
+			newLocation.get("address_id") == null
+			) {	
+			
+			jsonArray.add(obj);
+			return jsonArray;
+		}
+		
 		String query = "INSERT INTO `locations` (`short_name`, `long_name`, `description`, `location_type_id`, `address_id`, `active`) " + 
 				"VALUES (?, ?, ?, ?, ?, 1);";
 		
@@ -176,9 +204,9 @@ public class Location implements INavEntity {
 			
 			
 		} catch (SQLException e) {
-			JSONObject obj = new JSONObject();
-			obj.put("SQLException", e.getMessage());
-			jsonArray.add(obj);
+			JSONObject obj2 = new JSONObject();
+			obj2.put("SQLException", e.getMessage());
+			jsonArray.add(obj2);
 		}
 		
 		return jsonArray;
@@ -188,11 +216,13 @@ public class Location implements INavEntity {
 		
 		String select = 
 					" SELECT " + 
-					" l.location_id as location_location_id, l.short_name as location_short_name, l.long_name as location_long_name, l.description as location_description, l.image as canvas_image, " + 
-					" lt.location_type_id, lt.short_name as location_type_short_name, lt.description as location_type_description ";
+					" l.location_id as location_location_id, l.short_name as location_short_name, l.long_name as location_long_name, l.description as location_description, l.image as canvas_image, l.address_id, " + 
+					" lt.location_type_id, lt.short_name as location_type_short_name, lt.description as location_type_description, " + 
+					" a.address_id as address_address_id, a.address1, a.address2, a.city, a.state, a.zipcode, a.zipcode_ext ";
 		
 		String from = " FROM locations l ";
 		String join = " INNER JOIN location_types lt ON l.location_type_id = lt.location_type_id ";
+		join += " INNER JOIN addresses a ON a.address_id = l.address_id ";
 		String where = " WHERE 1 ";
 		
 		if (id != null) {
@@ -224,24 +254,37 @@ public class Location implements INavEntity {
 			while (resultSet.next()) {
 				Location location = new Location();
 				LocationType locationType = new LocationType();
+				Address address = new Address();
 				
 				location.setLocation_id(resultSet.getInt("location_location_id"));
 				location.setShort_name(resultSet.getString("location_short_name"));
 				location.setLong_name(resultSet.getString("location_long_name"));
 				location.setDescription(resultSet.getString("location_description"));
+				location.setLocation_type_id(resultSet.getInt("location_type_id"));
+				location.setAddress_id(resultSet.getInt("location_type_id"));
 				location.setImage(resultSet.getString("canvas_image"));
 				
 				locationType.setLocation_type_id(resultSet.getInt("location_type_id"));
 				locationType.setShort_name(resultSet.getString("location_type_short_name"));
 				locationType.setDescription(resultSet.getString("location_type_description"));
 				
+				address.setAddress_id(resultSet.getInt("address_id"));
+				address.setAddress1(resultSet.getString("address1"));
+				address.setAddress2(resultSet.getString("address2"));
+				address.setCity(resultSet.getString("city"));
+				address.setState(resultSet.getString("state"));
+				address.setZipcode(resultSet.getString("zipcode"));
+				address.setZipcode_ext(resultSet.getString("zipcode_ext"));
+				
 				JSONParser parser = new JSONParser();
 				try {
 					
 					JSONObject locationJson = (JSONObject) parser.parse(location.getJSONString());
 					JSONObject locationTypeJson = (JSONObject) parser.parse(locationType.getJSONString());
+					JSONObject addressJson = (JSONObject) parser.parse(address.getJSONString());
 					
 					locationJson.put("location_type", locationTypeJson);
+					locationJson.put("address", addressJson);
 					jsonArray.add(locationJson);
 					
 				} catch (ParseException e) {
