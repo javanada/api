@@ -363,6 +363,18 @@ public class INavLambdaHandler implements RequestStreamHandler {
 			String destObjectId = ((JSONObject) event).get("dest_object_id").toString();
 			
 			responseBodyArray = CloudGraphListUndirected.getShortestPath(sourceObjectId, destObjectId, true);
+			
+		}  else if (entity.equals("edge/remove-undirected")) {
+
+			String sourceObjectId = ((JSONObject) event).get("source_object_id").toString();
+			String destObjectId = ((JSONObject) event).get("dest_object_id").toString();
+			String locationId = ((JSONObject) event).get("location_id").toString();
+			
+			CloudGraphListUndirected graph = new CloudGraphListUndirected("i_nav_graph1", true);
+			graph.getPoints(locationId);
+			responseBodyArray = CloudGraphListUndirected.removeEdge(graph, sourceObjectId, destObjectId);
+			responseBodyArray = CloudGraphListUndirected.removeEdge(graph, destObjectId, sourceObjectId);
+			
 		}
 
 //		try {
