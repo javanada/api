@@ -300,12 +300,17 @@ public class INavLambdaHandler implements RequestStreamHandler {
 
 		} else if (entity.equals("users")) {
 
-			responseBodyArray = User.getUsers(null, null);
+			responseBodyArray = User.getUsers(null, null, null);
 
 		} else if (entity.equals("user")) {
 
 			String userId = ((JSONObject) event).get("id").toString();
-			responseBodyArray = User.getUsers(userId, null);
+			responseBodyArray = User.getUsers(userId, null, null);
+
+		}  else if (entity.equals("user/sub")) {
+
+			String userId = ((JSONObject) event).get("id").toString();
+			responseBodyArray = User.getUsers(null, null, userId);
 
 		} else if (entity.equals("user/update")) {
 
@@ -368,14 +373,37 @@ public class INavLambdaHandler implements RequestStreamHandler {
 
 			String sourceObjectId = ((JSONObject) event).get("source_object_id").toString();
 			String destObjectId = ((JSONObject) event).get("dest_object_id").toString();
-			String locationId = ((JSONObject) event).get("location_id").toString();
+			
 			
 			CloudGraphListUndirected graph = new CloudGraphListUndirected("i_nav_graph1", true);
-			graph.getPoints(locationId);
+			
 			responseBodyArray = CloudGraphListUndirected.removeEdge(graph, sourceObjectId, destObjectId);
 			responseBodyArray = CloudGraphListUndirected.removeEdge(graph, destObjectId, sourceObjectId);
 			
 		}
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
 
 //		try {
 //			responseBodyArray = (JSONArray) parser.parse(queryResultJson);

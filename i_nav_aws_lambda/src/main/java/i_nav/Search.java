@@ -146,6 +146,13 @@ public class Search {
 			double deltaY = (e.v2().getY() - e.v1().getY());
             double deltaX = (e.v2().getX() - e.v1().getX());
             double dist = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+            
+            if (i > 0) {
+            	
+            	Edge last = edges.get(i - 1);
+            	
+            	
+            }
 
             String from = "";
             if (allObjects.containsKey("" + e.v1().getObject_id())) {

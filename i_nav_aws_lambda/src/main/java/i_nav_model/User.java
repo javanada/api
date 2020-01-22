@@ -31,8 +31,6 @@ import com.amazonaws.services.apigateway.model.GetApiKeysRequest;
 import com.amazonaws.services.apigateway.model.GetUsagePlanRequest;
 import com.amazonaws.services.apigateway.model.UsagePlan;
 
-import i_nav.INavEntity;
-
 /**
  * 
  * @author CSCD490 Team5
@@ -166,22 +164,48 @@ public class User implements INavEntity {
 		return new User();
 	}
 	
-	public static JSONArray getUsers(String id, String username) {
+	public static JSONArray getUsers(String id, String username, String subUsersId) {
+		JSONArray jsonArray = new JSONArray();
+		
+		if ((id != null || username != null) && subUsersId != null) {
+			return jsonArray;
+		}
 		
 		String select = " SELECT u.user_id, u.username, u.first_name, u.last_name, u.email, u.role_id, u.active AS user_active, l.location_id, l.short_name, l.long_name, l.description, l.image, l.location_type_id, l.address_id, l.active AS location_active ";
 		String from = " FROM users u ";
 		String join = " LEFT JOIN users_locations ul ON u.user_id = ul.user_id ";
 		join += " LEFT JOIN locations l ON l.location_id = ul.location_id "; 
-		String where = "  ";
+		String where = " WHERE 1 ";
+		
+		String groupBy = " ";
+		String orderBy = " ";
+		
+		if (subUsersId != null) {
+			select = " SELECT u.user_id, u.username, u.first_name, u.last_name, u.email, u.role_id, u.active AS user_active ";
+			from = " FROM i_nav.users AS u, ( " + 
+					"    SELECT ul.location_id " + 
+					"    FROM users_locations AS ul " + 
+					"    WHERE ul.user_id = ? " + 
+					" ) AS ul1, i_nav.users_locations AS ul2 ";
+			join = " ";
+			groupBy = " GROUP BY u.user_id ";
+			orderBy = " ORDER BY u.user_id ";
+		}
 		
 		if (id != null) {
-			where = " WHERE u.user_id = ? ";
-		} else if (username != null) {
-			where = " WHERE u.username = ? ";
+			where += " AND u.user_id = ? ";
 		}
-		String query = select + from + join + where;
+		if (username != null) {
+			where += " AND u.username = ? ";
+		}
+		if (subUsersId != null) {
+			where += " AND ul2.user_id=u.user_id " + 
+					" AND ul1.location_id=ul2.location_id ";
+		}
 		
-		JSONArray jsonArray = new JSONArray();
+		
+		String query = select + from + join + where + groupBy + orderBy;
+		
 		
 		int c = 1;
 		
@@ -195,6 +219,9 @@ public class User implements INavEntity {
 			}
 			if (username != null) {
 				stmt.setString(c++, username);
+			}
+			if (subUsersId != null) {
+				stmt.setString(c++, subUsersId);
 			}
 			
 			ResultSet resultSet = stmt.executeQuery();
@@ -215,21 +242,28 @@ public class User implements INavEntity {
 				user.setActive(resultSet.getBoolean("user_active"));
 				users.put("" + user.getUser_id(), user);
 				
-				Location l = new Location();
-				l.setLocation_id(resultSet.getInt("location_id"));
-				l.setShort_name(resultSet.getString("short_name"));
-				l.setLong_name(resultSet.getString("long_name"));
-				l.setDescription(resultSet.getString("description"));
-				l.setImage(resultSet.getString("image"));
-				l.setActive(resultSet.getBoolean("location_active"));
-				l.setAddress_id(resultSet.getInt("address_id"));
-				l.setLocation_type_id(resultSet.getInt("location_type_id"));
-				
-				if (!userLocations.containsKey("" + user.getUser_id())) {
-					userLocations.put("" + user.getUser_id(), new ArrayList<Location>());
-				}
-				if (resultSet.getInt("location_id") != 0) {
-					userLocations.get("" + user.getUser_id()).add(l);
+				if (subUsersId == null) {
+					
+					Location l = new Location();
+					l.setLocation_id(resultSet.getInt("location_id"));
+					l.setShort_name(resultSet.getString("short_name"));
+					l.setLong_name(resultSet.getString("long_name"));
+					l.setDescription(resultSet.getString("description"));
+					l.setImage(resultSet.getString("image"));
+					l.setActive(resultSet.getBoolean("location_active"));
+					l.setAddress_id(resultSet.getInt("address_id"));
+					l.setLocation_type_id(resultSet.getInt("location_type_id"));
+					
+					if (!userLocations.containsKey("" + user.getUser_id())) {
+						userLocations.put("" + user.getUser_id(), new ArrayList<Location>());
+					}
+					if (resultSet.getInt("location_id") != 0) {
+						userLocations.get("" + user.getUser_id()).add(l);
+					}
+				} else {
+					if (!userLocations.containsKey("" + user.getUser_id())) {
+						userLocations.put("" + user.getUser_id(), new ArrayList<Location>());
+					}
 				}
 				
 				
@@ -253,6 +287,7 @@ public class User implements INavEntity {
 				}  catch (ParseException e) {
 					JSONObject obj = new JSONObject();
 					obj.put("ParseException", e.getMessage());
+					obj.put("query", query);
 					jsonArray.add(obj);
 				}
 				
@@ -262,6 +297,7 @@ public class User implements INavEntity {
 		} catch (SQLException e) {
 			JSONObject obj = new JSONObject();
 			obj.put("SQLException", e.getMessage());
+			obj.put("query", query);
 			jsonArray.add(obj);
 		} 
 		
@@ -523,7 +559,7 @@ public class User implements INavEntity {
 				
 				
                 long id = resultSet.getLong(1);
-                jsonArray = User.getUsers("" + id, null);
+                jsonArray = User.getUsers("" + id, null, null);
                 ((JSONObject) jsonArray.get(0)).put("x-api-key", uuid);
                 
                 JSONObject obj = new JSONObject();
@@ -543,7 +579,7 @@ public class User implements INavEntity {
 	
 	public static void newCognitoUser(JSONObject newUser) {
 		
-		if (getUsers(null, newUser.get("username").toString()).size() != 0) {
+		if (getUsers(null, newUser.get("username").toString(), null).size() != 0) {
 			return;
 		}
 		

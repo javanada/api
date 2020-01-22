@@ -13,8 +13,6 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-import i_nav.INavEntity;
-
 /**
  * 
  * @author CSCD490 Team5
@@ -105,12 +103,9 @@ public class Location implements INavEntity {
 			stmt.setInt(counter, Integer.parseInt(updateLoc.get("location_id").toString()));
 
 			stmt.executeUpdate();
-			ResultSet resultSet = stmt.getGeneratedKeys();
-
-			if (resultSet.next()) {
-				long id = resultSet.getLong(1);
-				JSONArr = Location.getLocations("" + id, null);
-			}
+			
+			JSONArr = Location.getLocations(updateLoc.get("location_id").toString(), null);
+			
 
 		} catch (SQLException e) {
 			JSONObject obj = new JSONObject();
@@ -226,13 +221,15 @@ public class Location implements INavEntity {
 		String where = " WHERE 1 ";
 		
 		if (id != null) {
-			where += " AND l.location_id = ? AND l.active = 1";
+			where += " AND l.location_id = ? ";
 		}
 		
 		if (parentId != null) {
 			from += " INNER JOIN location_relations lr ON lr.child_id = l.location_id ";
 			where += " AND lr.parent_id = ? ";
 		}
+		
+		where += " AND l.active = 1 ";
 		
 		String query = select + from + join + where;
 		
@@ -263,10 +260,12 @@ public class Location implements INavEntity {
 				location.setLocation_type_id(resultSet.getInt("location_type_id"));
 				location.setAddress_id(resultSet.getInt("location_type_id"));
 				location.setImage(resultSet.getString("canvas_image"));
+				location.setActive(true);
 				
 				locationType.setLocation_type_id(resultSet.getInt("location_type_id"));
 				locationType.setShort_name(resultSet.getString("location_type_short_name"));
 				locationType.setDescription(resultSet.getString("location_type_description"));
+				
 				
 				address.setAddress_id(resultSet.getInt("address_id"));
 				address.setAddress1(resultSet.getString("address1"));
@@ -275,6 +274,7 @@ public class Location implements INavEntity {
 				address.setState(resultSet.getString("state"));
 				address.setZipcode(resultSet.getString("zipcode"));
 				address.setZipcode_ext(resultSet.getString("zipcode_ext"));
+				
 				
 				JSONParser parser = new JSONParser();
 				try {

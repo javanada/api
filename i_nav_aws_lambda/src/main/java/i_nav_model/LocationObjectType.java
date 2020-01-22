@@ -12,8 +12,6 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-import i_nav.INavEntity;
-
 /**
  * 
  * @author CSCD490 Team5
@@ -75,12 +73,9 @@ public class LocationObjectType implements INavEntity {
 			stmt.setInt(counter, Integer.parseInt(updateObjLoc.get("object_type_id").toString()));
 
 			stmt.executeUpdate();
-			ResultSet resultSet = stmt.getGeneratedKeys();
-
-			if (resultSet.next()) {
-				long id = resultSet.getLong(1);
-				JSONArr = LocationObjectType.getLocationObjectTypes("" + id);
-			}
+			
+			JSONArr = LocationObjectType.getLocationObjectTypes(updateObjLoc.get("object_type_id").toString());
+			
 
 		} catch (SQLException e) {
 			JSONObject obj = new JSONObject();
