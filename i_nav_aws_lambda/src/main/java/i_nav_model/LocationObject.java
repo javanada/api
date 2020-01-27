@@ -14,7 +14,6 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import i_nav.CloudGraphListUndirected;
-import i_nav.INavEntity;
 
 /**
  * 

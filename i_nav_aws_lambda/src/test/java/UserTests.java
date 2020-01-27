@@ -52,7 +52,7 @@ class UserTests {
 		String fName = "david";
 		
 		// Act
-		JSONArray arr = User.getUsers(userId, null);
+		JSONArray arr = User.getUsers(userId, null, null);
 		JSONObject obj = (JSONObject) arr.get(0);
 		User user = new User(obj);
 		

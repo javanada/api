@@ -1,4 +1,4 @@
-package i_nav;
+package i_nav_model;
 
 /**
  * 

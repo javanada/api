@@ -12,8 +12,6 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-import i_nav.INavEntity;
-
 /**
  * 
  * @author CSCD490 Team5
@@ -67,12 +65,8 @@ public class Role implements INavEntity {
 			stmt.setInt(counter, Integer.parseInt(updateRole.get("role_id").toString()));
 
 			stmt.executeUpdate();
-			ResultSet resultSet = stmt.getGeneratedKeys();
-
-			if (resultSet.next()) {
-				long id = resultSet.getLong(1);
-				JSONArr = Role.getRoles("" + id);
-			}
+			JSONArr = Role.getRoles(updateRole.get("role_id").toString());
+			
 
 		} catch (SQLException e) {
 			JSONObject obj = new JSONObject();
