@@ -147,11 +147,13 @@ public class Search {
             double deltaX = (e.v2().getX() - e.v1().getX());
             double dist = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
             
+            double prevDeltaY = 0;
+            double prevDeltaX = 0;
+            
             if (i > 0) {
-            	
             	Edge last = edges.get(i - 1);
-            	
-            	
+            	prevDeltaY = (last.v2().getY() - last.v1().getY());
+            	prevDeltaX = (last.v2().getX() - last.v1().getX());
             }
 
             String from = "";
@@ -169,6 +171,10 @@ public class Search {
             double angle = Math.atan(deltaY / deltaX);
             angle = angle * (180 / Math.PI);
             angle = Math.round(angle);
+            
+            double anglePrev = Math.atan(prevDeltaY / prevDeltaX);
+            anglePrev = anglePrev * (180 / Math.PI);
+            anglePrev = Math.round(anglePrev);
 
             String direction = "";
 
@@ -193,17 +199,43 @@ public class Search {
             } else if (deltaX < 0 && deltaY == 0) { // W
                 direction = "W";
             }
+            
+            
+            if (prevDeltaX > 0 && prevDeltaY > 0) { // quadrant 1
+            	anglePrev = Math.abs(anglePrev);
+            } else if (prevDeltaX < 0 && prevDeltaY > 0) { // quadrant 2
+            	anglePrev = Math.abs(anglePrev) + 270;
+            } else if (prevDeltaX < 0 && prevDeltaY < 0) { // quadrant 3
+            	anglePrev = Math.abs(anglePrev) + 180;
+            } else if (prevDeltaX > 0 && prevDeltaY < 0) { // quadrant 4
+            	anglePrev = Math.abs(anglePrev) + 90;
+            }
+            
+            String turn  = " ";
+            if (angle > anglePrev && (angle - anglePrev < 180)) {
+            	turn += " right ";
+            } else {
+            	turn += " left ";
+            }
+            turn  += " (anglePrev: " + anglePrev + ", angle: " + angle + ")";
 
 
             System.out.println("###" + "v1: " + e.v1().getX() + ", " + e.v1().getY() + "    v2: " + e.v2().getX() + ", " + e.v2().getY());
 
-            String str = "Walk... " + angle + " deg (" + direction + ") " +  Math.round(dist) + " ft. ";
-
+            String str = "";
+            
+            if (i > 0) {
+            	str += " turn " + turn;
+            }
+            str += "Walk... " + angle + " deg (" + direction + ") " +  Math.round(dist) + " ft. ";
+            
+            
+            
             if (i == edges.size() - 1) {
                 str += "from " + from + ". Arrive at your destination, " + to + "";
             } else {
                 str += "from " + from + " to " + to + "";
-                str += ", turn";
+                
             }
             str += ".";
 

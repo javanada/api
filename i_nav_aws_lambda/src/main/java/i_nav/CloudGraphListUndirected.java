@@ -295,12 +295,22 @@ public class CloudGraphListUndirected { // should be undirected
 			destVertex.setY(destObject.getY_coordinate());
 			
 			if (graph == null)  {
-				graph = new CloudGraphListUndirected("i_nav_graph1", true);			
+				graph = new CloudGraphListUndirected("i_nav_graph1", true);
 				graph.getPoints(sourceLocationId);
 				if (!sourceLocationId.equals(destLocationId)) {
 					graph.getPoints(destLocationId);
 				}
 			}
+			List<Edge> edgesSource = graph.getAdj().get(sourceObjectId);
+			for (Edge e : edgesSource) {
+				if (
+					sourceObjectId.equals("" + e.v1().getObject_id()) && destObjectId.equals("" + e.v2().getObject_id()) ||
+					sourceObjectId.equals("" + e.v2().getObject_id()) && destObjectId.equals("" + e.v1().getObject_id())
+						) { // already exists
+					return jsonArray;
+				}
+			}
+			
 //			graph1.adj.put(sourceObjectId, graph1.dbGraphAccess.getCloudVertexEdges(graph1.graphName, sourceObjectId));
 //			graph1.adj.put(destObjectId, graph1.dbGraphAccess.getCloudVertexEdges(graph1.graphName, destObjectId));
 			

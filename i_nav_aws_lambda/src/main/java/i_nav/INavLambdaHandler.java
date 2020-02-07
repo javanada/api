@@ -103,6 +103,11 @@ public class INavLambdaHandler implements RequestStreamHandler {
 		if (event.get("httpMethod").equals("POST")) {
 			requestBody = event.get("requestBody").toString();
 		}
+		
+		
+		
+		
+		// TODO: refactor the following into a switch statement: 
 
 		if (entity.equals("location")) {
 
@@ -380,6 +385,17 @@ public class INavLambdaHandler implements RequestStreamHandler {
 			responseBodyArray = CloudGraphListUndirected.removeEdge(graph, sourceObjectId, destObjectId);
 			responseBodyArray = CloudGraphListUndirected.removeEdge(graph, destObjectId, sourceObjectId);
 			
+		} else if (entity.equals("location/image")) {
+
+			try {
+				responseBodyArray = Location.uploadImage((JSONObject) parser.parse(requestBody));
+				
+			} catch (ParseException e) {
+				JSONObject obj = new JSONObject();
+				obj.put("parseException", e.getMessage());
+				responseBodyArray.add(obj);
+			}
+			
 		}
 		
 		
@@ -440,6 +456,7 @@ public class INavLambdaHandler implements RequestStreamHandler {
 
 	}
 	
+	@SuppressWarnings("unchecked")
 	public void authTrigger(InputStream inputStream, OutputStream outputStream, Context context) throws IOException {
 //		LambdaLogger logger = context.getLogger();
 		BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));

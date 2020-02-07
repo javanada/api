@@ -302,6 +302,9 @@ public class LocationObject implements INavEntity {
                 if (jsonArray.size() > 0) {
 	                CloudGraphListUndirected graph1 = new CloudGraphListUndirected("i_nav_graph1", true);
 	                graph1.setVertex((JSONObject)jsonArray.get(0));
+	                
+	                
+	                
                 }
             }
 			

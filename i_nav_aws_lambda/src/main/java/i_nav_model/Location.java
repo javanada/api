@@ -20,7 +20,7 @@ import org.json.simple.parser.ParseException;
  * 
  *
  */
-public class Location implements INavEntity {
+public class Location extends FingerprintEntityBase {
 	
 	private int location_id;
 	private String short_name;
@@ -70,6 +70,7 @@ public class Location implements INavEntity {
 		if (updateLoc.get("image") != null) {
 			set += ", `image` = ? ";
 		}
+		
 
 		String where = " WHERE `location_id` = ?";
 
@@ -211,7 +212,8 @@ public class Location implements INavEntity {
 		
 		String select = 
 					" SELECT " + 
-					" l.location_id as location_location_id, l.short_name as location_short_name, l.long_name as location_long_name, l.description as location_description, l.image as canvas_image, l.address_id, " + 
+					" l.location_id as location_location_id, l.short_name as location_short_name, l.long_name as location_long_name, l.description as location_description, l.image as canvas_image, l.address_id, " +
+					" l.created_on, l.created_by, l.modified_on, l.modified_by, " + 
 					" lt.location_type_id, lt.short_name as location_type_short_name, lt.description as location_type_description, " + 
 					" a.address_id as address_address_id, a.address1, a.address2, a.city, a.state, a.zipcode, a.zipcode_ext ";
 		
@@ -258,9 +260,13 @@ public class Location implements INavEntity {
 				location.setLong_name(resultSet.getString("location_long_name"));
 				location.setDescription(resultSet.getString("location_description"));
 				location.setLocation_type_id(resultSet.getInt("location_type_id"));
-				location.setAddress_id(resultSet.getInt("location_type_id"));
+				location.setAddress_id(resultSet.getInt("address_id"));
 				location.setImage(resultSet.getString("canvas_image"));
 				location.setActive(true);
+//				location.setCreated_on(resultSet.getDate("created_on"));
+//				location.setCreated_by("");
+//				location.setModified_on(resultSet.getDate("modified_on"));
+//				location.setModified_by("");
 				
 				locationType.setLocation_type_id(resultSet.getInt("location_type_id"));
 				locationType.setShort_name(resultSet.getString("location_type_short_name"));
@@ -391,10 +397,20 @@ public class Location implements INavEntity {
 		return jsonArray;
 	}
 	
+	public static JSONArray uploadImage(JSONObject obj) {
+		
+		JSONArray jsonArray = new JSONArray();
+		
+		
+		
+		
+		return jsonArray;
+	}
+	
 	@Override
 	public String getJSONString() {
 		
-		JSONObject jsonObject = new JSONObject();
+		JSONObject jsonObject = super.getJSON();
 		jsonObject.put("location_id", location_id);
 		jsonObject.put("short_name", short_name);
 		jsonObject.put("long_name", long_name);
@@ -457,5 +473,7 @@ public class Location implements INavEntity {
 	public void setImage(String image) {
 		this.image = image;
 	}
+
+	
 
 }

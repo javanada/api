@@ -49,7 +49,7 @@ class UserTests {
 		
 		// Arrange
 		String userId = "1";
-		String fName = "david";
+		String fName = "David";
 		
 		// Act
 		JSONArray arr = User.getUsers(userId, null, null);
