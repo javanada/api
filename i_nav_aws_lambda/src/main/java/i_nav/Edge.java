@@ -15,6 +15,7 @@ public class Edge {
 	private LocationObjectVertex v1;
 	private LocationObjectVertex v2;
 	private int weight;
+	private boolean accessible;
 	private String step;
 	
 	public Edge(LocationObjectVertex v1, LocationObjectVertex v2, int weight) {
@@ -44,6 +45,8 @@ public class Edge {
 		obj.put("v1", v1.toJSON());
 		obj.put("v2", v2.toJSON());
 		obj.put("weight", weight);
+		obj.put("accessible", accessible);
+		obj.put("linked", isLinked());
 		return obj;
 	}
 
@@ -54,7 +57,17 @@ public class Edge {
 	public void setStep(String step) {
 		this.step = step;
 	}
+
+	public boolean isAccessible() {
+		return accessible;
+	}
+
+	public void setAccessible(boolean accessible) {
+		this.accessible = accessible;
+	}
 	
-	
+	public boolean isLinked() {
+		return v1.getLocation_id() != v2.getLocation_id();
+	}
 
 }

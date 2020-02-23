@@ -1,17 +1,24 @@
 package i_nav_model;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Base64;
 import java.util.Map;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+
+import i_nav.S3Access;
 
 /**
  * 
@@ -208,6 +215,47 @@ public class Location extends FingerprintEntityBase {
 		return jsonArray;
 	}
 	
+	public static JSONArray getParent(String id) {
+		
+		JSONArray jsonArray = new JSONArray();
+		
+		String select = 
+				"SELECT lr.parent_id";
+		String from = 
+				"FROM i_nav.locations l";
+		String join = 
+				"INNER JOIN location_relations lr ON lr.child_id = l.location_id ";
+		String where = 
+				"WHERE 1" + 
+				"AND l.location_id = ?";
+		
+		String query = select + from + join + where;
+		
+		try {
+			Connection conn = DriverManager.getConnection(url, username, password);
+			PreparedStatement stmt = conn.prepareStatement(query);
+			int c = 1;
+			if (id != null) {
+				stmt.setString(c++, id);
+			}
+			
+			ResultSet resultSet = stmt.executeQuery();
+			JSONObject jsonObj = new JSONObject();
+			
+			while (resultSet.next()) {
+				jsonObj.put("parent", resultSet.getInt("location_location_id"));
+			}
+			jsonArray.add(jsonObj);
+			
+		} catch (Exception e) {
+			JSONObject obj = new JSONObject();
+			obj.put("Exception", e.getMessage());
+			jsonArray.add(obj);
+		}
+		
+		return jsonArray;
+	}
+	
 	public static JSONArray getLocations(String id, String parentId) {
 		
 		String select = 
@@ -315,8 +363,8 @@ public class Location extends FingerprintEntityBase {
 		JSONArray jsonArray = new JSONArray();
 		
 		// get primary and secondary objects for this location id
-		JSONArray primaryArr = LocationObject.getLocationObjects(null, id, "4");
-		JSONArray secondaryArr = LocationObject.getLocationObjects(null, id, "5");
+		JSONArray primaryArr = LocationObject.getLocationObjects(null, id, "4", false);
+		JSONArray secondaryArr = LocationObject.getLocationObjects(null, id, "5", false);
 		
 		if (primaryArr.size() == 0 || secondaryArr.size() == 0) {
 			JSONObject obj = new JSONObject();
@@ -401,7 +449,28 @@ public class Location extends FingerprintEntityBase {
 		
 		JSONArray jsonArray = new JSONArray();
 		
-		
+		try {
+			byte[] decodedData = Base64.getDecoder().decode(obj.get("location_image_data").toString());
+			
+			File file = new File(obj.get("location_image_name").toString());
+			
+			OutputStream os  = new FileOutputStream(file); 
+
+	        // Starts writing the bytes in it 
+	        os.write(decodedData); 
+	
+	        // Close the file 
+	        os.close(); 
+			
+			S3Access s3 = new S3Access();
+			
+			s3.putObjectInBucket("inav-2761e89d-6096-43cc-b585-1c07a19a140d", obj.get("location_image_name").toString(), file);
+			
+		} catch (Exception e) {
+			JSONObject objE = new JSONObject();
+			objE.put("Exception", e.getMessage());
+			jsonArray.add(objE);
+		}
 		
 		
 		return jsonArray;

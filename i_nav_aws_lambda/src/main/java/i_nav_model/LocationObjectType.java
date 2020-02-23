@@ -26,7 +26,21 @@ public class LocationObjectType implements INavEntity {
 	private String long_name;
 	private String description;
 	private String image;
+	private boolean gateway;
 	private boolean accessibility;
+	
+	public LocationObjectType() {
+	}
+	
+	public LocationObjectType(JSONObject jsonObjectType) {
+		object_type_id = Integer.parseInt(jsonObjectType.get("object_type_id").toString());
+		short_name = jsonObjectType.get("short_name") != null ? jsonObjectType.get("short_name").toString() : "";
+		long_name = jsonObjectType.get("long_name") != null ? jsonObjectType.get("long_name").toString() : "";
+		description = jsonObjectType.get("description") != null ? jsonObjectType.get("description").toString() : "";
+		image = jsonObjectType.get("image") != null ? jsonObjectType.get("image").toString() : "";
+		gateway = Boolean.parseBoolean(jsonObjectType.get("gateway").toString());
+		accessibility = Boolean.parseBoolean(jsonObjectType.get("accessibility").toString());
+	}
 
 	public static JSONArray updateObjLoc(JSONObject updateObjLoc) {
 		JSONArray JSONArr = new JSONArray();
@@ -122,7 +136,8 @@ public class LocationObjectType implements INavEntity {
 				locationObjectType.setShort_name(resultSet.getString("short_name"));
 				locationObjectType.setLong_name(resultSet.getString("long_name"));
 				locationObjectType.setDescription(resultSet.getString("description"));
-				
+				locationObjectType.setGateway(resultSet.getString("gateway").equals("1") ? true : false);
+				locationObjectType.setAccessibility(resultSet.getString("accessibility").equals("1") ? true : false);
 				
 				JSONParser parser = new JSONParser();
 				try {
@@ -187,6 +202,8 @@ public class LocationObjectType implements INavEntity {
 		jsonObject.put("long_name", long_name);
 		jsonObject.put("description", description);
 		jsonObject.put("image", image);
+		jsonObject.put("gateway", gateway);
+		jsonObject.put("accessibility", accessibility);
 		return jsonObject.toJSONString();
 	}
 
@@ -235,9 +252,17 @@ public class LocationObjectType implements INavEntity {
 	public void setImage(String image) {
 		this.image = image;
 	}
+	public boolean getGateway() {
+		return gateway;
+	}
+	public void setGateway(boolean accessibility) {
+		this.gateway = accessibility;
+	}
+
 	public boolean isAccessibility() {
 		return accessibility;
 	}
+
 	public void setAccessibility(boolean accessibility) {
 		this.accessibility = accessibility;
 	}

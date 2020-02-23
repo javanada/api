@@ -42,7 +42,7 @@ class LocationObjectTests {
 		String locationId = "1";
 		
 		// Act
-		JSONArray arr = LocationObject.getLocationObjects(null, locationId, null);
+		JSONArray arr = LocationObject.getLocationObjects(null, locationId, null, false);
 		
 		// Assert
 		Assertions.assertTrue(arr.size() > 0);
@@ -55,7 +55,7 @@ class LocationObjectTests {
 		String locationId = "999999";
 		
 		// Act
-		JSONArray arr = LocationObject.getLocationObjects(null, locationId, null);
+		JSONArray arr = LocationObject.getLocationObjects(null, locationId, null, false);
 		
 		// Assert
 		Assertions.assertTrue(arr.size() == 0);
