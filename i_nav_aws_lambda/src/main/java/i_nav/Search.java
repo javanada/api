@@ -114,7 +114,7 @@ public class Search {
 						prevDist = dist.get(prev.get(current)) + dist.get(current);
 					}
 	
-					if ((prevDist + e.weight()) < dist.get(e.v2())) {
+					if (dist.containsKey(e.v2()) && (prevDist + e.weight()) < dist.get(e.v2())) {
 	
 						dist.put(e.v2(), prevDist + e.weight());
 	

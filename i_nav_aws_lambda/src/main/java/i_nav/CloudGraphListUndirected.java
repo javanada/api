@@ -428,6 +428,9 @@ public class CloudGraphListUndirected { // technically bidirectional
 		LocationObjectVertex end = graph1.getVertex(destObjectId);
 		
 		graph1.getPoints("" + start.getLocation_id());
+		if (start.getLocation_id() != end.getLocation_id()) {
+			graph1.getPoints("" + end.getLocation_id());
+		}
 		Search search = new Search(graph1);
 		
 		search.dijkstra(start, end);
