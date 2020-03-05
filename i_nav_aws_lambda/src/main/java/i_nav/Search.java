@@ -70,7 +70,7 @@ public class Search {
 		}
 	}
 	
-	public void dijkstra(LocationObjectVertex start, LocationObjectVertex end) {
+	public void dijkstra(LocationObjectVertex start, LocationObjectVertex end, boolean accessible) {
 		System.out.println("Dijkstra start");
 		this.start = start;
 		this.end = end;
@@ -84,11 +84,11 @@ public class Search {
 		}
 		path.put(start, new ArrayList<Edge>());
 		dist.put(start, 0);
-		dijkstra(start);
+		dijkstra(start, accessible);
 		printInfo();
 	}
 	
-	private void dijkstra(LocationObjectVertex current) {
+	private void dijkstra(LocationObjectVertex current, boolean accessible) {
 		
 		if (mark.containsKey(current)) {
 			return;
@@ -106,32 +106,50 @@ public class Search {
 			List<Edge> edges = G.getAdj().get("" + current.getObject_id());
 			System.out.println("NUM EDGES: " + edges.size());
 			for (Edge e : edges) {
+				
+				if (accessible && !e.isAccessible()) {
+					e.setWeight(999999);
+				}
+				
 				System.out.println("Comparing " + e.v1().getObject_id() + " and " + e.v2().getObject_id() + " current: " + current.getObject_id() + " cur dist: " + dist.get(current));
 				if (true) { // (!path.containsKey(e.v2())) {
 					
 					int prevDist = 0;
 					if (prev.containsKey(current)) {
-						prevDist = dist.get(prev.get(current)) + dist.get(current);
+//						prevDist = dist.get(prev.get(current)) + dist.get(current);
+						prevDist = dist.get(current);
 					}
+					
+					
 	
-					if (dist.containsKey(e.v2()) && (prevDist + e.weight()) < dist.get(e.v2())) {
-	
+					if (
+							dist.containsKey(e.v2()) && 
+							(prevDist + e.weight()) < dist.get(e.v2())
+							
+							) {
+						
 						dist.put(e.v2(), prevDist + e.weight());
+						System.out.println(" ---- putting " + (prevDist + e.weight()) + " prevDist: " + prevDist + " e.weight(): " + e.weight() + "....  in dist at key " + e.v2().getObject_id());
 	
 						prev.put(e.v2(), current);
+						
 						
 						
 						path.put(e.v2(), (ArrayList<Edge>) path.get(prev.get(e.v2())).clone());
 						path.get(e.v2()).add(e);
 						
 						
-						
 					}
 					
 				}
+				
 			}
 			for (Edge e : edges) {
-				dijkstra(e.v2());
+				if (!accessible || e.isAccessible()) {
+					dijkstra(e.v2(), accessible);
+				} else {
+					System.out.println("e is not accessible: v1: " + e.v1().getObject_id() + " v2: " + e.v2().getObject_id());
+				}
 			}
 		}
 		

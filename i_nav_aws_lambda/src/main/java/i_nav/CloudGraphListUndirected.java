@@ -419,7 +419,7 @@ public class CloudGraphListUndirected { // technically bidirectional
 		return jsonArray;
 	}
 	
-	public static JSONArray getShortestPath(String sourceObjectId, String destObjectId, boolean isLambda) {
+	public static JSONArray getShortestPath(String sourceObjectId, String destObjectId, boolean isLambda, boolean accessible) {
 		
 		JSONArray jsonArray = new JSONArray();
 		
@@ -433,7 +433,7 @@ public class CloudGraphListUndirected { // technically bidirectional
 		}
 		Search search = new Search(graph1);
 		
-		search.dijkstra(start, end);
+		search.dijkstra(start, end, accessible);
 		ArrayList<Edge> path = search.getPathToVertex();
 		
 		JSONArray arr;

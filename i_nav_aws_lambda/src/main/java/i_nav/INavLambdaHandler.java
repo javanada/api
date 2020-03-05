@@ -371,8 +371,10 @@ public class INavLambdaHandler implements RequestStreamHandler {
 
 			String sourceObjectId = ((JSONObject) event).get("source_object_id").toString();
 			String destObjectId = ((JSONObject) event).get("dest_object_id").toString();
+			String accessibleStr = ((JSONObject) event).get("accessible").toString();
+			Boolean accessible = Boolean.parseBoolean(accessibleStr);
 			
-			responseBodyArray = CloudGraphListUndirected.getShortestPath(sourceObjectId, destObjectId, true);
+			responseBodyArray = CloudGraphListUndirected.getShortestPath(sourceObjectId, destObjectId, true, accessible);
 			
 		}  else if (entity.equals("edge/remove-undirected")) {
 

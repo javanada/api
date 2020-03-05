@@ -35,6 +35,9 @@ public class Edge {
 	public int weight() {
 		return weight;
 	}
+	public void setWeight(int weight) {
+		this.weight = weight;
+	}
 	
 	public String toString() {
 		return "" + v1.toString() + "-" + v2.toString();
@@ -59,7 +62,11 @@ public class Edge {
 	}
 
 	public boolean isAccessible() {
-		return accessible;
+		if (isLinked()) {
+			return accessible;
+		} else {
+			return true;
+		}
 	}
 
 	public void setAccessible(boolean accessible) {
