@@ -235,7 +235,7 @@ public class Search {
             } else {
             	turn += " left ";
             }
-            turn  += " (anglePrev: " + anglePrev + ", angle: " + angle + ")";
+//            turn  += " (anglePrev: " + anglePrev + ", angle: " + angle + ")";
 
 
             System.out.println("###" + "v1: " + e.v1().getX() + ", " + e.v1().getY() + "    v2: " + e.v2().getX() + ", " + e.v2().getY());
