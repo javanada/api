@@ -243,10 +243,10 @@ public class Search {
             String str = "";
             
             if (i > 0) {
-            	str += " turn " + turn;
+            	str += "Turn " + turn;
             }
-            str += "Walk... " + angle + " deg (" + direction + ") " +  Math.round(dist) + " ft. ";
-            
+//            str += "Walk... " + angle + " deg (" + direction + ") " +  Math.round(dist) + " ft. ";
+            str += "walk " + direction + " " +  Math.round(dist) + " ft. ";
             
             
             if (i == edges.size() - 1) {

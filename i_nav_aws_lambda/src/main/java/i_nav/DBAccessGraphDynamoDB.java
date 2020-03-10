@@ -472,7 +472,11 @@ public class DBAccessGraphDynamoDB implements DBAccessGraph {
 							String v1str = row.get("v1").toString();
 							String v2str = row.get("v2").toString();
 							int w = Integer.parseInt(row.get("weight").toString());
-							boolean accessible = Boolean.parseBoolean(row.get("accessible").toString());
+							
+							boolean accessible = false;
+							if (row.get("accessible") != null) {
+								accessible = Boolean.parseBoolean(row.get("accessible").toString());
+							}
 							
 							JSONObject v1Obj = (JSONObject)parser.parse(v1str);
 							JSONObject v2Obj = (JSONObject)parser.parse(v2str);
