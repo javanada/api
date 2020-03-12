@@ -103,6 +103,11 @@ public class INavLambdaHandler implements RequestStreamHandler {
 		if (event.get("httpMethod").equals("POST")) {
 			requestBody = event.get("requestBody").toString();
 		}
+		
+		
+		
+		
+		// TODO: refactor the following into a switch statement: 
 
 		if (entity.equals("location")) {
 
@@ -141,17 +146,17 @@ public class INavLambdaHandler implements RequestStreamHandler {
 
 		} else if (entity.equals("objects")) {
 
-			responseBodyArray = LocationObject.getLocationObjects(null, null, null);
+			responseBodyArray = LocationObject.getLocationObjects(null, null, null, false);
 
 		} else if (entity.equals("objects/location")) {
 
 			String locationId = ((JSONObject) event).get("id").toString();
-			responseBodyArray = LocationObject.getLocationObjects(null, locationId, null);
+			responseBodyArray = LocationObject.getLocationObjects(null, locationId, null, false);
 
 		} else if (entity.equals("object")) {
 
 			String objectId = ((JSONObject) event).get("id").toString();
-			responseBodyArray = LocationObject.getLocationObjects(objectId, null, null);
+			responseBodyArray = LocationObject.getLocationObjects(objectId, null, null, false);
 
 		} else if (entity.equals("object/update")) {
 
@@ -366,8 +371,10 @@ public class INavLambdaHandler implements RequestStreamHandler {
 
 			String sourceObjectId = ((JSONObject) event).get("source_object_id").toString();
 			String destObjectId = ((JSONObject) event).get("dest_object_id").toString();
+			String accessibleStr = ((JSONObject) event).get("accessible").toString();
+			Boolean accessible = Boolean.parseBoolean(accessibleStr);
 			
-			responseBodyArray = CloudGraphListUndirected.getShortestPath(sourceObjectId, destObjectId, true);
+			responseBodyArray = CloudGraphListUndirected.getShortestPath(sourceObjectId, destObjectId, true, accessible);
 			
 		}  else if (entity.equals("edge/remove-undirected")) {
 
@@ -379,6 +386,17 @@ public class INavLambdaHandler implements RequestStreamHandler {
 			
 			responseBodyArray = CloudGraphListUndirected.removeEdge(graph, sourceObjectId, destObjectId);
 			responseBodyArray = CloudGraphListUndirected.removeEdge(graph, destObjectId, sourceObjectId);
+			
+		} else if (entity.equals("location/image")) {
+
+			try {
+				responseBodyArray = Location.uploadImage((JSONObject) parser.parse(requestBody));
+				
+			} catch (ParseException e) {
+				JSONObject obj = new JSONObject();
+				obj.put("parseException", e.getMessage());
+				responseBodyArray.add(obj);
+			}
 			
 		}
 		
@@ -440,6 +458,7 @@ public class INavLambdaHandler implements RequestStreamHandler {
 
 	}
 	
+	@SuppressWarnings("unchecked")
 	public void authTrigger(InputStream inputStream, OutputStream outputStream, Context context) throws IOException {
 //		LambdaLogger logger = context.getLogger();
 		BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));

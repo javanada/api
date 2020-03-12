@@ -70,7 +70,7 @@ public class Search {
 		}
 	}
 	
-	public void dijkstra(LocationObjectVertex start, LocationObjectVertex end) {
+	public void dijkstra(LocationObjectVertex start, LocationObjectVertex end, boolean accessible) {
 		System.out.println("Dijkstra start");
 		this.start = start;
 		this.end = end;
@@ -84,11 +84,11 @@ public class Search {
 		}
 		path.put(start, new ArrayList<Edge>());
 		dist.put(start, 0);
-		dijkstra(start);
+		dijkstra(start, accessible);
 		printInfo();
 	}
 	
-	private void dijkstra(LocationObjectVertex current) {
+	private void dijkstra(LocationObjectVertex current, boolean accessible) {
 		
 		if (mark.containsKey(current)) {
 			return;
@@ -106,32 +106,50 @@ public class Search {
 			List<Edge> edges = G.getAdj().get("" + current.getObject_id());
 			System.out.println("NUM EDGES: " + edges.size());
 			for (Edge e : edges) {
+				
+				if (accessible && !e.isAccessible()) {
+					e.setWeight(999999);
+				}
+				
 				System.out.println("Comparing " + e.v1().getObject_id() + " and " + e.v2().getObject_id() + " current: " + current.getObject_id() + " cur dist: " + dist.get(current));
 				if (true) { // (!path.containsKey(e.v2())) {
 					
 					int prevDist = 0;
 					if (prev.containsKey(current)) {
-						prevDist = dist.get(prev.get(current)) + dist.get(current);
+//						prevDist = dist.get(prev.get(current)) + dist.get(current);
+						prevDist = dist.get(current);
 					}
+					
+					
 	
-					if ((prevDist + e.weight()) < dist.get(e.v2())) {
-	
+					if (
+							dist.containsKey(e.v2()) && 
+							(prevDist + e.weight()) < dist.get(e.v2())
+							
+							) {
+						
 						dist.put(e.v2(), prevDist + e.weight());
+						System.out.println(" ---- putting " + (prevDist + e.weight()) + " prevDist: " + prevDist + " e.weight(): " + e.weight() + "....  in dist at key " + e.v2().getObject_id());
 	
 						prev.put(e.v2(), current);
+						
 						
 						
 						path.put(e.v2(), (ArrayList<Edge>) path.get(prev.get(e.v2())).clone());
 						path.get(e.v2()).add(e);
 						
 						
-						
 					}
 					
 				}
+				
 			}
 			for (Edge e : edges) {
-				dijkstra(e.v2());
+				if (!accessible || e.isAccessible()) {
+					dijkstra(e.v2(), accessible);
+				} else {
+					System.out.println("e is not accessible: v1: " + e.v1().getObject_id() + " v2: " + e.v2().getObject_id());
+				}
 			}
 		}
 		
@@ -147,11 +165,13 @@ public class Search {
             double deltaX = (e.v2().getX() - e.v1().getX());
             double dist = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
             
+            double prevDeltaY = 0;
+            double prevDeltaX = 0;
+            
             if (i > 0) {
-            	
             	Edge last = edges.get(i - 1);
-            	
-            	
+            	prevDeltaY = (last.v2().getY() - last.v1().getY());
+            	prevDeltaX = (last.v2().getX() - last.v1().getX());
             }
 
             String from = "";
@@ -169,6 +189,10 @@ public class Search {
             double angle = Math.atan(deltaY / deltaX);
             angle = angle * (180 / Math.PI);
             angle = Math.round(angle);
+            
+            double anglePrev = Math.atan(prevDeltaY / prevDeltaX);
+            anglePrev = anglePrev * (180 / Math.PI);
+            anglePrev = Math.round(anglePrev);
 
             String direction = "";
 
@@ -193,17 +217,43 @@ public class Search {
             } else if (deltaX < 0 && deltaY == 0) { // W
                 direction = "W";
             }
+            
+            
+            if (prevDeltaX > 0 && prevDeltaY > 0) { // quadrant 1
+            	anglePrev = Math.abs(anglePrev);
+            } else if (prevDeltaX < 0 && prevDeltaY > 0) { // quadrant 2
+            	anglePrev = Math.abs(anglePrev) + 270;
+            } else if (prevDeltaX < 0 && prevDeltaY < 0) { // quadrant 3
+            	anglePrev = Math.abs(anglePrev) + 180;
+            } else if (prevDeltaX > 0 && prevDeltaY < 0) { // quadrant 4
+            	anglePrev = Math.abs(anglePrev) + 90;
+            }
+            
+            String turn  = " ";
+            if (angle > anglePrev && (angle - anglePrev < 180)) {
+            	turn += " right ";
+            } else {
+            	turn += " left ";
+            }
+//            turn  += " (anglePrev: " + anglePrev + ", angle: " + angle + ")";
 
 
             System.out.println("###" + "v1: " + e.v1().getX() + ", " + e.v1().getY() + "    v2: " + e.v2().getX() + ", " + e.v2().getY());
 
-            String str = "Walk... " + angle + " deg (" + direction + ") " +  Math.round(dist) + " ft. ";
-
+            String str = "";
+            
+            if (i > 0) {
+            	str += "Turn " + turn;
+            }
+//            str += "Walk... " + angle + " deg (" + direction + ") " +  Math.round(dist) + " ft. ";
+            str += "walk " + direction + " " +  Math.round(dist) + " ft. ";
+            
+            
             if (i == edges.size() - 1) {
                 str += "from " + from + ". Arrive at your destination, " + to + "";
             } else {
                 str += "from " + from + " to " + to + "";
-                str += ", turn";
+                
             }
             str += ".";
 

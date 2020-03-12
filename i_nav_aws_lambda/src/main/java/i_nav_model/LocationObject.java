@@ -126,7 +126,7 @@ public class LocationObject implements INavEntity {
 			stmt.setInt(counter, Integer.parseInt(updateObj.get("object_id").toString()));
 			stmt.executeUpdate();
 			
-			JSONArr = LocationObject.getLocationObjects(updateObj.get("object_id").toString(), null, null);
+			JSONArr = LocationObject.getLocationObjects(updateObj.get("object_id").toString(), null, null, false);
 			
 
 		} catch (SQLException e) {
@@ -269,8 +269,8 @@ public class LocationObject implements INavEntity {
 			stmt.setInt(12, 1);
 			
 			// calculate x and y coordinates relative to primary object
-			JSONArray primaryArr = LocationObject.getLocationObjects(null, newLocationObject.get("location_id").toString(), "4");
-			JSONArray secondaryArr = LocationObject.getLocationObjects(null, newLocationObject.get("location_id").toString(), "5");
+			JSONArray primaryArr = LocationObject.getLocationObjects(null, newLocationObject.get("location_id").toString(), "4", false);
+			JSONArray secondaryArr = LocationObject.getLocationObjects(null, newLocationObject.get("location_id").toString(), "5", false);
 			
 			if (primaryArr.size() == 1 && secondaryArr.size() == 1) {
 				LocationObject primary = new LocationObject((JSONObject) primaryArr.get(0));
@@ -297,11 +297,14 @@ public class LocationObject implements INavEntity {
 			ResultSet resultSet = stmt.getGeneratedKeys();
 			if (resultSet.next()) {
                 long id = resultSet.getLong(1);
-                jsonArray = LocationObject.getLocationObjects("" + id, null, null);
+                jsonArray = LocationObject.getLocationObjects("" + id, null, null, false);
                 
                 if (jsonArray.size() > 0) {
 	                CloudGraphListUndirected graph1 = new CloudGraphListUndirected("i_nav_graph1", true);
 	                graph1.setVertex((JSONObject)jsonArray.get(0));
+	                
+	                
+	                
                 }
             }
 			
@@ -315,7 +318,7 @@ public class LocationObject implements INavEntity {
 		return jsonArray;
 	}
 	
-	public static JSONArray getLocationObjects(String id, String locationId, String objectTypeId) {
+	public static JSONArray getLocationObjects(String id, String locationId, String objectTypeId, boolean isGateway) {
 		String returnStr = "";
 		String where = "";
 		
@@ -323,7 +326,7 @@ public class LocationObject implements INavEntity {
 						" o.object_id, o.short_name as object_short_name, o.long_name as object_long_name, o.description as object_description, o.x_coordinate, o.y_coordinate, o.latitude, o.longitude, o.image_x, o.image_y, " + 
 						" l.location_id as location_location_id, l.short_name as location_short_name, l.long_name as location_long_name, l.description as location_description, l.image as canvas_image, " + 
 						" lt.location_type_id, lt.short_name as location_type_short_name, lt.description as location_type_description, " + 
-						" ot.object_type_id, ot.short_name as object_type_short_name,  ot.description as object_type_description, ot.image as object_type_image," + 
+						" ot.object_type_id, ot.short_name as object_type_short_name,  ot.description as object_type_description, ot.image as object_type_image, ot.gateway as object_type_gateway, " + 
 						" a.address_id, a.address1, a.address2, a.city, a.state, a.zipcode, a.zipcode_ext "
 				;
 		
@@ -343,6 +346,9 @@ public class LocationObject implements INavEntity {
 		}
 		if (objectTypeId != null) {
 			where += " AND ot.object_type_id = ? ";
+		}
+		if (isGateway) {
+			where += " AND ot.gateway = 1 ";
 		}
 		where += "  AND o.active = 1  ";
 		String query = select + from +  join + where;
@@ -410,6 +416,7 @@ public class LocationObject implements INavEntity {
 				locationObjectType.setShort_name(resultSet.getString("object_type_short_name"));
 				locationObjectType.setDescription(resultSet.getString("object_type_description"));
 				locationObjectType.setImage(resultSet.getString("object_type_image"));
+				locationObjectType.setGateway(resultSet.getString("object_type_gateway").equals("1") ? true : false);
 				
 				locationType.setLocation_type_id(resultSet.getInt("location_type_id"));
 				locationType.setShort_name(resultSet.getString("location_type_short_name"));
@@ -422,6 +429,9 @@ public class LocationObject implements INavEntity {
 				address.setState(resultSet.getString("state"));
 				address.setZipcode(resultSet.getString("zipcode"));
 				address.setZipcode_ext(resultSet.getString("zipcode_ext"));
+				
+				
+				
 				
 				JSONParser parser = new JSONParser();
 				try {
@@ -436,6 +446,7 @@ public class LocationObject implements INavEntity {
 					locationObjectJson.put("location", locationJson);
 					locationObjectJson.put("address", addressJson);
 					locationObjectJson.put("object_type", locationObjectTypeJson);
+					locationObjectJson.put("sibling_gateways", new JSONArray()); // put all gateway objects from parent/child locations relative to this location here
 					
 					jsonArray.add(locationObjectJson);
 					
@@ -446,6 +457,48 @@ public class LocationObject implements INavEntity {
 				}
 				
 			}
+			
+			if (!isGateway) { // need this because this is recursive... base case
+				
+				for (int j = 0; j < jsonArray.size(); j++) {
+					
+					JSONObject eachObj = (JSONObject) jsonArray.get(j);
+					JSONObject eachObjType = (JSONObject) eachObj.get("object_type");
+					LocationObjectType locationObjectType = new LocationObjectType(eachObjType);
+				
+					JSONArray siblings = new JSONArray();
+					JSONArray siblingGateways = new JSONArray();
+					if (locationObjectType.getGateway()) {
+						System.out.println("object is gateway.... attempting to find gateways");
+						JSONArray parentArr = Location.getParent(locationId);
+						String parentId = null;
+						if (parentArr.size() == 1) {
+							JSONObject parentObj = (JSONObject) parentArr.get(0);
+							if (parentObj.get("parent") != null) {
+								parentId = parentObj.get("parent").toString();
+							}
+						}
+						siblings = Location.getLocations(null, parentId);
+						System.out.println("siblings: " + siblings.toJSONString());
+						for (int i = 0; i < siblings.size(); i++) {
+							
+							
+							JSONObject sibling = (JSONObject) siblings.get(i);
+							String siblingId = sibling.get("location_id") != null ? sibling.get("location_id").toString() : "";
+							
+							if (!siblingId.equals(locationId)) {
+								JSONArray siblingGatewayObjects = LocationObject.getLocationObjects(null, siblingId, null, true);
+								JSONObject jsonSiblingObj = new JSONObject();
+								jsonSiblingObj.put(siblingId, siblingGatewayObjects);
+								siblingGateways.add(siblingGatewayObjects);
+							}
+						}
+						eachObj.put("sibling_gateways", siblingGateways);
+					}
+				}
+			}
+			
+			
 			returnStr += jsonArray.toJSONString();
 
 		} catch (SQLException e) {

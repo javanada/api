@@ -13,6 +13,7 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import i_nav_model.LocationObject;
+import i_nav_model.LocationObjectType;
 
 /**
  * 
@@ -21,10 +22,10 @@ import i_nav_model.LocationObject;
  * 
  *
  */
-public class CloudGraphListUndirected { // should be undirected
+public class CloudGraphListUndirected { // technically bidirectional
 	
 	private Map<String, List<Edge>> adj; // need to use String, not LocationObjectVertex... should be ID
-	private Map<LocationObjectVertex, List<Edge>> adjVertex;
+	private Map<LocationObjectVertex, List<Edge>> adjVertex; // might not need this
 	private int numEdges;
 	private List<String> Mark;
 	private int maxWeight;
@@ -99,9 +100,9 @@ public class CloudGraphListUndirected { // should be undirected
 		dbGraphAccess.addGraphVertex(locationObjectJson.get("object_id").toString(), null, vertex.toJSONString(), locationObjectJson.get("location_id").toString(), graphName);
 	}
 	
-	public void setEdgeDirected(LocationObjectVertex v1, LocationObjectVertex v2, int weight) {
+	public void setEdgeDirected(LocationObjectVertex v1, LocationObjectVertex v2, int weight, boolean linked, boolean accessible) {
 		
-		// todo: this should set undirected edge, fix
+		// used by setEdgeUndirected
 		
 		
 		
@@ -112,9 +113,18 @@ public class CloudGraphListUndirected { // should be undirected
 		}
 		double distance_x = v2.getX() - v1.getX();
 		double distance_y = v2.getY() - v1.getY();
+		
+		
 		weight = (int) Math.sqrt(distance_x * distance_x + distance_y * distance_y);
 		
+		if (linked) {
+			weight = 0;
+		}
+		
 		Edge e = new Edge(v1, v2, weight);
+		e.setAccessible(accessible);
+		
+		
 		adj.get("" + v1.getObject_id()).add(e);
 		
 		JSONArray arr = new JSONArray();
@@ -123,6 +133,8 @@ public class CloudGraphListUndirected { // should be undirected
 			JSONObject obj = new JSONObject();
 			
 			obj.put("weight", i.weight());
+			obj.put("linked", i.isLinked());
+			obj.put("accessible", i.isAccessible());
 			
 			JSONObject locationV1 = new JSONObject();
 			locationV1.put("x", i.v1().getX());
@@ -270,10 +282,83 @@ public class CloudGraphListUndirected { // should be undirected
 		
 		JSONArray jsonArray = new JSONArray();
 		
-		JSONArray arrSource = LocationObject.getLocationObjects(sourceObjectId, sourceLocationId, null);
-		JSONArray arrDest = LocationObject.getLocationObjects(destObjectId, destLocationId, null);
+		JSONArray arrSource = LocationObject.getLocationObjects(sourceObjectId, sourceLocationId, null, false);
+		JSONArray arrDest = LocationObject.getLocationObjects(destObjectId, destLocationId, null, false);
 		
-		if (arrSource.size() == 1 && arrDest.size() == 1) {
+		boolean canConnect = false;
+		boolean linked = false;
+		boolean accessibility = false;
+		
+		if (!sourceLocationId.equals(destLocationId) && arrSource.size() == 1 && arrDest.size() == 1) { // connecting two locations
+			
+			JSONObject gatewaySource = (JSONObject) arrSource.get(0);
+			JSONObject gatewayDest = (JSONObject) arrDest.get(0);
+			
+			LocationObject gatewaySourceObject = new LocationObject(gatewaySource);
+			LocationObject gatewayDestObject = new LocationObject(gatewayDest);
+			JSONArray gatewaySourceObjectTypeArr = LocationObjectType.getLocationObjectTypes("" + gatewaySourceObject.getObject_type_id());
+			JSONArray gatewayDestObjectTypeArr = LocationObjectType.getLocationObjectTypes("" + gatewayDestObject.getObject_type_id());
+			
+			if (gatewaySourceObjectTypeArr.size() == 1 && gatewaySourceObjectTypeArr.size() == 1) {
+				JSONObject gatewaySourceObjectTypeObj = (JSONObject) gatewaySourceObjectTypeArr.get(0);
+				JSONObject gatewayDestObjectTypeObj = (JSONObject) gatewayDestObjectTypeArr.get(0);
+				
+				System.out.println("!!!!!!!!!!! " + gatewaySourceObjectTypeObj.toJSONString());
+				LocationObjectType sourceType = new LocationObjectType(gatewaySourceObjectTypeObj);
+				LocationObjectType destType = new LocationObjectType(gatewayDestObjectTypeObj);
+				
+				if (sourceType.getGateway() && destType.getGateway() && (sourceType.isAccessibility() == destType.isAccessibility())) {
+					System.out.println();
+					System.out.println();
+					System.out.println("both source and dest objects are gateways and same level of accessibility, let's try to connect them...");
+					accessibility = sourceType.isAccessibility();
+				} else {
+					JSONObject ret = new JSONObject();
+					ret.put("error", "connecting objects in different locations must be of type gateway and must have the same level of accessibility. ");
+					ret.put("source", gatewaySourceObjectTypeObj);
+					ret.put("dest", gatewayDestObjectTypeObj);
+					jsonArray.add(ret);
+					
+					canConnect = false;
+					return jsonArray;
+				}
+			}
+			
+			JSONObject sourceSiblings = new JSONObject(); // array? obj?
+			for (int i = 0; i < arrSource.size(); i++) {
+				JSONObject obj = (JSONObject) arrSource.get(i);
+				JSONArray siblingsEach = (JSONArray) obj.get("sibling_gateways");
+				if (siblingsEach.size() > 0) {
+					for (int j = 0; j < siblingsEach.size(); j++) {
+						
+						JSONArray sibling = (JSONArray) siblingsEach.get(j);
+						for (int k = 0; k < sibling.size(); k++) {
+							JSONObject siblingLocationObject = (JSONObject) sibling.get(k);
+							
+							sourceSiblings.put("" + siblingLocationObject.get("location_id"), siblingLocationObject);
+						}
+					}
+				}
+			}
+			
+			// is 1) the source object a type of gateway 2) is dest object a type gateway and 3) is the dest location Id contained in the siblings
+			// if yes, we can connect these two objects, else throw an error
+			
+			if (sourceSiblings.get(destLocationId) != null) {
+				// let's connect these
+				canConnect = true;
+				linked = true;
+				System.out.println("we can connect these... " + accessibility);
+//				return jsonArray;
+			}
+			
+		} else {
+			canConnect = true;
+		}
+		
+		
+		
+		if (arrSource.size() == 1 && arrDest.size() == 1 && canConnect) {
 			
 			JSONObject source = (JSONObject) arrSource.get(0);
 			JSONObject dest = (JSONObject) arrDest.get(0);
@@ -295,17 +380,30 @@ public class CloudGraphListUndirected { // should be undirected
 			destVertex.setY(destObject.getY_coordinate());
 			
 			if (graph == null)  {
-				graph = new CloudGraphListUndirected("i_nav_graph1", true);			
+				graph = new CloudGraphListUndirected("i_nav_graph1", true);
 				graph.getPoints(sourceLocationId);
 				if (!sourceLocationId.equals(destLocationId)) {
 					graph.getPoints(destLocationId);
 				}
 			}
+			
+			List<Edge> edgesSource = graph.getAdj().get(sourceObjectId);
+			if (edgesSource != null) {
+				for (Edge e : edgesSource) {
+					if (
+						sourceObjectId.equals("" + e.v1().getObject_id()) && destObjectId.equals("" + e.v2().getObject_id()) ||
+						sourceObjectId.equals("" + e.v2().getObject_id()) && destObjectId.equals("" + e.v1().getObject_id())
+							) { // already exists
+						return jsonArray;
+					}
+				}
+			}
+			
 //			graph1.adj.put(sourceObjectId, graph1.dbGraphAccess.getCloudVertexEdges(graph1.graphName, sourceObjectId));
 //			graph1.adj.put(destObjectId, graph1.dbGraphAccess.getCloudVertexEdges(graph1.graphName, destObjectId));
 			
-			graph.setEdgeDirected(sourceVertex, destVertex, 0);
-			graph.setEdgeDirected(destVertex, sourceVertex, 0);
+			graph.setEdgeDirected(sourceVertex, destVertex, 0, linked, accessibility);
+			graph.setEdgeDirected(destVertex, sourceVertex, 0, linked, accessibility);
 			
 			JSONObject ret = new JSONObject();
 			ret.put("success", "maybe");
@@ -321,7 +419,7 @@ public class CloudGraphListUndirected { // should be undirected
 		return jsonArray;
 	}
 	
-	public static JSONArray getShortestPath(String sourceObjectId, String destObjectId, boolean isLambda) {
+	public static JSONArray getShortestPath(String sourceObjectId, String destObjectId, boolean isLambda, boolean accessible) {
 		
 		JSONArray jsonArray = new JSONArray();
 		
@@ -330,9 +428,12 @@ public class CloudGraphListUndirected { // should be undirected
 		LocationObjectVertex end = graph1.getVertex(destObjectId);
 		
 		graph1.getPoints("" + start.getLocation_id());
+		if (start.getLocation_id() != end.getLocation_id()) {
+			graph1.getPoints("" + end.getLocation_id());
+		}
 		Search search = new Search(graph1);
 		
-		search.dijkstra(start, end);
+		search.dijkstra(start, end, accessible);
 		ArrayList<Edge> path = search.getPathToVertex();
 		
 		JSONArray arr;

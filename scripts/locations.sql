@@ -18,7 +18,11 @@ CREATE TABLE IF NOT EXISTS `i_nav`.`locations` (
   `image` varchar(128) COLLATE utf8_unicode_ci DEFAULT NULL,
   `location_type_id` int(11) NOT NULL,
   `address_id` int(11) NOT NULL,
-  `active` tinyint(1) NOT NULL
+  `active` tinyint(1) NOT NULL,
+  `modified_on` TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `modified_by` varchar(50) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `created_on` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  `created_by` varchar(50) COLLATE utf8_unicode_ci DEFAULT NULL,
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 --

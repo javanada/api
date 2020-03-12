@@ -1,17 +1,24 @@
 package i_nav_model;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Base64;
 import java.util.Map;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+
+import i_nav.S3Access;
 
 /**
  * 
@@ -20,7 +27,7 @@ import org.json.simple.parser.ParseException;
  * 
  *
  */
-public class Location implements INavEntity {
+public class Location extends FingerprintEntityBase {
 	
 	private int location_id;
 	private String short_name;
@@ -70,6 +77,7 @@ public class Location implements INavEntity {
 		if (updateLoc.get("image") != null) {
 			set += ", `image` = ? ";
 		}
+		
 
 		String where = " WHERE `location_id` = ?";
 
@@ -207,11 +215,53 @@ public class Location implements INavEntity {
 		return jsonArray;
 	}
 	
+	public static JSONArray getParent(String id) {
+		
+		JSONArray jsonArray = new JSONArray();
+		
+		String select = 
+				"SELECT lr.parent_id";
+		String from = 
+				"FROM i_nav.locations l";
+		String join = 
+				"INNER JOIN location_relations lr ON lr.child_id = l.location_id ";
+		String where = 
+				"WHERE 1" + 
+				"AND l.location_id = ?";
+		
+		String query = select + from + join + where;
+		
+		try {
+			Connection conn = DriverManager.getConnection(url, username, password);
+			PreparedStatement stmt = conn.prepareStatement(query);
+			int c = 1;
+			if (id != null) {
+				stmt.setString(c++, id);
+			}
+			
+			ResultSet resultSet = stmt.executeQuery();
+			JSONObject jsonObj = new JSONObject();
+			
+			while (resultSet.next()) {
+				jsonObj.put("parent", resultSet.getInt("location_location_id"));
+			}
+			jsonArray.add(jsonObj);
+			
+		} catch (Exception e) {
+			JSONObject obj = new JSONObject();
+			obj.put("Exception", e.getMessage());
+			jsonArray.add(obj);
+		}
+		
+		return jsonArray;
+	}
+	
 	public static JSONArray getLocations(String id, String parentId) {
 		
 		String select = 
 					" SELECT " + 
-					" l.location_id as location_location_id, l.short_name as location_short_name, l.long_name as location_long_name, l.description as location_description, l.image as canvas_image, l.address_id, " + 
+					" l.location_id as location_location_id, l.short_name as location_short_name, l.long_name as location_long_name, l.description as location_description, l.image as canvas_image, l.address_id, " +
+					" l.created_on, l.created_by, l.modified_on, l.modified_by, " + 
 					" lt.location_type_id, lt.short_name as location_type_short_name, lt.description as location_type_description, " + 
 					" a.address_id as address_address_id, a.address1, a.address2, a.city, a.state, a.zipcode, a.zipcode_ext ";
 		
@@ -258,9 +308,13 @@ public class Location implements INavEntity {
 				location.setLong_name(resultSet.getString("location_long_name"));
 				location.setDescription(resultSet.getString("location_description"));
 				location.setLocation_type_id(resultSet.getInt("location_type_id"));
-				location.setAddress_id(resultSet.getInt("location_type_id"));
+				location.setAddress_id(resultSet.getInt("address_id"));
 				location.setImage(resultSet.getString("canvas_image"));
 				location.setActive(true);
+//				location.setCreated_on(resultSet.getDate("created_on"));
+//				location.setCreated_by("");
+//				location.setModified_on(resultSet.getDate("modified_on"));
+//				location.setModified_by("");
 				
 				locationType.setLocation_type_id(resultSet.getInt("location_type_id"));
 				locationType.setShort_name(resultSet.getString("location_type_short_name"));
@@ -309,8 +363,8 @@ public class Location implements INavEntity {
 		JSONArray jsonArray = new JSONArray();
 		
 		// get primary and secondary objects for this location id
-		JSONArray primaryArr = LocationObject.getLocationObjects(null, id, "4");
-		JSONArray secondaryArr = LocationObject.getLocationObjects(null, id, "5");
+		JSONArray primaryArr = LocationObject.getLocationObjects(null, id, "4", false);
+		JSONArray secondaryArr = LocationObject.getLocationObjects(null, id, "5", false);
 		
 		if (primaryArr.size() == 0 || secondaryArr.size() == 0) {
 			JSONObject obj = new JSONObject();
@@ -391,10 +445,41 @@ public class Location implements INavEntity {
 		return jsonArray;
 	}
 	
+	public static JSONArray uploadImage(JSONObject obj) {
+		
+		JSONArray jsonArray = new JSONArray();
+		
+		try {
+			byte[] decodedData = Base64.getDecoder().decode(obj.get("location_image_data").toString());
+			
+			File file = new File(obj.get("location_image_name").toString());
+			
+			OutputStream os  = new FileOutputStream(file); 
+
+	        // Starts writing the bytes in it 
+	        os.write(decodedData); 
+	
+	        // Close the file 
+	        os.close(); 
+			
+			S3Access s3 = new S3Access();
+			
+			s3.putObjectInBucket("inav-2761e89d-6096-43cc-b585-1c07a19a140d", obj.get("location_image_name").toString(), file);
+			
+		} catch (Exception e) {
+			JSONObject objE = new JSONObject();
+			objE.put("Exception", e.getMessage());
+			jsonArray.add(objE);
+		}
+		
+		
+		return jsonArray;
+	}
+	
 	@Override
 	public String getJSONString() {
 		
-		JSONObject jsonObject = new JSONObject();
+		JSONObject jsonObject = super.getJSON();
 		jsonObject.put("location_id", location_id);
 		jsonObject.put("short_name", short_name);
 		jsonObject.put("long_name", long_name);
@@ -457,5 +542,7 @@ public class Location implements INavEntity {
 	public void setImage(String image) {
 		this.image = image;
 	}
+
+	
 
 }

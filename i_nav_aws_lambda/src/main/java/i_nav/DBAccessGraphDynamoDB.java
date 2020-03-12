@@ -473,6 +473,11 @@ public class DBAccessGraphDynamoDB implements DBAccessGraph {
 							String v2str = row.get("v2").toString();
 							int w = Integer.parseInt(row.get("weight").toString());
 							
+							boolean accessible = false;
+							if (row.get("accessible") != null) {
+								accessible = Boolean.parseBoolean(row.get("accessible").toString());
+							}
+							
 							JSONObject v1Obj = (JSONObject)parser.parse(v1str);
 							JSONObject v2Obj = (JSONObject)parser.parse(v2str);
 							
@@ -506,6 +511,7 @@ public class DBAccessGraphDynamoDB implements DBAccessGraph {
 							System.out.println("v1str: " + v1str + " v2str: " + v2str + " weight: " + w);
 							
 							Edge e = new Edge(v1, v2, w);
+							e.setAccessible(accessible);
 							pointsAndEdges.get(item).add(e);
 						}
 						
